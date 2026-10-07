@@ -170,11 +170,11 @@ public static class ToolLoader
         protected override Assembly? Load(AssemblyName assemblyName)
         {
             // Prefer default context for host + contracts + Rhino.
+            // Logic loads from the shadow folder so SurfaceOps/CurveOps hot-reload with Tools.
             if (assemblyName.Name is "MCP4Rhino" or "MCP4Rhino.Contracts"
                 or "RhinoCommon" or "Rhino.UI")
                 return null;
 
-            // Logic ships beside Tools and must hot-reload with it (new types like SurfaceOps).
             if (assemblyName.Name == "MCP4Rhino.Logic")
             {
                 var logicShadow = Path.Combine(_shadowDir, "MCP4Rhino.Logic.dll");

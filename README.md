@@ -119,6 +119,16 @@ bash scripts/test-coverage.sh
 
 Details: [docs/TESTING.md](docs/TESTING.md).
 
+## Run tests
+
+Unit tests + **≥80% line coverage** on `MCP4Rhino.Logic` / `MCP4Rhino.Contracts` (Rhino UI facades excluded):
+
+```bash
+bash scripts/test-coverage.sh
+```
+
+Details: [docs/TESTING.md](docs/TESTING.md).
+
 ## Verify
 
 With Rhino open and `MCP4Rhino` already started:
