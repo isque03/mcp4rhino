@@ -14,7 +14,7 @@ public static class McpJsonRpc
 {
     public const string ProtocolVersion = "2024-11-05";
     public const string ServerName = "MCP4Rhino";
-    public const string ServerVersion = "0.3.0";
+    public const string ServerVersion = "0.4.0";
 
     public static JsonNode? Dispatch(JsonNode? req, IMcpToolProvider tools, Func<JsonObject, object>? hotReload = null)
     {

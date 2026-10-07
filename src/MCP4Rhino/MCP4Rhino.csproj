@@ -10,7 +10,7 @@
     <TargetExt>.rhp</TargetExt>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
     <Authors>MCP4Rhino contributors</Authors>
     <Description>Rhino plugin embedding a lightweight MCP server so AI agents can drive Rhino.</Description>
     <Copyright>Copyright (c) 2026</Copyright>

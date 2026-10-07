@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using MCP4Rhino.Host;
+using MCP4Rhino.Logic;
 using Rhino;
 using Rhino.DocObjects;
 using Rhino.Geometry;
@@ -210,19 +211,19 @@ internal static class ArchElementTools
             ("name", "string", "Name substring"),
             ("layer", "string", "Layer substring"),
             ("limit", "integer", "Max results (default 1000)")),
-        Tool("measure_distance", "Distance between two points or two objects (centers + bounding-box gap).",
-            ("a", "any", "[x,y,z] point"),
-            ("b", "any", "[x,y,z] point"),
+        Tool("measure_distance", "Distance between two points or two objects (centers + bounding-box gap). Returns model units plus _mm/_in/_ft/_m.",
+            ("a", "any", "[x,y,z] point in model units"),
+            ("b", "any", "[x,y,z] point in model units"),
             ("ids", "any", "Alternative: two object GUIDs")),
         Tool("measure_area", "Area of objects (surface area / closed curve area) or a polygon of points.",
             ("ids", "any", "GUIDs"),
-            ("points", "array", "[[x,y,z],...] polygon")),
+            ("points", "array", "[[x,y,z],...] polygon in model units")),
         Tool("measure_clear_width", "Clear width of a door/window (id), between two walls (a,b ids), or between two points (from,to).",
             ("id", "string", "Door/window GUID"),
             ("a", "string", "First wall/object GUID"),
             ("b", "string", "Second wall/object GUID"),
-            ("from", "any", "[x,y,z]"),
-            ("to", "any", "[x,y,z]")),
+            ("from", "any", "[x,y,z] in model units"),
+            ("to", "any", "[x,y,z] in model units")),
     ];
 
     public static string? TryCall(string name, JsonObject args) => name switch
@@ -1269,12 +1270,24 @@ internal static class ArchElementTools
     private static string MeasureDistance(JsonObject args) => UiThread.Invoke(() =>
     {
         var doc = RequireDoc();
-        var upm = UnitsPerMetre(doc);
+        var model = doc.ModelUnitSystem;
         if (args["a"] is not null || args["b"] is not null)
         {
             var a = ParsePoint(args["a"], "a"); var b = ParsePoint(args["b"], "b");
             var d = a.DistanceTo(b);
-            return JsonSerializer.Serialize(new { distance = d, distance_m = d / upm, dx = b.X - a.X, dy = b.Y - a.Y, dz = b.Z - a.Z });
+            var len = UnitConversion.Breakdown(d, model);
+            return JsonSerializer.Serialize(new
+            {
+                distance = len.Model,
+                distance_m = len.Meters,
+                distance_mm = len.Millimeters,
+                distance_in = len.Inches,
+                distance_ft = len.Feet,
+                unit_system = len.UnitSystem,
+                dx = b.X - a.X,
+                dy = b.Y - a.Y,
+                dz = b.Z - a.Z,
+            });
         }
         var ids = IdsArg(args);
         if (ids.Count != 2) throw new ArgumentException("Provide two ids, or points a and b.");
@@ -1283,7 +1296,22 @@ internal static class ArchElementTools
         var center = ba.Center.DistanceTo(bb.Center);
         double Gap(double a0, double a1, double b0, double b1) => Math.Max(0, Math.Max(b0 - a1, a0 - b1));
         var gap = new Vector3d(Gap(ba.Min.X, ba.Max.X, bb.Min.X, bb.Max.X), Gap(ba.Min.Y, ba.Max.Y, bb.Min.Y, bb.Max.Y), Gap(ba.Min.Z, ba.Max.Z, bb.Min.Z, bb.Max.Z)).Length;
-        return JsonSerializer.Serialize(new { center_distance = center, center_distance_m = center / upm, bbox_gap = gap, bbox_gap_m = gap / upm });
+        var c = UnitConversion.Breakdown(center, model);
+        var g = UnitConversion.Breakdown(gap, model);
+        return JsonSerializer.Serialize(new
+        {
+            center_distance = c.Model,
+            center_distance_m = c.Meters,
+            center_distance_mm = c.Millimeters,
+            center_distance_in = c.Inches,
+            center_distance_ft = c.Feet,
+            bbox_gap = g.Model,
+            bbox_gap_m = g.Meters,
+            bbox_gap_mm = g.Millimeters,
+            bbox_gap_in = g.Inches,
+            bbox_gap_ft = g.Feet,
+            unit_system = model.ToString(),
+        });
     });
 
     private static string MeasureArea(JsonObject args) => UiThread.Invoke(() =>

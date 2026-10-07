@@ -6,7 +6,7 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>MCP4Rhino.Tools</RootNamespace>
     <AssemblyName>MCP4Rhino.Tools</AssemblyName>
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 

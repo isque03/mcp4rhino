@@ -4,6 +4,7 @@ using System.Drawing.Imaging;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using MCP4Rhino.Host;
+using MCP4Rhino.Logic;
 using Rhino;
 using Rhino.Display;
 using Rhino.DocObjects;
@@ -116,8 +117,8 @@ public static class RhinoToolCatalog
             },
             required = new[] { "name", "ids" },
         }),
-        Tool("create_box", "Create an axis-aligned box. Optional name/layer/tags/group.", CreateGeomSchema()),
-        Tool("create_sphere", "Create a sphere. Optional name/layer/tags/group.", new
+        Tool("create_box", "Create an axis-aligned box. Coordinates are document model units (get_document_units / convert_length first). Optional name/layer/tags/group.", CreateGeomSchema()),
+        Tool("create_sphere", "Create a sphere. center/radius are document model units (get_document_units / convert_length first). Optional name/layer/tags/group.", new
         {
             type = "object",
             properties = new
@@ -129,7 +130,7 @@ public static class RhinoToolCatalog
                 tags = new { type = "object", description = "Attribute User Text key/values" },
             },
         }),
-        Tool("create_cylinder", "Create a cylinder along +Z. Optional name/layer/tags/group.", new
+        Tool("create_cylinder", "Create a cylinder along +Z. Dimensions are document model units (get_document_units / convert_length first). Optional name/layer/tags/group.", new
         {
             type = "object",
             properties = new
@@ -240,8 +241,8 @@ public static class RhinoToolCatalog
         type = "object",
         properties = new
         {
-            minX = new { type = "number" }, minY = new { type = "number" }, minZ = new { type = "number" },
-            maxX = new { type = "number" }, maxY = new { type = "number" }, maxZ = new { type = "number" },
+            minX = new { type = "number", description = "Model units" }, minY = new { type = "number", description = "Model units" }, minZ = new { type = "number", description = "Model units" },
+            maxX = new { type = "number", description = "Model units" }, maxY = new { type = "number", description = "Model units" }, maxZ = new { type = "number", description = "Model units" },
             name = new { type = "string" }, layer = new { type = "string" },
             group = new { type = "string" },
             tags = new { type = "object", description = "Attribute User Text key/values" },
@@ -371,6 +372,36 @@ public static class RhinoToolCatalog
             }
 
             var bbox = obj.Geometry?.GetBoundingBox(true) ?? BoundingBox.Empty;
+            object? bboxPayload = null;
+            if (bbox.IsValid)
+            {
+                var sx = bbox.Max.X - bbox.Min.X;
+                var sy = bbox.Max.Y - bbox.Min.Y;
+                var sz = bbox.Max.Z - bbox.Min.Z;
+                var model = doc.ModelUnitSystem;
+                bboxPayload = new
+                {
+                    min = new[] { bbox.Min.X, bbox.Min.Y, bbox.Min.Z },
+                    max = new[] { bbox.Max.X, bbox.Max.Y, bbox.Max.Z },
+                    size = new[] { sx, sy, sz },
+                    size_in = new[] {
+                        UnitConversion.Convert(sx, model, UnitSystem.Inches),
+                        UnitConversion.Convert(sy, model, UnitSystem.Inches),
+                        UnitConversion.Convert(sz, model, UnitSystem.Inches),
+                    },
+                    size_ft = new[] {
+                        UnitConversion.Convert(sx, model, UnitSystem.Feet),
+                        UnitConversion.Convert(sy, model, UnitSystem.Feet),
+                        UnitConversion.Convert(sz, model, UnitSystem.Feet),
+                    },
+                    size_mm = new[] {
+                        UnitConversion.Convert(sx, model, UnitSystem.Millimeters),
+                        UnitConversion.Convert(sy, model, UnitSystem.Millimeters),
+                        UnitConversion.Convert(sz, model, UnitSystem.Millimeters),
+                    },
+                    unit_system = model.ToString(),
+                };
+            }
             items.Add(new
             {
                 id = obj.Id.ToString(),
@@ -379,9 +410,7 @@ public static class RhinoToolCatalog
                 layer = layerName,
                 groups = groupNames,
                 tags = includeTags ? tags : null,
-                bbox = bbox.IsValid
-                    ? new { min = new[] { bbox.Min.X, bbox.Min.Y, bbox.Min.Z }, max = new[] { bbox.Max.X, bbox.Max.Y, bbox.Max.Z } }
-                    : null,
+                bbox = bboxPayload,
             });
         }
 

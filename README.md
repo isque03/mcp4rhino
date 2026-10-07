@@ -6,80 +6,25 @@ MCP4Rhino is a Rhino 8 plugin. It hosts a local **MCP** (Model Context Protocol)
 
 > If you use Claude or a similar agent with this repository, start with [`CLAUDE.md`](CLAUDE.md).
 
-## Quick start (macOS)
+## Quick start
 
 **Prerequisites:** [Rhino 8](https://www.rhino3d.com/), [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0), [Node.js](https://nodejs.org/) (`npx` for MCP clients).
 
 ```bash
 git clone https://github.com/isque03/mcp4rhino.git
 cd mcp4rhino
-bash scripts/install-yak.sh
 ```
 
-This command builds the solution, packs a yak package (`MCP4Rhino` **0.3.0**), and installs the package into the Rhino package folder.
+| Host | Install |
+|------|---------|
+| **macOS** | `bash scripts/install-yak.sh` |
+| **Windows 11** | `powershell -ExecutionPolicy Bypass -File scripts/install-yak.ps1` |
+
+Each script builds the solution, packs yak (`MCP4Rhino` **0.4.0**), and installs into the Rhino package folder. Override yak with env `YAK` if needed.
 
 Then [start the server in Rhino](#start-in-rhino).
 
-## Quick start (Windows 11)
-
-**Prerequisites:** [Rhino 8 for Windows](https://www.rhino3d.com/), [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0), [Node.js](https://nodejs.org/) (`npx` for MCP clients).
-
-In **PowerShell**:
-
-```powershell
-git clone https://github.com/isque03/mcp4rhino.git
-cd mcp4rhino
-dotnet build MCP4Rhino.sln -c Release
-
-$yak = "C:\Program Files\Rhino 8\System\Yak.exe"
-$stage = Join-Path $env:TEMP ("mcp4rhino-yak-" + [guid]::NewGuid().ToString("n"))
-New-Item -ItemType Directory -Force -Path "$stage\net8.0" | Out-Null
-
-$hostOut = "src\MCP4Rhino\bin\Release\net8.0"
-$toolsOut = "src\MCP4Rhino.Tools\bin\Release\net8.0"
-Copy-Item "$hostOut\MCP4Rhino.rhp" "$stage\net8.0\"
-Copy-Item "$hostOut\MCP4Rhino.Contracts.dll" "$stage\net8.0\"
-Copy-Item "$toolsOut\MCP4Rhino.Tools.dll" "$stage\net8.0\"
-Get-ChildItem "$toolsOut\*.dll" | Where-Object {
-  $_.Name -notin @("RhinoCommon.dll","Rhino.UI.dll","Eto.dll")
-} | Copy-Item -Destination "$stage\net8.0\" -Force
-Copy-Item "manifest.yml" $stage
-
-Push-Location $stage
-& $yak build --platform win
-& $yak install (Get-ChildItem *.yak | Select-Object -First 1).FullName
-& $yak list
-Pop-Location
-```
-
-Package install location (typical): `%APPDATA%\McNeel\Rhinoceros\packages\8.0\MCP4Rhino\`.
-
-Then [start the server in Rhino](#start-in-rhino).
-
-## Quick start (Linux)
-
-Rhino 8 has **no official Linux desktop** ([system requirements](https://www.rhino3d.com/8/system-requirements/)). MCP4Rhino needs a running Rhino UI process.
-
-**Recommended path:**
-
-1. Run [Rhino 8 for Windows](https://www.rhino3d.com/) in a **Windows 11 VM** or on a remote Windows host.
-2. Follow the [Windows 11](#quick-start-windows-11) quick start on that host.
-3. Point your Linux MCP client at `http://<windows-host>:4010/mcp`.
-4. Open the firewall for that port if the client cannot connect.
-
-**Unsupported community path:** If you already run Rhino under Wine, use the Windows install steps in that prefix (`Yak.exe` / `Rhino.exe` under `drive_c/Program Files/Rhino 8/...`). This path is not supported.
-
-**Build-only on Linux** (builds a `.yak` for a Mac or Windows Rhino host; does not start the MCP server):
-
-```bash
-git clone https://github.com/isque03/mcp4rhino.git
-cd mcp4rhino
-dotnet build MCP4Rhino.sln -c Release
-# Optional: download standalone yak for linux-x64 from McNeel’s yak releases,
-# stage net8.0/ + manifest.yml like scripts/install-yak.sh, then:
-#   ./yak build --platform win   # or --platform mac
-# Copy the .yak to the Rhino machine and: yak install ./mcp4rhino-*.yak
-```
+**Linux:** Rhino 8 has [no official Linux desktop](https://www.rhino3d.com/8/system-requirements/). Run Rhino on a Windows 11 VM/host, install with `install-yak.ps1` there, and point your Linux MCP client at `http://<windows-host>:4010/mcp`. Wine is unsupported.
 
 ## Start in Rhino
 
@@ -111,23 +56,11 @@ After you install the package on a supported host:
 
 ## Run tests
 
-Unit tests + **≥80% line coverage** on `MCP4Rhino.Logic` / `MCP4Rhino.Contracts` (Rhino UI facades excluded):
-
 ```bash
 bash scripts/test-coverage.sh
 ```
 
-Details: [docs/TESTING.md](docs/TESTING.md).
-
-## Run tests
-
-Unit tests + **≥80% line coverage** on `MCP4Rhino.Logic` / `MCP4Rhino.Contracts` (Rhino UI facades excluded):
-
-```bash
-bash scripts/test-coverage.sh
-```
-
-Details: [docs/TESTING.md](docs/TESTING.md).
+≥80% line coverage on `MCP4Rhino.Logic` / `MCP4Rhino.Contracts`. Details: [docs/TESTING.md](docs/TESTING.md).
 
 ## Verify
 
@@ -139,40 +72,20 @@ curl -sS -X POST http://127.0.0.1:4010/mcp \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
 ```
 
-PowerShell:
-
-```powershell
-Invoke-RestMethod -Method Post -Uri http://127.0.0.1:4010/mcp `
-  -ContentType 'application/json' `
-  -Body '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
-```
-
-Or call tool `get_document_info` from your MCP client.
+Or call `get_document_info` from your MCP client.
 
 **Logs:** macOS `~/Library/Logs/MCP4Rhino/mcp4rhino.log` · Windows `%LOCALAPPDATA%\MCP4Rhino\mcp4rhino.log`
 
 ## Daily loop (tools only)
 
-For Tools or Logic changes, rebuild, copy the DLLs, then hot-reload. Do not restart Rhino for tools-only changes.
+Rebuild Tools/Logic, copy into the installed package, then hot-reload (no Rhino restart):
 
-**macOS**
+| Host | Command |
+|------|---------|
+| **macOS** | `bash scripts/hot-reload-tools.sh` |
+| **Windows** | `powershell -ExecutionPolicy Bypass -File scripts/hot-reload-tools.ps1` |
 
-```bash
-bash scripts/hot-reload-tools.sh
-# then in Rhino: MCP4RhinoReload
-# or MCP tool: mcp4rhino_reload
-```
-
-The script copies `MCP4Rhino.Tools.dll` and `MCP4Rhino.Logic.dll` into the installed package.
-
-**Windows**
-
-1. Rebuild `src\MCP4Rhino.Tools\MCP4Rhino.Tools.csproj` in Release.
-2. Copy `MCP4Rhino.Tools.dll` and `MCP4Rhino.Logic.dll` into `%APPDATA%\McNeel\Rhinoceros\packages\8.0\MCP4Rhino\<version>\net8.0\`.
-3. Copy new dependency DLLs from the Tools build output if needed.
-4. Run `MCP4RhinoReload` or call `mcp4rhino_reload`.
-
-After host plugin (`.rhp`) changes, restart Rhino, then run `MCP4Rhino` again.
+Then in Rhino: `MCP4RhinoReload` (or MCP tool `mcp4rhino_reload`). After host `.rhp` changes, restart Rhino and run `MCP4Rhino` again.
 
 ## Commands and environment
 
