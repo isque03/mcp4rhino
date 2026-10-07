@@ -68,7 +68,7 @@ Module: `SurfaceFoundationTools`. Inventory based on [Rhino 8 command list](http
 | MatchSrf, MergeSrf, ExtendSrf, Untrim, ShrinkTrimmedSrf, Rebuild, ChangeDegree, FitSrf, FilletEdge, ExtrudeCrvTapered/ToPoint, SrfPtGrid, Cone/Torus/Ellipsoid, ConnectSrf, ExtractSrf | — | P1 (not yet) |
 | VariableFilletSrf, VariableBlendSrf, FilletSrfCrv, SoftEditSrf, Drape, Heightfield, DevLoft, Ribbon/Fin, UnrollSrf, analysis, SubD sweeps | — | P2 / `run_rhino_command` |
 
-Edge pick for fillet/blend/dup_edge: `edge_index` from `list_surface_edges`, or `pick_point` (unambiguous nearest).
+Face pick for fillet/chamfer: `face_index_a` / `face_index_b`, or `pick_point_a` / `pick_point_b` (required when the brep has more than one face). Edge pick for blend/dup_edge: `edge_index` from `list_surface_edges`, or `pick_point` (unambiguous nearest). Curve cutters for `trim_surface` / `split_surface` must be planar; use a surface or brep cutter otherwise.
 
 Semantics use Attribute UserText keys `mcp4:*` and document strings `MCP4RHINO_*_JSON`.
 

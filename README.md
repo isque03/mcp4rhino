@@ -2,9 +2,9 @@
 
 [github.com/isque03/mcp4rhino](https://github.com/isque03/mcp4rhino)
 
-Rhino 8 plugin that embeds a local **MCP** (Model Context Protocol) HTTP server so AI agents (Claude Desktop, Cursor, etc.) can inspect and drive the active Rhino document.
+MCP4Rhino is a Rhino 8 plugin. It hosts a local **MCP** (Model Context Protocol) HTTP server. AI agents such as Claude Desktop and Cursor can inspect and control the active Rhino document.
 
-> Pointing Claude (or similar) at this repo? Start with [`CLAUDE.md`](CLAUDE.md).
+> If you use Claude or a similar agent with this repository, start with [`CLAUDE.md`](CLAUDE.md).
 
 ## Quick start (macOS)
 
@@ -16,7 +16,7 @@ cd mcp4rhino
 bash scripts/install-yak.sh
 ```
 
-That builds the solution, packs a yak package (`MCP4Rhino` **0.3.0**), and installs it into Rhino’s package folder.
+This command builds the solution, packs a yak package (`MCP4Rhino` **0.3.0**), and installs the package into the Rhino package folder.
 
 Then [start the server in Rhino](#start-in-rhino).
 
@@ -58,13 +58,18 @@ Then [start the server in Rhino](#start-in-rhino).
 
 ## Quick start (Linux)
 
-Rhino 8 has **no official Linux desktop** ([system requirements](https://www.rhino3d.com/8/system-requirements/) list Linux as unsupported). MCP4Rhino still needs a running Rhino UI process.
+Rhino 8 has **no official Linux desktop** ([system requirements](https://www.rhino3d.com/8/system-requirements/)). MCP4Rhino needs a running Rhino UI process.
 
-**Recommended:** run [Rhino 8 for Windows](https://www.rhino3d.com/) in a **Windows 11 VM** (or remote Windows box), follow the [Windows 11](#quick-start-windows-11) quick start there, then point your Linux MCP client at `http://<windows-host>:4010/mcp` (open the firewall for that port if needed).
+**Recommended path:**
 
-**Unsupported community path:** if you already run Rhino under Wine, use the Windows install steps inside that prefix (`Yak.exe` / `Rhino.exe` under `drive_c/Program Files/Rhino 8/...`). Expect breakage; not supported here.
+1. Run [Rhino 8 for Windows](https://www.rhino3d.com/) in a **Windows 11 VM** or on a remote Windows host.
+2. Follow the [Windows 11](#quick-start-windows-11) quick start on that host.
+3. Point your Linux MCP client at `http://<windows-host>:4010/mcp`.
+4. Open the firewall for that port if the client cannot connect.
 
-**Build-only on Linux** (produce a `.yak` for a Mac/Windows Rhino machine — does not start the MCP server):
+**Unsupported community path:** If you already run Rhino under Wine, use the Windows install steps in that prefix (`Yak.exe` / `Rhino.exe` under `drive_c/Program Files/Rhino 8/...`). This path is not supported.
+
+**Build-only on Linux** (builds a `.yak` for a Mac or Windows Rhino host; does not start the MCP server):
 
 ```bash
 git clone https://github.com/isque03/mcp4rhino.git
@@ -78,13 +83,14 @@ dotnet build MCP4Rhino.sln -c Release
 
 ## Start in Rhino
 
-After install on any supported host:
+After you install the package on a supported host:
 
-1. **Restart Rhino** (required after install / host `.rhp` changes).
-2. On startup you should see something like: `MCP4Rhino … loaded. Run MCP4Rhino to start…`
-3. Click the **command line** above the viewports (not the Help search box).
-4. Run: `MCP4Rhino`
-5. Expect: `MCP server started: http://localhost:4010` (endpoint: `http://127.0.0.1:4010/mcp`)
+1. **Restart Rhino** after install or after host `.rhp` changes.
+2. Confirm a load message such as: `MCP4Rhino … loaded. Run MCP4Rhino to start…`
+3. Click the **command line** above the viewports. Do not use the Help search box.
+4. Run `MCP4Rhino`.
+5. Confirm: `MCP server started: http://localhost:4010`.
+6. Use this MCP endpoint: `http://127.0.0.1:4010/mcp`.
 
 ## Connect a client
 
@@ -101,7 +107,7 @@ After install on any supported host:
 }
 ```
 
-**Cursor / other** — same MCP URL via `npx mcp-remote http://localhost:4010/mcp` (or your client’s HTTP MCP equivalent). On Linux talking to Rhino in a VM, replace `localhost` with the Windows host IP.
+**Cursor and other clients** — connect with `npx mcp-remote http://localhost:4010/mcp`, or use the client HTTP MCP equivalent. If the client runs on Linux and Rhino runs in a Windows VM, replace `localhost` with the Windows host IP.
 
 ## Run tests
 
@@ -137,7 +143,7 @@ Or call tool `get_document_info` from your MCP client.
 
 ## Daily loop (tools only)
 
-Edit tools → rebuild + copy → hot-reload (no Rhino restart):
+For Tools or Logic changes, rebuild, copy the DLLs, then hot-reload. Do not restart Rhino for tools-only changes.
 
 **macOS**
 
@@ -147,9 +153,16 @@ bash scripts/hot-reload-tools.sh
 # or MCP tool: mcp4rhino_reload
 ```
 
-**Windows** — rebuild Tools, copy `MCP4Rhino.Tools.dll` (and any new deps) into the installed package `net8.0` folder under `%APPDATA%\McNeel\Rhinoceros\packages\8.0\MCP4Rhino\<version>\net8.0\`, then `MCP4RhinoReload` / `mcp4rhino_reload`.
+The script copies `MCP4Rhino.Tools.dll` and `MCP4Rhino.Logic.dll` into the installed package.
 
-Host plugin (`.rhp`) changes still need a Rhino restart, then `MCP4Rhino` again.
+**Windows**
+
+1. Rebuild `src\MCP4Rhino.Tools\MCP4Rhino.Tools.csproj` in Release.
+2. Copy `MCP4Rhino.Tools.dll` and `MCP4Rhino.Logic.dll` into `%APPDATA%\McNeel\Rhinoceros\packages\8.0\MCP4Rhino\<version>\net8.0\`.
+3. Copy new dependency DLLs from the Tools build output if needed.
+4. Run `MCP4RhinoReload` or call `mcp4rhino_reload`.
+
+After host plugin (`.rhp`) changes, restart Rhino, then run `MCP4Rhino` again.
 
 ## Commands and environment
 
@@ -163,51 +176,72 @@ Host plugin (`.rhp`) changes still need a Rhino restart, then `MCP4Rhino` again.
 
 ## Features
 
-- Yak package: host `.rhp` + hot-reloadable `MCP4Rhino.Tools.dll`
-- Geometry, tagging/groups, view/camera control, viewport capture
-- Agent-callable `mcp4rhino_reload` so iteration does not require restarting Rhino
-- **Architecture agent (roadmap):** IRC/IBC-oriented MCP tools (phased P0–P4) plus project skills under [`.cursor/skills/`](.cursor/skills/) — overview in [docs/ARCHITECTURE_AGENT.md](docs/ARCHITECTURE_AGENT.md). Semantic tags use `mcp4:` user-text keys on model objects.
+MCP4Rhino provides:
+
+- A yak package with a host `.rhp` and hot-reloadable `MCP4Rhino.Tools.dll` (plus `MCP4Rhino.Logic.dll`)
+- Curve, surface, solid, tag, group, view, and viewport-capture tools
+- The `mcp4rhino_reload` tool so you can iterate without a Rhino restart
+- Architecture-agent tools and skills (phases P0–P4) under [`.cursor/skills/`](.cursor/skills/) — see [docs/ARCHITECTURE_AGENT.md](docs/ARCHITECTURE_AGENT.md)
+
+Semantic tags use `mcp4:` user-text keys on model objects.
 
 ## MCP tools
+
+Core document and view tools:
 
 | Tool | Description |
 |------|-------------|
 | `get_document_info` | Units, layers, counts, selection |
-| `get_objects` | List/filter objects (`tag_key`/`tag_value`/`group`, layer, name, …) |
+| `get_objects` | List or filter objects by tag, group, layer, or name |
 | `create_box` / `create_sphere` / `create_cylinder` | Add solids |
 | `delete_objects` | Delete by GUID list |
 | `set_user_text` / `get_user_text` | Object key/value tags |
-| `set_object_name` / `set_object_layer` | Rename / re-layer |
+| `set_object_name` / `set_object_layer` | Rename or change layer |
 | `list_groups` / `create_group` / `add_to_group` | Group membership |
-| `list_views` | Viewports + camera summaries |
-| `get_view` | Full camera state (`view` name optional; default active) |
-| `set_active_view` | Activate by name (`Perspective`, `Top`, …) |
-| `set_view` | Absolute `camera` + `target` (+ optional `up`) |
-| `orbit_view` | Relative yaw/pitch in degrees around target |
+| `list_views` | Viewports and camera summaries |
+| `get_view` | Full camera state (`view` optional; default is the active view) |
+| `set_active_view` | Activate a view by name (`Perspective`, `Top`, …) |
+| `set_view` | Set absolute `camera` and `target` (optional `up`) |
+| `orbit_view` | Relative yaw and pitch in degrees around the target |
 | `pan_view` | Screen-space pan (`right` / `up` in model units) |
-| `zoom_view` | Dolly toward/away from target (`factor` > 1 zooms in) |
+| `zoom_view` | Dolly toward or away from the target (`factor` > 1 zooms in) |
 | `zoom_extents` | Fit all objects (optional `ids`) |
-| `capture_viewport` | PNG screenshot (`width`/`height`/`view`/`path`; Mac uses ViewCaptureToFile) |
+| `capture_viewport` | PNG screenshot (`width`/`height`/`view`/`path`; macOS uses ViewCaptureToFile) |
 | `run_rhino_command` | Scripted Rhino command escape hatch |
-| Geometry P0 | `create_point` / `create_line` / `create_polyline` / `create_circle` / `create_ellipse` / `create_polygon` / `join_curves` / `trim_curve` / `split_curve` / `explode_objects` / `extrude_curve` / booleans / transforms / layers / blocks / units |
-| Surfaces P0 | Full inventory in [`docs/ARCHITECTURE_AGENT.md`](docs/ARCHITECTURE_AGENT.md) and [`CLAUDE.md`](CLAUDE.md): plane/srf_pt/planar/edge, loft, sweep1/2, revolve, rail_revolve, network, patch, pipe, extrude_along, fillet/blend/chamfer, offset, trim/split/join, cap, list_surface_edges / dup_border / dup_edge / extract_isocurve |
-| Architecture P1 | `create_level` / `create_wall` / `create_slab` / `create_door` / `create_window` / `create_stair` / `create_space` / `get_building_model` / … |
-| Documentation P2 | sections/elevations, dims/tags, sheets, schedules, `export_dwg` / `export_images` |
-| Interop P3 | `export_ifc` / `clash_detect` / `quantity_takeoff` / links |
-| Code P4 | `set_code_context` / `run_code_checks` / `get_code_report` (pre-check only) |
-| `mcp4rhino_reload` | Hot-reload Tools DLL without restarting Rhino |
+| `mcp4rhino_reload` | Hot-reload Tools and Logic without a Rhino restart |
 
-Full architecture tool + skill map: [docs/ARCHITECTURE_AGENT.md](docs/ARCHITECTURE_AGENT.md). Project skills: [`.cursor/skills/arch-*`](.cursor/skills/).
+**Geometry P0 (curves and solids)** — also listed in [`CLAUDE.md`](CLAUDE.md):
+
+- Create: `create_point`, `create_line`, `create_polyline`, `create_circle`, `create_arc`, `create_ellipse`, `create_polygon`, `create_rectangle`, `create_curve`
+- Edit: `join_curves`, `trim_curve`, `split_curve`, `explode_objects`, `offset_curve`, `fillet_curve`, `extrude_curve`
+- Other: boolean tools, `transform_objects`, layers, blocks, units
+
+**Surfaces P0** — full Rhino-command map in [`docs/ARCHITECTURE_AGENT.md`](docs/ARCHITECTURE_AGENT.md):
+
+- Create: `create_plane_surface`, `create_srf_pt`, `create_planar_surface`, `create_edge_surface`, `loft_surface`, `sweep1_surface`, `sweep2_surface`, `revolve_surface`, `rail_revolve_surface`, `network_surface`, `patch_surface`, `pipe_surface`, `extrude_curve_along_curve`
+- Edit: `fillet_surfaces`, `blend_surfaces`, `chamfer_surfaces`, `offset_surface`, `trim_surface`, `split_surface`, `join_surfaces`, `cap_planar_holes`
+- Edges: `list_surface_edges`, `dup_border`, `dup_edge`, `extract_isocurve`
+
+Later phases (see [docs/ARCHITECTURE_AGENT.md](docs/ARCHITECTURE_AGENT.md)):
+
+| Phase | Examples |
+|-------|----------|
+| Architecture P1 | `create_level`, `create_wall`, `create_slab`, `create_door`, `create_window`, `create_stair`, `create_space`, `get_building_model` |
+| Documentation P2 | Sections, elevations, dims, tags, sheets, schedules, `export_dwg`, `export_images` |
+| Interop P3 | `export_ifc`, `clash_detect`, `quantity_takeoff`, links |
+| Code P4 | `set_code_context`, `run_code_checks`, `get_code_report` (pre-check findings only) |
+
+Project skills: [`.cursor/skills/arch-*`](.cursor/skills/).
 
 ## Troubleshooting
 
 | Symptom | Fix |
 |---------|-----|
-| Nothing listens on 4010 | Run `MCP4Rhino` in Rhino’s **command line** (not Help). Server does not auto-start on load. |
-| Port bind error | Another process owns the port, or set `MCP4RHINO_PORT` and update your client URL. |
-| Commands not found | Install failed or Rhino not restarted after yak install. Re-run `bash scripts/install-yak.sh`, restart Rhino. |
-| Tools code not updating | Use `bash scripts/hot-reload-tools.sh` then `MCP4RhinoReload` / `mcp4rhino_reload`. Host `.rhp` edits need restart. |
-| `capture_viewport` on Mac | Uses scripted ViewCaptureToFile (GDI+ `CaptureToBitmap` is unreliable). PNGs land under `~/Library/Logs/MCP4Rhino/` by default. |
+| Nothing listens on 4010 | Run `MCP4Rhino` in the Rhino **command line** (not Help). The server does not start when the plugin loads. |
+| Port bind error | Another process owns the port. Set `MCP4RHINO_PORT` and update the client URL. |
+| Commands not found | Install failed, or Rhino was not restarted after yak install. Re-run `bash scripts/install-yak.sh`, then restart Rhino. |
+| Tools or Logic code not updating | Copy both DLLs (`hot-reload-tools.sh` on macOS), then run `MCP4RhinoReload` / `mcp4rhino_reload`. Restart Rhino after host `.rhp` edits. |
+| `capture_viewport` on Mac | Uses scripted ViewCaptureToFile. Default PNG path: `~/Library/Logs/MCP4Rhino/`. |
 
 ## License
 
