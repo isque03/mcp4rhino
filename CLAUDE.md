@@ -194,11 +194,21 @@ Then Rhino command `MCP4RhinoReload` or MCP tool `mcp4rhino_reload`.
 
 ---
 
+## Architecture workflow
+
+For **residential (IRC)** and **commercial (IBC)** design in Rhino, use project skills in [`.cursor/skills/`](.cursor/skills/) (`arch-project-bootstrap`, program/massing/envelope skills, documentation, IFC, code pre-checks, review pack). Roadmap summary: [docs/ARCHITECTURE_AGENT.md](docs/ARCHITECTURE_AGENT.md).
+
+- MCP endpoint: `http://127.0.0.1:4010/mcp` (user must run `MCP4Rhino` first).
+- Store element semantics with **`mcp4:`** user-text keys (`set_user_text` / dedicated arch tools when available).
+- Skills require jurisdiction/amendments from the user; agents report **pre-check findings**, never legal “code compliant” or RA stamp.
+
+---
+
 ## Useful tools for agents
 
-- **Inspect:** `get_document_info`, `get_objects` (filters: `tag_key`/`tag_value`/`group`, layer, name)
-- **Build:** `create_box` / `create_sphere` / `create_cylinder`, `delete_objects`
-- **Structure:** `set_user_text`, `set_object_name`, `set_object_layer`, `list_groups` / `create_group` / `add_to_group`
-- **Camera:** `list_views`, `get_view`, `set_active_view`, `set_view`, `orbit_view`, `pan_view`, `zoom_view`, `zoom_extents` — mutate tools return camera JSON so you can chain without a separate `get_view`
-- **See:** `capture_viewport` → open the returned `path` PNG
-- **Iterate:** `mcp4rhino_reload` after the OS-specific tools copy step above
+- **Inspect:** `get_document_info`, `get_objects`, `get_building_model`, `query_elements`
+- **Geometry P0:** `create_polyline`, `extrude_curve`, booleans, `transform_objects`, layers/blocks
+- **Architecture P1:** `create_level`, `create_wall`/`slab`/`roof`, `create_door`/`window`, `create_stair`/`ramp`, `create_space`
+- **Docs P2 / Interop P3 / Code P4:** sheets, `export_ifc`, `run_code_checks` (findings only — never “compliant”)
+- **Camera / see:** view tools + `capture_viewport`
+- **Iterate:** `mcp4rhino_reload` after the OS-specific tools copy step

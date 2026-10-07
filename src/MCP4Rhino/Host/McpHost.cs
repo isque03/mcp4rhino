@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using MCP4Rhino.Logic;
 
 namespace MCP4Rhino.Host;
 
@@ -9,6 +11,7 @@ namespace MCP4Rhino.Host;
 /// Lightweight MCP JSON-RPC host over HTTP POST /mcp (no ASP.NET).
 /// Compatible with clients using mcp-remote against http://localhost:PORT/mcp.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class McpHost
 {
     public const int DefaultPort = 4010;
@@ -32,7 +35,6 @@ public static class McpHost
         PluginLog.Info($"McpHost.Start begin port={Port}");
 
         var listener = new HttpListener();
-        // Trailing slash required by HttpListener prefixes.
         listener.Prefixes.Add($"http://127.0.0.1:{Port}/");
         try
         {
@@ -120,7 +122,6 @@ public static class McpHost
 
             if (!string.Equals(ctx.Request.HttpMethod, "POST", StringComparison.OrdinalIgnoreCase))
             {
-                // Health / probes
                 await WriteTextAsync(ctx, 200, "text/plain", "MCP4Rhino OK\n");
                 return;
             }
@@ -136,12 +137,7 @@ public static class McpHost
             }
             catch
             {
-                await WriteJsonAsync(ctx, new
-                {
-                    jsonrpc = "2.0",
-                    id = (object?)null,
-                    error = new { code = -32700, message = "Parse error" },
-                });
+                await WriteJsonAsync(ctx, McpJsonRpc.ParseError(null, "Parse error"));
                 return;
             }
 
@@ -187,97 +183,28 @@ public static class McpHost
         }
     }
 
-    private static JsonNode? Dispatch(JsonNode? req)
+    private static JsonNode? Dispatch(JsonNode? req) =>
+        McpJsonRpc.Dispatch(req, ToolProvider.Instance, HotReload);
+
+    private sealed class ToolProvider : IMcpToolProvider
     {
-        if (req is null)
-            return null;
+        public static readonly ToolProvider Instance = new();
 
-        var method = req["method"]?.GetValue<string>();
-        var id = req["id"];
-        var @params = req["params"];
-
-        // Notifications have no id / no response.
-        if (method is not null && method.StartsWith("notifications/", StringComparison.Ordinal))
-            return null;
-
-        object? result;
-        try
+        public object[] ListTools()
         {
-            result = method switch
-            {
-                "initialize" => new
-                {
-                    protocolVersion = "2024-11-05",
-                    capabilities = new { tools = new { } },
-                    serverInfo = new { name = "MCP4Rhino", version = "0.3.0" },
-                },
-                "ping" => new { },
-                "tools/list" => new { tools = ListAllTools() },
-                "tools/call" => CallTool(@params),
-                _ => throw new InvalidOperationException($"Method not found: {method}"),
-            };
-        }
-        catch (Exception ex)
-        {
-            return JsonSerializer.SerializeToNode(new
-            {
-                jsonrpc = "2.0",
-                id,
-                error = new { code = -32000, message = ex.Message },
-            });
+            ToolLoader.EnsureLoaded();
+            var bridge = ToolLoader.Bridge
+                ?? throw new InvalidOperationException("Tools bridge not loaded.");
+            return bridge.ListTools();
         }
 
-        return JsonSerializer.SerializeToNode(new
+        public object CallTool(JsonNode? @params)
         {
-            jsonrpc = "2.0",
-            id,
-            result,
-        });
-    }
-
-    private static object[] ListAllTools()
-    {
-        ToolLoader.EnsureLoaded();
-        var bridge = ToolLoader.Bridge
-            ?? throw new InvalidOperationException("Tools bridge not loaded.");
-
-        var hostTools = new object[]
-        {
-            new
-            {
-                name = "mcp4rhino_reload",
-                description = "Hot-reload MCP4Rhino.Tools.dll from disk (no Rhino restart). Call after rebuilding tools.",
-                inputSchema = new
-                {
-                    type = "object",
-                    properties = new
-                    {
-                        path = new
-                        {
-                            type = "string",
-                            description = "Optional path to MCP4Rhino.Tools.dll (or directory containing it). Overrides MCP4RHINO_TOOLS_PATH for this reload.",
-                        },
-                    },
-                },
-            },
-        };
-
-        return hostTools.Concat(bridge.ListTools()).ToArray();
-    }
-
-    private static object CallTool(JsonNode? @params)
-    {
-        var name = @params?["name"]?.GetValue<string>()
-            ?? throw new ArgumentException("tools/call missing name");
-        var args = @params?["arguments"] as JsonObject ?? new JsonObject();
-
-        if (name == "mcp4rhino_reload")
-            return HotReload(args);
-
-        ToolLoader.EnsureLoaded();
-        var bridge = ToolLoader.Bridge
-            ?? throw new InvalidOperationException("Tools bridge not loaded.");
-        return bridge.CallTool(@params);
+            ToolLoader.EnsureLoaded();
+            var bridge = ToolLoader.Bridge
+                ?? throw new InvalidOperationException("Tools bridge not loaded.");
+            return bridge.CallTool(@params);
+        }
     }
 
     private static object HotReload(JsonObject args)

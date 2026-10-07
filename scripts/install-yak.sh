@@ -13,6 +13,7 @@ TOOLS_OUT="$ROOT/src/MCP4Rhino.Tools/bin/Release/net8.0"
 
 cp "$HOST_OUT/MCP4Rhino.rhp" "$STAGE/net8.0/"
 cp "$HOST_OUT/MCP4Rhino.Contracts.dll" "$STAGE/net8.0/"
+[[ -f "$HOST_OUT/MCP4Rhino.Logic.dll" ]] && cp "$HOST_OUT/MCP4Rhino.Logic.dll" "$STAGE/net8.0/"
 cp "$TOOLS_OUT/MCP4Rhino.Tools.dll" "$STAGE/net8.0/"
 # Tools deps (e.g. System.Drawing.Common) — skip RhinoCommon
 shopt -s nullglob

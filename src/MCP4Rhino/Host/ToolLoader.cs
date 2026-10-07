@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.Loader;
 using MCP4Rhino.Contracts;
@@ -7,6 +8,7 @@ namespace MCP4Rhino.Host;
 /// <summary>
 /// Loads MCP4Rhino.Tools.dll in a collectible ALC so it can be hot-reloaded.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class ToolLoader
 {
     private static readonly object Gate = new();
@@ -164,7 +166,9 @@ public static class ToolLoader
         protected override Assembly? Load(AssemblyName assemblyName)
         {
             // Prefer default context for host + contracts + Rhino.
-            if (assemblyName.Name is "MCP4Rhino" or "MCP4Rhino.Contracts" or "RhinoCommon" or "Rhino.UI")
+            // Prefer default context for host + contracts + logic + Rhino.
+            if (assemblyName.Name is "MCP4Rhino" or "MCP4Rhino.Contracts" or "MCP4Rhino.Logic"
+                or "RhinoCommon" or "Rhino.UI")
                 return null;
 
             var path = _resolver.ResolveAssemblyToPath(assemblyName);

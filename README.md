@@ -103,6 +103,16 @@ After install on any supported host:
 
 **Cursor / other** — same MCP URL via `npx mcp-remote http://localhost:4010/mcp` (or your client’s HTTP MCP equivalent). On Linux talking to Rhino in a VM, replace `localhost` with the Windows host IP.
 
+## Run tests
+
+Unit tests + **≥80% line coverage** on `MCP4Rhino.Logic` / `MCP4Rhino.Contracts` (Rhino UI facades excluded):
+
+```bash
+bash scripts/test-coverage.sh
+```
+
+Details: [docs/TESTING.md](docs/TESTING.md).
+
 ## Verify
 
 With Rhino open and `MCP4Rhino` already started:
@@ -156,6 +166,7 @@ Host plugin (`.rhp`) changes still need a Rhino restart, then `MCP4Rhino` again.
 - Yak package: host `.rhp` + hot-reloadable `MCP4Rhino.Tools.dll`
 - Geometry, tagging/groups, view/camera control, viewport capture
 - Agent-callable `mcp4rhino_reload` so iteration does not require restarting Rhino
+- **Architecture agent (roadmap):** IRC/IBC-oriented MCP tools (phased P0–P4) plus project skills under [`.cursor/skills/`](.cursor/skills/) — overview in [docs/ARCHITECTURE_AGENT.md](docs/ARCHITECTURE_AGENT.md). Semantic tags use `mcp4:` user-text keys on model objects.
 
 ## MCP tools
 
@@ -177,8 +188,15 @@ Host plugin (`.rhp`) changes still need a Rhino restart, then `MCP4Rhino` again.
 | `zoom_view` | Dolly toward/away from target (`factor` > 1 zooms in) |
 | `zoom_extents` | Fit all objects (optional `ids`) |
 | `capture_viewport` | PNG screenshot (`width`/`height`/`view`/`path`; Mac uses ViewCaptureToFile) |
-| `execute_csharp` | Run a short RhinoCommon C# script (`Doc` global) |
+| `run_rhino_command` | Scripted Rhino command escape hatch |
+| Geometry P0 | `create_polyline` / `extrude_curve` / booleans / `transform_objects` / layers / blocks / units |
+| Architecture P1 | `create_level` / `create_wall` / `create_slab` / `create_door` / `create_window` / `create_stair` / `create_space` / `get_building_model` / … |
+| Documentation P2 | sections/elevations, dims/tags, sheets, schedules, `export_dwg` / `export_images` |
+| Interop P3 | `export_ifc` / `clash_detect` / `quantity_takeoff` / links |
+| Code P4 | `set_code_context` / `run_code_checks` / `get_code_report` (pre-check only) |
 | `mcp4rhino_reload` | Hot-reload Tools DLL without restarting Rhino |
+
+Full architecture tool + skill map: [docs/ARCHITECTURE_AGENT.md](docs/ARCHITECTURE_AGENT.md). Project skills: [`.cursor/skills/arch-*`](.cursor/skills/).
 
 ## Troubleshooting
 

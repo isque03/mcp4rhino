@@ -9,3 +9,6 @@ dist/
 .DS_Store
 *.rhp.mdb
 *.pdb
+
+# Test coverage outputs
+tests/**/coverage/
