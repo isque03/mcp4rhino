@@ -1,0 +1,11 @@
+bin/
+obj/
+dist/
+*.user
+*.suo
+.vs/
+.idea/
+*.yak
+.DS_Store
+*.rhp.mdb
+*.pdb
