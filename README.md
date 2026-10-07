@@ -14,6 +14,8 @@ Inspired by the public behavior of [RhinoAiMCP (Food4Rhino)](https://www.food4rh
 - MCP HTTP at `http://localhost:4010/mcp` (override with `MCP4RHINO_PORT`)
 - Tools DLL path override: `MCP4RHINO_TOOLS_PATH`
 - Geometry tools: `get_document_info`, `get_objects`, `create_*`, `delete_objects`, `capture_viewport`
+- Tagging: `set_user_text` / `get_user_text`, `set_object_name`, `set_object_layer`, `list_groups` / `create_group` / `add_to_group`; `get_objects` filters by `tag_key`/`tag_value`/`group`
+- Views: `list_views`, `get_view`, `set_active_view`, `set_view`, `orbit_view`, `pan_view`, `zoom_view`, `zoom_extents`
 - Log: `~/Library/Logs/MCP4Rhino/mcp4rhino.log`
 
 ### Hot-reload loop (tools only)
@@ -82,10 +84,23 @@ Merge [`examples/claude_desktop_config.json`](examples/claude_desktop_config.jso
 | Tool | Description |
 |------|-------------|
 | `get_document_info` | Units, layers, counts, selection |
-| `get_objects` | List/filter objects |
+| `get_objects` | List/filter objects (`tag_key`/`tag_value`/`group`, layer, name, …) |
 | `create_box` / `create_sphere` / `create_cylinder` | Add solids |
 | `delete_objects` | Delete by GUID list |
+| `set_user_text` / `get_user_text` | Object key/value tags |
+| `set_object_name` / `set_object_layer` | Rename / re-layer |
+| `list_groups` / `create_group` / `add_to_group` | Group membership |
+| `list_views` | Viewports + camera summaries |
+| `get_view` | Full camera state (`view` name optional; default active) |
+| `set_active_view` | Activate by name (`Perspective`, `Top`, …) |
+| `set_view` | Absolute `camera` + `target` (+ optional `up`) |
+| `orbit_view` | Relative yaw/pitch in degrees around target |
+| `pan_view` | Screen-space pan (`right` / `up` in model units) |
+| `zoom_view` | Dolly toward/away from target (`factor` > 1 zooms in) |
+| `zoom_extents` | Fit all objects (optional `ids`) |
+| `capture_viewport` | PNG screenshot (`width`/`height`/`view`/`path`; Mac-safe fallbacks) |
 | `execute_csharp` | Run a short RhinoCommon C# script (`Doc` global) |
+| `mcp4rhino_reload` | Hot-reload Tools DLL without restarting Rhino |
 
 ## License
 
