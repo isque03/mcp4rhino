@@ -20,7 +20,7 @@ Prerequisites: Rhino 8, .NET 8 SDK, Node.js (`npx`).
 bash scripts/install-yak.sh
 ```
 
-Installs into: `~/Library/Application Support/McNeel/Rhinoceros/packages/8.0/MCP4Rhino/` (manifest version **0.3.0** — see [manifest.yml](manifest.yml)).
+Installs into the Rhino packages folder under Application Support (`*/Rhinoceros/packages/8.0/MCP4Rhino/`). Manifest version **0.4.0** — see [manifest.yml](manifest.yml). Override with `RHINO_PACKAGES_DIR` if needed.
 
 Then [finish in Rhino](#finish-in-rhino-agent-cannot-do-this).
 
@@ -30,35 +30,13 @@ Then [finish in Rhino](#finish-in-rhino-agent-cannot-do-this).
 
 Prerequisites: Rhino 8 for Windows, .NET 8 SDK, Node.js (`npx`).
 
-Run from the repo root in **PowerShell**:
+From the repo root in **PowerShell**:
 
 ```powershell
-dotnet build MCP4Rhino.sln -c Release
-
-$yak = "C:\Program Files\Rhino 8\System\Yak.exe"
-$stage = Join-Path $env:TEMP ("mcp4rhino-yak-" + [guid]::NewGuid().ToString("n"))
-New-Item -ItemType Directory -Force -Path "$stage\net8.0" | Out-Null
-
-$hostOut = "src\MCP4Rhino\bin\Release\net8.0"
-$toolsOut = "src\MCP4Rhino.Tools\bin\Release\net8.0"
-Copy-Item "$hostOut\MCP4Rhino.rhp" "$stage\net8.0\"
-Copy-Item "$hostOut\MCP4Rhino.Contracts.dll" "$stage\net8.0\"
-Copy-Item "$toolsOut\MCP4Rhino.Tools.dll" "$stage\net8.0\"
-Get-ChildItem "$toolsOut\*.dll" | Where-Object {
-  $_.Name -notin @("RhinoCommon.dll","Rhino.UI.dll","Eto.dll")
-} | Copy-Item -Destination "$stage\net8.0\" -Force
-Copy-Item "manifest.yml" $stage
-
-Push-Location $stage
-& $yak build --platform win
-& $yak install (Get-ChildItem *.yak | Select-Object -First 1).FullName
-& $yak list
-Pop-Location
+powershell -ExecutionPolicy Bypass -File scripts/install-yak.ps1
 ```
 
-Installs into (typical): `%APPDATA%\McNeel\Rhinoceros\packages\8.0\MCP4Rhino\`
-
-Yak CLI: `C:\Program Files\Rhino 8\System\Yak.exe`
+Installs under `%APPDATA%\*\Rhinoceros\packages\8.0\MCP4Rhino\`. Optional: `YAK` (path to Yak.exe), `RHINO_PACKAGES_DIR`.
 
 Then [finish in Rhino](#finish-in-rhino-agent-cannot-do-this).
 
@@ -66,7 +44,7 @@ Then [finish in Rhino](#finish-in-rhino-agent-cannot-do-this).
 
 ## Linux
 
-Rhino 8 has no official Linux desktop. Use a **Windows 11 VM** or a remote Windows host. Follow the [Windows 11](#get-a-working-server-windows-11) steps on that host. Point the Linux MCP client at `http://<windows-host>:4010/mcp`.
+Rhino 8 has no official Linux desktop. Use a **Windows 11 VM** or a remote Windows host. Run `scripts/install-yak.ps1` on that host. Point the Linux MCP client at `http://<windows-host>:4010/mcp`.
 
 ---
 
@@ -147,8 +125,8 @@ If the connection is refused: Rhino is not running, or the user has not run `MCP
 | [src/MCP4Rhino.Tools/](src/MCP4Rhino.Tools/) | Tool implementations (`RhinoToolCatalog`, surface/curve tools, …) | Hot-reload — no restart |
 | [src/MCP4Rhino.Logic/](src/MCP4Rhino.Logic/) | Pure helpers (`SurfaceOps`, `CurveOps`, …); loaded with Tools in the collectible ALC | Hot-reload with Tools (copy `MCP4Rhino.Logic.dll`) |
 | [src/MCP4Rhino.Contracts/](src/MCP4Rhino.Contracts/) | Shared bridge interfaces | Usually with host |
-| [scripts/install-yak.sh](scripts/install-yak.sh) | macOS full build + yak install | Restart Rhino after |
-| [scripts/hot-reload-tools.sh](scripts/hot-reload-tools.sh) | macOS Tools + Logic build and copy into package | Then `mcp4rhino_reload` |
+| [scripts/install-yak.sh](scripts/install-yak.sh) / [install-yak.ps1](scripts/install-yak.ps1) | Full build + yak install (macOS / Windows) | Restart Rhino after |
+| [scripts/hot-reload-tools.sh](scripts/hot-reload-tools.sh) / [hot-reload-tools.ps1](scripts/hot-reload-tools.ps1) | Tools + Logic build and copy into package | Then `mcp4rhino_reload` |
 | [examples/claude_desktop_config.json](examples/claude_desktop_config.json) | Claude Desktop MCP client snippet | — |
 
 Prefer editing **Tools** (and **Logic** helpers) for new MCP capabilities. Keep the host thin.
@@ -169,21 +147,9 @@ bash scripts/hot-reload-tools.sh
 ### Windows 11
 
 ```powershell
-dotnet build src\MCP4Rhino.Tools\MCP4Rhino.Tools.csproj -c Release
-
-$pkgRoot = Join-Path $env:APPDATA "McNeel\Rhinoceros\packages\8.0\MCP4Rhino"
-$ver = Get-Content (Join-Path $pkgRoot "manifest.txt") -ErrorAction SilentlyContinue
-if (-not $ver) { $ver = "0.3.0" }
-$dest = Join-Path $pkgRoot "$ver\net8.0"
-$toolsOut = "src\MCP4Rhino.Tools\bin\Release\net8.0"
-Copy-Item "$toolsOut\MCP4Rhino.Tools.dll" $dest -Force
-foreach ($f in @("MCP4Rhino.Logic.dll","System.Drawing.Common.dll","Microsoft.Win32.SystemEvents.dll")) {
-  $src = Join-Path $toolsOut $f
-  if (Test-Path $src) { Copy-Item $src $dest -Force }
-}
+powershell -ExecutionPolicy Bypass -File scripts/hot-reload-tools.ps1
+# then Rhino: MCP4RhinoReload  — or MCP tool: mcp4rhino_reload
 ```
-
-Then run Rhino command `MCP4RhinoReload` or MCP tool `mcp4rhino_reload`.
 
 ---
 
@@ -224,4 +190,4 @@ For **residential (IRC)** and **commercial (IBC)** design in Rhino, use project 
 - **Camera:** view tools + `capture_viewport`
 - **Iterate:** copy Tools and Logic DLLs, then `mcp4rhino_reload`
 
-Surface face pick for fillet/chamfer: `face_index_*` or `pick_point_*` (required on multi-face breps). Edge pick for blend/dup_edge: `edge_index` or `pick_point` from `list_surface_edges`. Curve cutters for trim/split must be planar (or pass a surface/brep cutter). Full McNeel map: [docs/ARCHITECTURE_AGENT.md](docs/ARCHITECTURE_AGENT.md).
+Surface face pick for fillet/chamfer: `face_index_*` or `pick_point_*` (required on multi-face breps). Edge pick for blend/dup_edge: `edge_index` or `pick_point` from `list_surface_edges`. Curve cutters for trim/split must be planar (or pass a surface/brep cutter). Full Rhino→MCP map: [docs/ARCHITECTURE_AGENT.md](docs/ARCHITECTURE_AGENT.md).

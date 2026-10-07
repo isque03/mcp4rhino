@@ -21,7 +21,7 @@ public class MCP4RhinoPlugin : PlugIn
 
     protected override LoadReturnCode OnLoad(ref string errorMessage)
     {
-        var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.3.0";
+        var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.4.0";
         PluginLog.Info($"OnLoad LoadTime=WhenNeeded version={version} log={PluginLog.LogPath}");
         Rhino.RhinoApp.WriteLine($"MCP4Rhino {version} loaded. MCP4Rhino / MCP4RhinoReload / tool mcp4rhino_reload.");
         return LoadReturnCode.Success;
