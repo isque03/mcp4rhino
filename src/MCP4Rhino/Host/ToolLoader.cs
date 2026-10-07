@@ -81,7 +81,9 @@ public static class ToolLoader
         if (!File.Exists(shadowTools))
             File.Copy(sourceDll, shadowTools, overwrite: true);
 
-        _alc = new CollectibleAlc(sourceDir);
+        // Load Tools + Logic from the shadow folder so Logic API additions hot-reload with Tools.
+        // Contracts + Rhino stay in the default (host) context.
+        _alc = new CollectibleAlc(_shadowDir, sourceDir);
         var asm = _alc.LoadFromAssemblyPath(shadowTools);
         var type = asm.GetType("MCP4Rhino.Tools.RhinoToolBridge")
             ?? throw new TypeLoadException("MCP4Rhino.Tools.RhinoToolBridge not found.");
@@ -155,10 +157,12 @@ public static class ToolLoader
 
     private sealed class CollectibleAlc : AssemblyLoadContext
     {
+        private readonly string _shadowDir;
         private readonly AssemblyDependencyResolver _resolver;
 
-        public CollectibleAlc(string pluginDir) : base(isCollectible: true)
+        public CollectibleAlc(string shadowDir, string pluginDir) : base(isCollectible: true)
         {
+            _shadowDir = shadowDir;
             var toolsPath = Path.Combine(pluginDir, "MCP4Rhino.Tools.dll");
             _resolver = new AssemblyDependencyResolver(toolsPath);
         }
@@ -166,10 +170,17 @@ public static class ToolLoader
         protected override Assembly? Load(AssemblyName assemblyName)
         {
             // Prefer default context for host + contracts + Rhino.
-            // Prefer default context for host + contracts + logic + Rhino.
-            if (assemblyName.Name is "MCP4Rhino" or "MCP4Rhino.Contracts" or "MCP4Rhino.Logic"
+            if (assemblyName.Name is "MCP4Rhino" or "MCP4Rhino.Contracts"
                 or "RhinoCommon" or "Rhino.UI")
                 return null;
+
+            // Logic ships beside Tools and must hot-reload with it (new types like SurfaceOps).
+            if (assemblyName.Name == "MCP4Rhino.Logic")
+            {
+                var logicShadow = Path.Combine(_shadowDir, "MCP4Rhino.Logic.dll");
+                if (File.Exists(logicShadow))
+                    return LoadFromAssemblyPath(logicShadow);
+            }
 
             var path = _resolver.ResolveAssemblyToPath(assemblyName);
             return path is not null ? LoadFromAssemblyPath(path) : null;

@@ -190,6 +190,7 @@ Host plugin (`.rhp`) changes still need a Rhino restart, then `MCP4Rhino` again.
 | `capture_viewport` | PNG screenshot (`width`/`height`/`view`/`path`; Mac uses ViewCaptureToFile) |
 | `run_rhino_command` | Scripted Rhino command escape hatch |
 | Geometry P0 | `create_point` / `create_line` / `create_polyline` / `create_circle` / `create_ellipse` / `create_polygon` / `join_curves` / `trim_curve` / `split_curve` / `explode_objects` / `extrude_curve` / booleans / transforms / layers / blocks / units |
+| Surfaces P0 | Full inventory in [`docs/ARCHITECTURE_AGENT.md`](docs/ARCHITECTURE_AGENT.md) and [`CLAUDE.md`](CLAUDE.md): plane/srf_pt/planar/edge, loft, sweep1/2, revolve, rail_revolve, network, patch, pipe, extrude_along, fillet/blend/chamfer, offset, trim/split/join, cap, list_surface_edges / dup_border / dup_edge / extract_isocurve |
 | Architecture P1 | `create_level` / `create_wall` / `create_slab` / `create_door` / `create_window` / `create_stair` / `create_space` / `get_building_model` / … |
 | Documentation P2 | sections/elevations, dims/tags, sheets, schedules, `export_dwg` / `export_images` |
 | Interop P3 | `export_ifc` / `clash_detect` / `quantity_takeoff` / links |

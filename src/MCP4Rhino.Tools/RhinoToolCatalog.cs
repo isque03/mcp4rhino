@@ -19,6 +19,7 @@ public static class RhinoToolCatalog
 {
     public static object[] ListTools() =>
         CurveFoundationTools.ListTools()
+            .Concat(SurfaceFoundationTools.ListTools())
             .Concat(GeometryFoundationTools.ListTools())
             .Concat(ArchElementTools.ListTools())
             .Concat(DocSheetTools.ListTools())
@@ -279,6 +280,7 @@ public static class RhinoToolCatalog
             "zoom_extents" => ViewTools.ZoomExtents(args),
             "capture_viewport" => CaptureViewport(args),
             _ => CurveFoundationTools.TryCall(name, args)
+                ?? SurfaceFoundationTools.TryCall(name, args)
                 ?? GeometryFoundationTools.TryCall(name, args)
                 ?? ArchElementTools.Dispatch(name, args)
                 ?? DocSheetTools.Dispatch(name, args)
