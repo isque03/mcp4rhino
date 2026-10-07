@@ -18,7 +18,8 @@ namespace MCP4Rhino.Tools;
 public static class RhinoToolCatalog
 {
     public static object[] ListTools() =>
-        GeometryFoundationTools.ListTools()
+        CurveFoundationTools.ListTools()
+            .Concat(GeometryFoundationTools.ListTools())
             .Concat(ArchElementTools.ListTools())
             .Concat(DocSheetTools.ListTools())
             .Concat(InteropTools.ListTools())
@@ -277,7 +278,8 @@ public static class RhinoToolCatalog
             "zoom_view" => ViewTools.ZoomView(args),
             "zoom_extents" => ViewTools.ZoomExtents(args),
             "capture_viewport" => CaptureViewport(args),
-            _ => GeometryFoundationTools.TryCall(name, args)
+            _ => CurveFoundationTools.TryCall(name, args)
+                ?? GeometryFoundationTools.TryCall(name, args)
                 ?? ArchElementTools.Dispatch(name, args)
                 ?? DocSheetTools.Dispatch(name, args)
                 ?? InteropTools.Dispatch(name, args)

@@ -189,7 +189,7 @@ Host plugin (`.rhp`) changes still need a Rhino restart, then `MCP4Rhino` again.
 | `zoom_extents` | Fit all objects (optional `ids`) |
 | `capture_viewport` | PNG screenshot (`width`/`height`/`view`/`path`; Mac uses ViewCaptureToFile) |
 | `run_rhino_command` | Scripted Rhino command escape hatch |
-| Geometry P0 | `create_polyline` / `extrude_curve` / booleans / `transform_objects` / layers / blocks / units |
+| Geometry P0 | `create_point` / `create_line` / `create_polyline` / `create_circle` / `create_ellipse` / `create_polygon` / `join_curves` / `trim_curve` / `split_curve` / `explode_objects` / `extrude_curve` / booleans / transforms / layers / blocks / units |
 | Architecture P1 | `create_level` / `create_wall` / `create_slab` / `create_door` / `create_window` / `create_stair` / `create_space` / `get_building_model` / … |
 | Documentation P2 | sections/elevations, dims/tags, sheets, schedules, `export_dwg` / `export_images` |
 | Interop P3 | `export_ifc` / `clash_detect` / `quantity_takeoff` / links |

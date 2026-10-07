@@ -6,11 +6,33 @@ Agents use MCP tools + Cursor skills under [`.cursor/skills/`](../.cursor/skills
 
 | Phase | Module | Capability |
 |-------|--------|------------|
-| P0 | `GeometryFoundationTools` | Curves, extrude, booleans, transforms, layers, blocks, units, `run_rhino_command` |
+| P0 | `CurveFoundationTools` + `GeometryFoundationTools` | Curves/line tools (see below), extrude, booleans, transforms, layers, blocks, units, `run_rhino_command` |
 | P1 | `ArchElementTools` | Levels, walls/slabs/roofs, doors/windows, stairs/ramps, spaces, types, building graph |
 | P2 | `DocSheetTools` | Sections/elevations, dims/tags, sheets, schedules, DWG/PNG export, layer standard |
 | P3 | `InteropTools` | Minimal IFC export, OBJ/3DM, links, clash, quantity takeoff |
 | P4 | `CodeCheckTools` | `set_code_context`, `run_code_checks`, `get_code_report` (IRC/IBC/ADA heuristics) |
+
+### P0 curve/line tools (McNeel → MCP)
+
+| Rhino command | MCP tool |
+|---------------|----------|
+| Point | `create_point` |
+| Line | `create_line` |
+| Polyline | `create_polyline` |
+| Curve / InterpCrv | `create_curve` |
+| Circle | `create_circle` |
+| Arc | `create_arc` |
+| Ellipse | `create_ellipse` |
+| Rectangle | `create_rectangle` |
+| Polygon | `create_polygon` |
+| Fillet | `fillet_curve` |
+| Offset | `offset_curve` |
+| Join | `join_curves` |
+| Trim | `trim_curve` |
+| Split | `split_curve` |
+| Explode | `explode_objects` (polycurve, polyline, extrusion, polysurface, block instance) |
+
+Obscure Line variants (e.g. LineThroughPt): use `run_rhino_command`.
 
 Semantics use Attribute UserText keys `mcp4:*` and document strings `MCP4RHINO_*_JSON`.
 
