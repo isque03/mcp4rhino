@@ -6,6 +6,6 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>MCP4Rhino.Contracts</RootNamespace>
     <AssemblyName>MCP4Rhino.Contracts</AssemblyName>
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
   </PropertyGroup>
 </Project>

@@ -6,13 +6,13 @@ Agents use MCP tools + Cursor skills under [`.cursor/skills/`](../.cursor/skills
 
 | Phase | Module | Capability |
 |-------|--------|------------|
-| P0 | `CurveFoundationTools` + `SurfaceFoundationTools` + `GeometryFoundationTools` | Curves, NURBS surfaces (see below), extrude, booleans, transforms, layers, blocks, units, `run_rhino_command` |
-| P1 | `ArchElementTools` | Levels, walls/slabs/roofs, doors/windows, stairs/ramps, spaces, types, building graph |
+| P0 | `CurveFoundationTools` + `SurfaceFoundationTools` + `GeometryFoundationTools` | Curves, NURBS surfaces (see below), extrude, booleans, transforms, layers, blocks, units (`get_document_units`, `set_document_units`, `convert_length`, `measure_size`), `run_rhino_command` |
+| P1 | `ArchElementTools` | Levels, walls/slabs/roofs, doors/windows, stairs/ramps, spaces, types, building graph, `measure_distance` / `measure_area` / `measure_clear_width` |
 | P2 | `DocSheetTools` | Sections/elevations, dims/tags, sheets, schedules, DWG/PNG export, layer standard |
 | P3 | `InteropTools` | Minimal IFC export, OBJ/3DM, links, clash, quantity takeoff |
 | P4 | `CodeCheckTools` | `set_code_context`, `run_code_checks`, `get_code_report` (IRC/IBC/ADA heuristics) |
 
-### P0 curve/line tools (McNeel → MCP)
+### P0 curve/line tools (Rhino → MCP)
 
 | Rhino command | MCP tool |
 |---------------|----------|
@@ -34,9 +34,9 @@ Agents use MCP tools + Cursor skills under [`.cursor/skills/`](../.cursor/skills
 
 Obscure Line variants (e.g. LineThroughPt): use `run_rhino_command`.
 
-### P0 surface / NURBS tools (McNeel → MCP)
+### P0 surface / NURBS tools (Rhino → MCP)
 
-Module: `SurfaceFoundationTools`. Inventory based on [Rhino 8 command list](https://docs.mcneel.com/rhino/8/help/en-us/commandlist/command_list.htm) and [Create surfaces](https://docs.mcneel.com/rhino/8/help/en-us/seealso/sak_surface.htm).
+Module: `SurfaceFoundationTools`. Inventory based on the Rhino 8 Help command list and Create surfaces topics.
 
 | Rhino command | MCP tool | Phase |
 |---------------|----------|-------|
@@ -71,6 +71,20 @@ Module: `SurfaceFoundationTools`. Inventory based on [Rhino 8 command list](http
 Face pick for fillet/chamfer: `face_index_a` / `face_index_b`, or `pick_point_a` / `pick_point_b` (required when the brep has more than one face). Edge pick for blend/dup_edge: `edge_index` from `list_surface_edges`, or `pick_point` (unambiguous nearest). Curve cutters for `trim_surface` / `split_surface` must be planar; use a surface or brep cutter otherwise.
 
 Semantics use Attribute UserText keys `mcp4:*` and document strings `MCP4RHINO_*_JSON`.
+
+### Document units (P0)
+
+Create and transform tools take **naked doubles in the current Rhino document unit system**. They do not parse “32 inches” from the argument list.
+
+| Tool | Role |
+|------|------|
+| `get_document_units` | Current `unit_system` plus factors such as `model_units_per_inch` / `inches_per_model_unit` |
+| `convert_length` | `{ value, from_unit, to_unit? }` → `result` in `to_unit` (default = document). Use `model_units` for create tools. `model_breakdown` is always document-based; `result_breakdown` matches `to_unit` |
+| `measure_size` | Object bbox size in model + mm/in/ft/m |
+| `measure_distance` | Points `a`/`b`: `distance_*`. Two object ids: `center_distance_*` and `bbox_gap_*` (not `distance_*`) |
+| `set_document_units` | Change unit system; `scale_existing: true` scales object geometry (not `mcp4:` tags / level JSON) |
+
+Agent rule: if the user names a unit that differs from `unit_system`, convert before create, then measure to confirm. Details: [CHANGELOG.md](../CHANGELOG.md).
 
 ## Skills
 

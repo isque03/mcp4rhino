@@ -68,11 +68,12 @@ Use the Read tool on each capture. For each view note:
 
 Call as needed:
 
-- `measure_distance` — overall span, wall top ↔ roof bottom (story height / eave gap).
+- `measure_size` — object bbox vs named sizes in the brief (use `size_z.inches` / `size_*.feet`, not model numbers alone).
+- `measure_distance` — overall span, wall top ↔ roof bottom. Point pairs expose `distance_in` / `distance_ft` / `distance_mm`; two object ids expose `center_distance_*` and `bbox_gap_*`.
 - `measure_area` or space tags (`mcp4:area`) — rooms vs brief.
 - `measure_clear_width` — primary egress door.
 
-Compare to the brief; cite IRC/IBC only as heuristic findings.
+Compare to the brief in **user units**. A Feet document with height `32` is 32 feet, not 32 inches. Cite IRC/IBC only as heuristic findings.
 
 ### 6. Verdict
 

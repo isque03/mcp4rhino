@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using MCP4Rhino.Host;
+using MCP4Rhino.Logic;
 using Rhino;
 using Rhino.DocObjects;
 using Rhino.Geometry;
@@ -22,10 +23,10 @@ internal static class GeometryFoundationTools
         ToolC("create_polyline", "Create a polyline curve through points; optionally closed.",
             ("points*", "array", "[[x,y,z],...] or flat list (stride 3 if length%3==0, else 2)"),
             ("closed", "boolean", "Close the polyline (default false)")),
-        ToolC("create_rectangle", "Create a rectangle in the XY plane: origin + width/height, or corner_min/corner_max.",
+        ToolC("create_rectangle", "Create a rectangle in the XY plane: origin + width/height, or corner_min/corner_max. Sizes are document model units (call get_document_units / convert_length first).",
             ("origin", "any", "Corner [x,y,z] (or center if centered=true)"),
-            ("width", "number", "Size along X"),
-            ("height", "number", "Size along Y"),
+            ("width", "number", "Size along X in model units"),
+            ("height", "number", "Size along Y in model units"),
             ("centered", "boolean", "Treat origin as center (default false)"),
             ("rotation_deg", "number", "Rotation about Z at origin (default 0)"),
             ("corner_min", "any", "[x,y,z] minimum corner (alternative to origin+width/height)"),
@@ -42,7 +43,7 @@ internal static class GeometryFoundationTools
         Tool("extrude_curve", "Extrude a curve into a Brep (closed planar curves are capped into solids).",
             ("id*", "string", "Curve GUID"),
             ("direction", "any", "[dx,dy,dz] extrusion vector"),
-            ("height", "number", "Extrude along +Z by this distance (used if direction omitted)"),
+            ("height", "number", "Extrude along +Z by this distance in model units (used if direction omitted)"),
             ("cap", "boolean", "Cap closed planar curves (default true)"),
             ("keep_input", "boolean", "Keep source curve (default true)")),
         Tool("boolean_difference", "Boolean difference A - B (Breps/extrusions). Replaces inputs unless keep_inputs.",
@@ -62,7 +63,7 @@ internal static class GeometryFoundationTools
             ("keep_inputs", "boolean", "Keep input objects (default false)")),
         Tool("offset_curve", "Offset a curve by distance (sign flips side; planar XY curves use the XY plane).",
             ("id*", "string", "Curve GUID"),
-            ("distance*", "number", "Offset distance"),
+            ("distance*", "number", "Offset distance in model units"),
             ("corner_style", "string", "sharp|round|smooth|chamfer (default sharp)"),
             ("keep_input", "boolean", "Keep source curve (default true)")),
         Tool("fillet_curve", "Fillet all corners of a (poly)curve with the given radius.",
@@ -112,10 +113,16 @@ internal static class GeometryFoundationTools
             ("layer", "string", "Optional layer"),
             ("tags", "object", "Optional user-text tags")),
         Tool("list_blocks", "List block definitions with instance counts."),
-        Tool("set_document_units", "Set document unit system (e.g. Millimeters, Meters, Feet, Inches).",
+        Tool("set_document_units", "Set document unit system (e.g. Millimeters, Meters, Feet, Inches). Create-tool numbers are always in the current system.",
             ("unit_system*", "string", "Unit system name or alias (mm, cm, m, in, ft)"),
-            ("scale_existing", "boolean", "Scale existing geometry to the new unit (default false)")),
-        Tool("get_document_units", "Get document unit system and tolerances."),
+            ("scale_existing", "boolean", "Scale existing geometry so real-world size is preserved (default false)")),
+        Tool("get_document_units", "Get document unit system, tolerances, and conversion factors (model_units_per_inch, inches_per_model_unit, …). Call before creating sized geometry."),
+        Tool("convert_length", "Convert a length into document model units (or between named units). Use before create_* when the user speaks inches/feet/mm.",
+            ("value*", "number", "Length value"),
+            ("from_unit*", "string", "Source unit alias (in, ft, mm, cm, m, …) or full name"),
+            ("to_unit", "string", "Destination unit (default: current document unit_system)")),
+        Tool("measure_size", "Axis-aligned bounding-box size of an object in model units plus mm/in/ft/m.",
+            ("id*", "string", "Object GUID")),
         Tool("run_rhino_command", "Run a Rhino command script string via RhinoApp.RunScript (escape hatch).",
             ("script*", "string", "Command script, e.g. \"_-Line 0,0,0 10,0,0 _Enter\""),
             ("echo", "boolean", "Echo to command line (default false)")),
@@ -147,6 +154,8 @@ internal static class GeometryFoundationTools
         "list_blocks" => ListBlocks(),
         "set_document_units" => SetDocumentUnits(args),
         "get_document_units" => GetDocumentUnits(),
+        "convert_length" => ConvertLength(args),
+        "measure_size" => MeasureSize(args),
         "run_rhino_command" => RunRhinoCommand(args),
         "execute_csharp" => ExecuteCsharp(),
         _ => null,
@@ -678,37 +687,86 @@ internal static class GeometryFoundationTools
 
     // ---- Units -----------------------------------------------------------------------
 
-    private static readonly Dictionary<string, UnitSystem> UnitAliases = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ["mm"] = UnitSystem.Millimeters, ["cm"] = UnitSystem.Centimeters, ["m"] = UnitSystem.Meters,
-        ["km"] = UnitSystem.Kilometers, ["in"] = UnitSystem.Inches, ["inch"] = UnitSystem.Inches,
-        ["ft"] = UnitSystem.Feet, ["foot"] = UnitSystem.Feet, ["yd"] = UnitSystem.Yards, ["mi"] = UnitSystem.Miles,
-    };
-
     private static string SetDocumentUnits(JsonObject args) => UiThread.Invoke(() =>
     {
         var doc = RequireDoc();
         var s = Str(args, "unit_system") ?? throw new ArgumentException("unit_system required");
-        if (!UnitAliases.TryGetValue(s.Trim(), out var us) && !Enum.TryParse(s.Trim(), true, out us))
-            throw new ArgumentException($"Unknown unit system: {s}");
+        var us = UnitConversion.ParseUnitSystem(s);
         var prev = doc.ModelUnitSystem;
-        var scale = Bool(args, "scale_existing");
-        doc.ModelUnitSystem = us;
-        // AdjustModelUnitSystem API varies by Rhino build; assign ModelUnitSystem directly.
-        _ = scale;
+        var scaleExisting = Bool(args, "scale_existing");
+        var factor = UnitConversion.Scale(prev, us);
+        // Official Rhino path: scales objects, block defs, and tolerances when scaleExisting is true.
+        doc.AdjustModelUnitSystem(us, scaleExisting);
         doc.Views.Redraw();
-        return JsonSerializer.Serialize(new { previous = prev.ToString(), unit_system = doc.ModelUnitSystem.ToString(), scaled_existing = scale });
+        return JsonSerializer.Serialize(new
+        {
+            previous = prev.ToString(),
+            unit_system = doc.ModelUnitSystem.ToString(),
+            scaled_existing = scaleExisting && prev != us,
+            scale_factor = factor,
+            method = "AdjustModelUnitSystem",
+        });
     });
 
     private static string GetDocumentUnits() => UiThread.Invoke(() =>
     {
         var doc = RequireDoc();
+        var factors = UnitConversion.DocumentFactorsJson(doc.ModelUnitSystem);
+        // Merge tolerances onto the factor object for a single response.
+        var node = JsonSerializer.SerializeToNode(factors)!.AsObject();
+        node["absolute_tolerance"] = doc.ModelAbsoluteTolerance;
+        node["angle_tolerance_deg"] = doc.ModelAngleToleranceDegrees;
+        return node.ToJsonString();
+    });
+
+    private static string ConvertLength(JsonObject args) => UiThread.Invoke(() =>
+    {
+        var doc = RequireDoc();
+        if (args["value"] is null) throw new ArgumentException("value required");
+        var value = Num(args, "value");
+        var fromUnit = Str(args, "from_unit") ?? throw new ArgumentException("from_unit required");
+        var toUnit = Str(args, "to_unit");
+        var from = UnitConversion.ParseUnitSystem(fromUnit);
+        var to = string.IsNullOrWhiteSpace(toUnit) ? doc.ModelUnitSystem : UnitConversion.ParseUnitSystem(toUnit!);
+        var result = UnitConversion.Convert(value, from, to);
+        var modelUnits = UnitConversion.Convert(value, from, doc.ModelUnitSystem);
+        // model_breakdown is always in document units (use model_units for create_*).
+        // result_breakdown is result expressed in mm/in/ft/m (same numeric base as to_unit).
         return JsonSerializer.Serialize(new
         {
-            unit_system = doc.ModelUnitSystem.ToString(),
-            absolute_tolerance = doc.ModelAbsoluteTolerance,
-            angle_tolerance_deg = doc.ModelAngleToleranceDegrees,
-            units_per_meter = RhinoMath.UnitScale(UnitSystem.Meters, doc.ModelUnitSystem),
+            value,
+            from_unit = from.ToString(),
+            to_unit = to.ToString(),
+            result,
+            model_units = modelUnits,
+            document_unit_system = doc.ModelUnitSystem.ToString(),
+            model_breakdown = UnitConversion.BreakdownObject(modelUnits, doc.ModelUnitSystem),
+            result_breakdown = UnitConversion.BreakdownObject(result, to),
+        });
+    });
+
+    private static string MeasureSize(JsonObject args) => UiThread.Invoke(() =>
+    {
+        var doc = RequireDoc();
+        var id = IdArg(args, "id");
+        var obj = FindObject(doc, id);
+        var bb = obj.Geometry?.GetBoundingBox(true) ?? BoundingBox.Empty;
+        if (!bb.IsValid) throw new InvalidOperationException("Object has no valid bounding box.");
+        var sx = bb.Max.X - bb.Min.X;
+        var sy = bb.Max.Y - bb.Min.Y;
+        var sz = bb.Max.Z - bb.Min.Z;
+        var model = doc.ModelUnitSystem;
+        return JsonSerializer.Serialize(new
+        {
+            id = id.ToString(),
+            unit_system = model.ToString(),
+            min = new[] { bb.Min.X, bb.Min.Y, bb.Min.Z },
+            max = new[] { bb.Max.X, bb.Max.Y, bb.Max.Z },
+            size = new[] { sx, sy, sz },
+            size_x = UnitConversion.BreakdownObject(sx, model),
+            size_y = UnitConversion.BreakdownObject(sy, model),
+            size_z = UnitConversion.BreakdownObject(sz, model),
+            diagonal = UnitConversion.BreakdownObject(bb.Diagonal.Length, model),
         });
     });
 
