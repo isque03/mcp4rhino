@@ -18,6 +18,14 @@ Semantics use Attribute UserText keys `mcp4:*` and document strings `MCP4RHINO_*
 
 See `.cursor/skills/arch-*` — bootstrap, program, massing, envelope, openings, circulation, spaces, sheets, IFC, code checks, accessibility, design-review pack, LOD gate.
 
+**Modeling quality loop** (run before claiming done):
+
+1. `arch-modeling-iterate` — orchestrates build → check → improve
+2. `arch-model-coherence-pass` — non-visual levels/tags/roof-bearing/hosts
+3. `arch-model-visual-review` — multi-angle `capture_viewport`, Read PNGs, measurements vs brief
+
+Then `arch-lod-gate` → `arch-design-review-pack` for human RA handoff.
+
 ## Hot-reload
 
 ```bash

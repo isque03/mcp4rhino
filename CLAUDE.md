@@ -201,6 +201,7 @@ For **residential (IRC)** and **commercial (IBC)** design in Rhino, use project 
 - MCP endpoint: `http://127.0.0.1:4010/mcp` (user must run `MCP4Rhino` first).
 - Store element semantics with **`mcp4:`** user-text keys (`set_user_text` / dedicated arch tools when available).
 - Skills require jurisdiction/amendments from the user; agents report **pre-check findings**, never legal “code compliant” or RA stamp.
+- After modeling, run **`arch-model-coherence-pass`** then **`arch-model-visual-review`** (multi-angle screenshots + measurements vs the brief) before claiming done. Orchestrator: `arch-modeling-iterate`.
 
 ---
 
