@@ -79,10 +79,10 @@ Create and transform tools take **naked doubles in the current Rhino document un
 | Tool | Role |
 |------|------|
 | `get_document_units` | Current `unit_system` plus factors such as `model_units_per_inch` / `inches_per_model_unit` |
-| `convert_length` | `{ value, from_unit }` → model units (optional `to_unit`) |
+| `convert_length` | `{ value, from_unit, to_unit? }` → `result` is in `to_unit` (default = document). Always also returns `model_units` in the document system — use `model_units` for create tools |
 | `measure_size` | Object bbox size in model + mm/in/ft/m |
-| `measure_distance` | Point/object distance with `_mm` / `_in` / `_ft` fields |
-| `set_document_units` | Change unit system; `scale_existing: true` scales geometry so real size is preserved |
+| `measure_distance` | Points `a`/`b`: `distance_*`. Two object ids: `center_distance_*` and `bbox_gap_*` (not `distance_*`) |
+| `set_document_units` | Change unit system; `scale_existing: true` scales object geometry (not `mcp4:` tags / level JSON) |
 
 Agent rule: if the user names a unit that differs from `unit_system`, convert before create, then measure to confirm. Details: [CHANGELOG.md](../CHANGELOG.md).
 
