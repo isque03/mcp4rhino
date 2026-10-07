@@ -31,6 +31,7 @@ dotnet test tests/MCP4Rhino.Tests -c Release
 | `QuantityTakeoffTests` / `BboxClashTests` | Aggregation / AABB clashes |
 | `GeometryBuildersTests` | Documents that builders need Rhino natives (excluded from coverage) |
 | `UnitConversionTests` | Unit aliases, inch↔feet conversion, document factor JSON |
+| `CurveOpsTests` / `SurfaceOpsTests` | Curve/surface pure-logic helpers |
 | `McpJsonRpcTests` | `initialize` / `tools/list` / `tools/call` / errors |
 
 ## Rhino integration (manual)
@@ -39,5 +40,6 @@ After hot-reload, smoke one facade path:
 
 1. `bash scripts/hot-reload-tools.sh` then `MCP4RhinoReload` (or `mcp4rhino_reload`)
 2. Call `create_wall` + `run_code_checks` from an MCP client
+3. Units smoke: `set_document_units` Feet → `convert_length` 32 in → create → `measure_size` (~32 in); with `scale_existing: true`, flip Inches→Feet and confirm geometry height ≈ /12
 
 Full Rhino.Testing harness for ArchElement/ViewCapture is optional and out of the 80% gate.

@@ -229,7 +229,7 @@ Core document and view tools:
 - Edit: `join_curves`, `trim_curve`, `split_curve`, `explode_objects`, `offset_curve`, `fillet_curve`, `extrude_curve`
 - Other: boolean tools, `transform_objects`, layers, blocks, `set_document_units` / `get_document_units`, `convert_length`, `measure_size`
 
-**Document units:** every create/edit size argument is in the **current document unit system** (same as Rhino). If the user says “32 inches” and the file is in Feet, call `convert_length` first, then create, then verify with `measure_size` or `measure_distance` (`distance_in`). See [CHANGELOG.md](CHANGELOG.md).
+**Document units:** length coordinates on create/transform tools are in the **current document unit system** (same as Rhino). Angles, counts, and scale factors are not lengths. If the user says “32 inches” and the file is in Feet, call `convert_length` first, then create, then verify with `measure_size` or `measure_distance` (`distance_in` for point pairs). See [CHANGELOG.md](CHANGELOG.md).
 
 **Surfaces P0** — full Rhino-command map in [`docs/ARCHITECTURE_AGENT.md`](docs/ARCHITECTURE_AGENT.md):
 
