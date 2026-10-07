@@ -14,6 +14,7 @@
     <PackageReference Include="RhinoCommon" Version="8.21.25188.17001" ExcludeAssets="runtime" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.11" />
     <ProjectReference Include="..\MCP4Rhino.Contracts\MCP4Rhino.Contracts.csproj" />
+    <ProjectReference Include="..\MCP4Rhino.Logic\MCP4Rhino.Logic.csproj" />
     <ProjectReference Include="..\MCP4Rhino\MCP4Rhino.csproj">
       <!-- Tools call UiThread/PluginLog in the host; host must not reference Tools. -->
       <Private>false</Private>
@@ -21,3 +22,4 @@
     </ProjectReference>
   </ItemGroup>
 </Project>
+

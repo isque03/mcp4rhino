@@ -1,4 +1,5 @@
 using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing.Imaging;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -13,9 +14,19 @@ namespace MCP4Rhino.Tools;
 /// <summary>
 /// MCP tool definitions + dispatch (no external MCP SDK / Roslyn).
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class RhinoToolCatalog
 {
     public static object[] ListTools() =>
+        GeometryFoundationTools.ListTools()
+            .Concat(ArchElementTools.ListTools())
+            .Concat(DocSheetTools.ListTools())
+            .Concat(InteropTools.ListTools())
+            .Concat(CodeCheckTools.ListTools())
+            .Concat(LegacyTools())
+            .ToArray();
+
+    private static object[] LegacyTools() =>
     [
         Tool("get_document_info", "Get units, layers, groups, object count, and selected object IDs.", new
         {
@@ -266,7 +277,12 @@ public static class RhinoToolCatalog
             "zoom_view" => ViewTools.ZoomView(args),
             "zoom_extents" => ViewTools.ZoomExtents(args),
             "capture_viewport" => CaptureViewport(args),
-            _ => throw new InvalidOperationException($"Unknown tool: {name}"),
+            _ => GeometryFoundationTools.TryCall(name, args)
+                ?? ArchElementTools.Dispatch(name, args)
+                ?? DocSheetTools.Dispatch(name, args)
+                ?? InteropTools.Dispatch(name, args)
+                ?? CodeCheckTools.Dispatch(name, args)
+                ?? throw new InvalidOperationException($"Unknown tool: {name}"),
         };
 
         return new
@@ -285,7 +301,7 @@ public static class RhinoToolCatalog
 
     private static string GetDocumentInfo() => UiThread.Invoke(() =>
     {
-        var doc = RequireDoc();
+        var doc = ToolHelpers.RequireDoc();
         var layers = doc.Layers.Select(l => l.FullPath).ToArray();
         var selected = doc.Objects.GetSelectedObjects(false, false).Select(o => o.Id.ToString()).ToArray();
         var groups = Enumerable.Range(0, doc.Groups.Count)
@@ -307,7 +323,7 @@ public static class RhinoToolCatalog
 
     private static string GetObjects(JsonObject args) => UiThread.Invoke(() =>
     {
-        var doc = RequireDoc();
+        var doc = ToolHelpers.RequireDoc();
         var layer = args["layer"]?.GetValue<string>();
         var name = args["name"]?.GetValue<string>();
         var type = args["type"]?.GetValue<string>();
@@ -320,7 +336,7 @@ public static class RhinoToolCatalog
         foreach (var obj in doc.Objects)
         {
             if (obj is null || obj.IsDeleted) continue;
-            var geomType = Classify(obj.Geometry);
+            var geomType = ToolHelpers.Classify(obj.Geometry);
             if (!string.IsNullOrWhiteSpace(type) &&
                 !string.Equals(geomType, type, StringComparison.OrdinalIgnoreCase))
                 continue;
@@ -335,12 +351,12 @@ public static class RhinoToolCatalog
                 objName.IndexOf(name, StringComparison.OrdinalIgnoreCase) < 0)
                 continue;
 
-            var groupNames = GetGroupNames(doc, obj);
+            var groupNames = ToolHelpers.GetGroupNames(doc, obj);
             if (!string.IsNullOrWhiteSpace(group) &&
                 !groupNames.Any(g => string.Equals(g, group, StringComparison.OrdinalIgnoreCase)))
                 continue;
 
-            var tags = ReadTags(obj);
+            var tags = ToolHelpers.ReadTags(obj);
             if (!string.IsNullOrWhiteSpace(tagKey))
             {
                 if (!tags.TryGetValue(tagKey, out var tv))
@@ -370,9 +386,9 @@ public static class RhinoToolCatalog
 
     private static string SetUserText(JsonObject args) => UiThread.Invoke(() =>
     {
-        var doc = RequireDoc();
-        var ids = ParseIds(args["ids"]?.GetValue<string>() ?? throw new ArgumentException("ids required"));
-        var tags = ParseTags(args);
+        var doc = ToolHelpers.RequireDoc();
+        var ids = ToolHelpers.ParseIds(args["ids"]?.GetValue<string>() ?? throw new ArgumentException("ids required"));
+        var tags = ToolHelpers.ParseTags(args);
         if (tags.Count == 0)
             throw new ArgumentException("Provide key+value and/or tags object.");
 
@@ -392,8 +408,8 @@ public static class RhinoToolCatalog
 
     private static string GetUserText(JsonObject args) => UiThread.Invoke(() =>
     {
-        var doc = RequireDoc();
-        var ids = ParseIds(args["ids"]?.GetValue<string>() ?? throw new ArgumentException("ids required"));
+        var doc = ToolHelpers.RequireDoc();
+        var ids = ToolHelpers.ParseIds(args["ids"]?.GetValue<string>() ?? throw new ArgumentException("ids required"));
         var key = args["key"]?.GetValue<string>();
         var items = new List<object>();
         var missing = new List<string>();
@@ -401,7 +417,7 @@ public static class RhinoToolCatalog
         {
             var obj = doc.Objects.FindId(id);
             if (obj is null) { missing.Add(id.ToString()); continue; }
-            var tags = ReadTags(obj);
+            var tags = ToolHelpers.ReadTags(obj);
             items.Add(new
             {
                 id = id.ToString(),
@@ -417,8 +433,8 @@ public static class RhinoToolCatalog
 
     private static string SetObjectName(JsonObject args) => UiThread.Invoke(() =>
     {
-        var doc = RequireDoc();
-        var ids = ParseIds(args["ids"]?.GetValue<string>() ?? throw new ArgumentException("ids required"));
+        var doc = ToolHelpers.RequireDoc();
+        var ids = ToolHelpers.ParseIds(args["ids"]?.GetValue<string>() ?? throw new ArgumentException("ids required"));
         var name = args["name"]?.GetValue<string>() ?? throw new ArgumentException("name required");
         var updated = new List<string>();
         var missing = new List<string>();
@@ -435,10 +451,10 @@ public static class RhinoToolCatalog
 
     private static string SetObjectLayer(JsonObject args) => UiThread.Invoke(() =>
     {
-        var doc = RequireDoc();
-        var ids = ParseIds(args["ids"]?.GetValue<string>() ?? throw new ArgumentException("ids required"));
+        var doc = ToolHelpers.RequireDoc();
+        var ids = ToolHelpers.ParseIds(args["ids"]?.GetValue<string>() ?? throw new ArgumentException("ids required"));
         var layer = args["layer"]?.GetValue<string>() ?? throw new ArgumentException("layer required");
-        var layerIndex = EnsureLayer(doc, layer);
+        var layerIndex = ToolHelpers.EnsureLayer(doc, layer);
         var updated = new List<string>();
         var missing = new List<string>();
         foreach (var id in ids)
@@ -454,7 +470,7 @@ public static class RhinoToolCatalog
 
     private static string ListGroups() => UiThread.Invoke(() =>
     {
-        var doc = RequireDoc();
+        var doc = ToolHelpers.RequireDoc();
         var groups = new List<object>();
         for (var i = 0; i < doc.Groups.Count; i++)
         {
@@ -468,9 +484,9 @@ public static class RhinoToolCatalog
 
     private static string CreateGroup(JsonObject args) => UiThread.Invoke(() =>
     {
-        var doc = RequireDoc();
+        var doc = ToolHelpers.RequireDoc();
         var gname = args["name"]?.GetValue<string>() ?? throw new ArgumentException("name required");
-        var ids = ParseIds(args["ids"]?.GetValue<string>() ?? throw new ArgumentException("ids required"));
+        var ids = ToolHelpers.ParseIds(args["ids"]?.GetValue<string>() ?? throw new ArgumentException("ids required"));
 
         // Remove existing group with same name so create is idempotent.
         var existing = doc.Groups.Find(gname);
@@ -489,9 +505,9 @@ public static class RhinoToolCatalog
 
     private static string AddToGroup(JsonObject args) => UiThread.Invoke(() =>
     {
-        var doc = RequireDoc();
+        var doc = ToolHelpers.RequireDoc();
         var gname = args["name"]?.GetValue<string>() ?? throw new ArgumentException("name required");
-        var ids = ParseIds(args["ids"]?.GetValue<string>() ?? throw new ArgumentException("ids required"));
+        var ids = ToolHelpers.ParseIds(args["ids"]?.GetValue<string>() ?? throw new ArgumentException("ids required"));
         var idx = doc.Groups.Find(gname);
         if (idx < 0)
             idx = doc.Groups.Add(gname);
@@ -507,50 +523,50 @@ public static class RhinoToolCatalog
 
     private static string CreateBox(JsonObject args) => UiThread.Invoke(() =>
     {
-        var doc = RequireDoc();
-        var minX = Num(args, "minX"); var minY = Num(args, "minY"); var minZ = Num(args, "minZ");
-        var maxX = Num(args, "maxX", 1); var maxY = Num(args, "maxY", 1); var maxZ = Num(args, "maxZ", 1);
+        var doc = ToolHelpers.RequireDoc();
+        var minX = ToolHelpers.Num(args, "minX"); var minY = ToolHelpers.Num(args, "minY"); var minZ = ToolHelpers.Num(args, "minZ");
+        var maxX = ToolHelpers.Num(args, "maxX", 1); var maxY = ToolHelpers.Num(args, "maxY", 1); var maxZ = ToolHelpers.Num(args, "maxZ", 1);
         var box = new Box(new BoundingBox(new Point3d(minX, minY, minZ), new Point3d(maxX, maxY, maxZ)));
         if (!box.IsValid) throw new ArgumentException("Invalid box dimensions.");
-        var id = doc.Objects.AddBox(box, BuildAttributes(doc, args));
-        ApplyGroup(doc, id, args);
+        var id = doc.Objects.AddBox(box, ToolHelpers.BuildAttributes(doc, args));
+        ToolHelpers.ApplyGroup(doc, id, args);
         doc.Views.Redraw();
         return JsonSerializer.Serialize(new { id = id.ToString(), type = "brep" });
     });
 
     private static string CreateSphere(JsonObject args) => UiThread.Invoke(() =>
     {
-        var doc = RequireDoc();
-        var radius = Num(args, "radius", 1);
+        var doc = ToolHelpers.RequireDoc();
+        var radius = ToolHelpers.Num(args, "radius", 1);
         if (radius <= 0) throw new ArgumentException("Radius must be positive.");
-        var sphere = new Sphere(new Point3d(Num(args, "centerX"), Num(args, "centerY"), Num(args, "centerZ")), radius);
-        var id = doc.Objects.AddSphere(sphere, BuildAttributes(doc, args));
-        ApplyGroup(doc, id, args);
+        var sphere = new Sphere(new Point3d(ToolHelpers.Num(args, "centerX"), ToolHelpers.Num(args, "centerY"), ToolHelpers.Num(args, "centerZ")), radius);
+        var id = doc.Objects.AddSphere(sphere, ToolHelpers.BuildAttributes(doc, args));
+        ToolHelpers.ApplyGroup(doc, id, args);
         doc.Views.Redraw();
         return JsonSerializer.Serialize(new { id = id.ToString(), type = "brep" });
     });
 
     private static string CreateCylinder(JsonObject args) => UiThread.Invoke(() =>
     {
-        var doc = RequireDoc();
-        var radius = Num(args, "radius", 1);
-        var height = Num(args, "height", 1);
+        var doc = ToolHelpers.RequireDoc();
+        var radius = ToolHelpers.Num(args, "radius", 1);
+        var height = ToolHelpers.Num(args, "height", 1);
         if (radius <= 0 || Math.Abs(height) < 1e-12)
             throw new ArgumentException("Radius must be positive and height non-zero.");
-        var plane = new Plane(new Point3d(Num(args, "baseX"), Num(args, "baseY"), Num(args, "baseZ")), Vector3d.ZAxis);
+        var plane = new Plane(new Point3d(ToolHelpers.Num(args, "baseX"), ToolHelpers.Num(args, "baseY"), ToolHelpers.Num(args, "baseZ")), Vector3d.ZAxis);
         var cylinder = new Cylinder(new Circle(plane, radius), height);
         var brep = cylinder.ToBrep(true, true) ?? throw new InvalidOperationException("Failed to create cylinder.");
-        var id = doc.Objects.AddBrep(brep, BuildAttributes(doc, args));
-        ApplyGroup(doc, id, args);
+        var id = doc.Objects.AddBrep(brep, ToolHelpers.BuildAttributes(doc, args));
+        ToolHelpers.ApplyGroup(doc, id, args);
         doc.Views.Redraw();
         return JsonSerializer.Serialize(new { id = id.ToString(), type = "brep" });
     });
 
     private static string DeleteObjects(JsonObject args) => UiThread.Invoke(() =>
     {
-        var doc = RequireDoc();
+        var doc = ToolHelpers.RequireDoc();
         var ids = args["ids"]?.GetValue<string>() ?? throw new ArgumentException("ids required");
-        var parsed = ParseIds(ids);
+        var parsed = ToolHelpers.ParseIds(ids);
         var deleted = new List<string>();
         var missing = new List<string>();
         foreach (var id in parsed)
@@ -564,7 +580,7 @@ public static class RhinoToolCatalog
 
     private static string CaptureViewport(JsonObject args) => UiThread.Invoke(() =>
     {
-        var doc = RequireDoc();
+        var doc = ToolHelpers.RequireDoc();
         var viewName = args["view"]?.GetValue<string>();
         RhinoView? view = null;
         if (string.IsNullOrWhiteSpace(viewName))
@@ -588,8 +604,8 @@ public static class RhinoToolCatalog
                 ? "No active view."
                 : $"View not found: {viewName}");
 
-        var width = (int)Num(args, "width", 1024);
-        var height = (int)Num(args, "height", 768);
+        var width = (int)ToolHelpers.Num(args, "width", 1024);
+        var height = (int)ToolHelpers.Num(args, "height", 768);
         if (width < 64 || height < 64 || width > 4096 || height > 4096)
             throw new ArgumentException("width/height must be between 64 and 4096.");
 
@@ -721,134 +737,4 @@ public static class RhinoToolCatalog
             return null;
         }
     }
-
-    private static RhinoDoc RequireDoc() =>
-        RhinoDoc.ActiveDoc ?? throw new InvalidOperationException("No active Rhino document.");
-
-    private static ObjectAttributes BuildAttributes(RhinoDoc doc, JsonObject args)
-    {
-        var attrs = new ObjectAttributes();
-        var name = args["name"]?.GetValue<string>();
-        if (!string.IsNullOrWhiteSpace(name)) attrs.Name = name;
-
-        var layer = args["layer"]?.GetValue<string>();
-        if (!string.IsNullOrWhiteSpace(layer))
-            attrs.LayerIndex = EnsureLayer(doc, layer);
-
-        foreach (var (k, v) in ParseTags(args))
-            attrs.SetUserString(k, v);
-
-        return attrs;
-    }
-
-    private static void ApplyGroup(RhinoDoc doc, Guid id, JsonObject args)
-    {
-        var gname = args["group"]?.GetValue<string>();
-        if (string.IsNullOrWhiteSpace(gname) || id == Guid.Empty) return;
-        var idx = doc.Groups.Find(gname);
-        if (idx < 0) idx = doc.Groups.Add(gname);
-        doc.Groups.AddToGroup(idx, id);
-    }
-
-    private static int EnsureLayer(RhinoDoc doc, string layerPath)
-    {
-        var idx = doc.Layers.FindByFullPath(layerPath, -1);
-        if (idx >= 0) return idx;
-
-        // Create nested path a::b::c
-        var parts = layerPath.Split(["::"], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        var parentIndex = -1;
-        var full = "";
-        foreach (var part in parts)
-        {
-            full = string.IsNullOrEmpty(full) ? part : full + "::" + part;
-            idx = doc.Layers.FindByFullPath(full, -1);
-            if (idx >= 0)
-            {
-                parentIndex = idx;
-                continue;
-            }
-            var layer = new Layer { Name = part };
-            if (parentIndex >= 0)
-                layer.ParentLayerId = doc.Layers[parentIndex].Id;
-            idx = doc.Layers.Add(layer);
-            parentIndex = idx;
-        }
-        return idx;
-    }
-
-    private static Dictionary<string, string> ReadTags(RhinoObject obj)
-    {
-        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        NameValueCollection? nvc = obj.Attributes.GetUserStrings();
-        if (nvc is null) return result;
-        foreach (var key in nvc.AllKeys)
-        {
-            if (key is null) continue;
-            result[key] = nvc[key] ?? "";
-        }
-        return result;
-    }
-
-    private static string[] GetGroupNames(RhinoDoc doc, RhinoObject obj)
-    {
-        var list = obj.GetGroupList();
-        if (list is null || list.Length == 0) return [];
-        return list
-            .Select(i => doc.Groups.GroupName(i))
-            .Where(n => !string.IsNullOrEmpty(n))
-            .Select(n => n!)
-            .ToArray();
-    }
-
-    private static Dictionary<string, string> ParseTags(JsonObject args)
-    {
-        var tags = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        var key = args["key"]?.GetValue<string>();
-        var value = args["value"]?.GetValue<string>();
-        if (!string.IsNullOrWhiteSpace(key))
-            tags[key] = value ?? "";
-
-        if (args["tags"] is JsonObject map)
-        {
-            foreach (var kv in map)
-                tags[kv.Key] = kv.Value?.GetValue<string>() ?? kv.Value?.ToJsonString() ?? "";
-        }
-        return tags;
-    }
-
-    private static double Num(JsonObject args, string key, double fallback = 0)
-    {
-        var n = args[key];
-        if (n is null) return fallback;
-        return n.GetValue<double>();
-    }
-
-    private static List<Guid> ParseIds(string ids)
-    {
-        var trimmed = ids.Trim();
-        IEnumerable<string> parts = trimmed.StartsWith('[')
-            ? JsonSerializer.Deserialize<string[]>(trimmed) ?? []
-            : trimmed.Split([',', ';', '\n', ' '], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-        var result = new List<Guid>();
-        foreach (var p in parts)
-        {
-            if (!Guid.TryParse(p, out var g)) throw new ArgumentException($"Invalid GUID: {p}");
-            result.Add(g);
-        }
-        return result;
-    }
-
-    private static string Classify(GeometryBase? geometry) => geometry switch
-    {
-        null => "unknown",
-        Brep => "brep",
-        Extrusion => "extrude",
-        Mesh => "mesh",
-        Curve => "curve",
-        Rhino.Geometry.Point => "point",
-        Surface => "surface",
-        _ => geometry.GetType().Name.ToLowerInvariant(),
-    };
 }

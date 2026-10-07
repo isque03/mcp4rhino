@@ -1,10 +1,12 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MCP4Rhino.Host;
 
 /// <summary>
 /// Marshals work onto Rhino's UI thread and waits for the result.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class UiThread
 {
     public static T Invoke<T>(Func<T> func)

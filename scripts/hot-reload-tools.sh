@@ -18,11 +18,11 @@ if [[ ! -d "$DEST" ]]; then
 fi
 
 cp "$TOOLS_OUT/MCP4Rhino.Tools.dll" "$DEST/"
-# refresh drawing deps if present
-for f in System.Drawing.Common.dll Microsoft.Win32.SystemEvents.dll; do
+# Logic + drawing deps (host also needs Logic.dll beside the .rhp)
+for f in MCP4Rhino.Logic.dll System.Drawing.Common.dll Microsoft.Win32.SystemEvents.dll; do
   [[ -f "$TOOLS_OUT/$f" ]] && cp "$TOOLS_OUT/$f" "$DEST/"
 done
 
-echo "Updated: $DEST/MCP4Rhino.Tools.dll"
+echo "Updated: $DEST/MCP4Rhino.Tools.dll (+ Logic deps)"
 echo "In Rhino run MCP4RhinoReload, or via MCP call tool mcp4rhino_reload"
 echo "Optional: export MCP4RHINO_TOOLS_PATH=\"$DEST\""

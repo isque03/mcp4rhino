@@ -1,9 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
 using Rhino;
 using Rhino.Commands;
 using MCP4Rhino.Host;
 
 namespace MCP4Rhino.Commands;
 
+[ExcludeFromCodeCoverage]
 [CommandStyle(Style.ScriptRunner)]
 public class MCP4RhinoCommand : Command
 {
