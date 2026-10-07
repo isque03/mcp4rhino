@@ -30,6 +30,7 @@ dotnet test tests/MCP4Rhino.Tests -c Release
 | `MinimalIfcExporterTests` | IFC2x3 text + storey GUID scan |
 | `QuantityTakeoffTests` / `BboxClashTests` | Aggregation / AABB clashes |
 | `GeometryBuildersTests` | Documents that builders need Rhino natives (excluded from coverage) |
+| `UnitConversionTests` | Unit aliases, inch↔feet conversion, document factor JSON |
 | `McpJsonRpcTests` | `initialize` / `tools/list` / `tools/call` / errors |
 
 ## Rhino integration (manual)

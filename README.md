@@ -202,8 +202,11 @@ Core document and view tools:
 | Tool | Description |
 |------|-------------|
 | `get_document_info` | Units, layers, counts, selection |
-| `get_objects` | List or filter objects by tag, group, layer, or name |
-| `create_box` / `create_sphere` / `create_cylinder` | Add solids |
+| `get_document_units` | Unit system, tolerances, and conversion factors (`model_units_per_inch`, …) |
+| `convert_length` | Convert a named unit (in/ft/mm/…) into document model units |
+| `measure_size` | Bounding-box size of one object in model units plus mm/in/ft/m |
+| `get_objects` | List or filter objects by tag, group, layer, or name (bbox includes `size_in` / `size_ft` / `size_mm`) |
+| `create_box` / `create_sphere` / `create_cylinder` | Add solids (**sizes are document model units**) |
 | `delete_objects` | Delete by GUID list |
 | `set_user_text` / `get_user_text` | Object key/value tags |
 | `set_object_name` / `set_object_layer` | Rename or change layer |
@@ -224,7 +227,9 @@ Core document and view tools:
 
 - Create: `create_point`, `create_line`, `create_polyline`, `create_circle`, `create_arc`, `create_ellipse`, `create_polygon`, `create_rectangle`, `create_curve`
 - Edit: `join_curves`, `trim_curve`, `split_curve`, `explode_objects`, `offset_curve`, `fillet_curve`, `extrude_curve`
-- Other: boolean tools, `transform_objects`, layers, blocks, units
+- Other: boolean tools, `transform_objects`, layers, blocks, `set_document_units` / `get_document_units`, `convert_length`, `measure_size`
+
+**Document units:** every create/edit size argument is in the **current document unit system** (same as Rhino). If the user says “32 inches” and the file is in Feet, call `convert_length` first, then create, then verify with `measure_size` or `measure_distance` (`distance_in`). See [CHANGELOG.md](CHANGELOG.md).
 
 **Surfaces P0** — full Rhino-command map in [`docs/ARCHITECTURE_AGENT.md`](docs/ARCHITECTURE_AGENT.md):
 
@@ -251,7 +256,13 @@ Project skills: [`.cursor/skills/arch-*`](.cursor/skills/).
 | Port bind error | Another process owns the port. Set `MCP4RHINO_PORT` and update the client URL. |
 | Commands not found | Install failed, or Rhino was not restarted after yak install. Re-run `bash scripts/install-yak.sh`, then restart Rhino. |
 | Tools or Logic code not updating | Copy both DLLs (`hot-reload-tools.sh` on macOS), then run `MCP4RhinoReload` / `mcp4rhino_reload`. Restart Rhino after host `.rhp` edits. |
+| Object is huge vs the size the user named (e.g. “32 inches” → tens of feet) | Document is likely Feet (or another unit) while the agent passed the inch number raw. Call `get_document_units`, `convert_length`, recreate, then `measure_size`. |
+| Unit change did not resize geometry | Pass `scale_existing: true` to `set_document_units` (fixed to actually scale). |
 | `capture_viewport` on Mac | Uses scripted ViewCaptureToFile. Default PNG path: `~/Library/Logs/MCP4Rhino/`. |
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
