@@ -1,5 +1,7 @@
 # MCP4Rhino
 
+[github.com/isque03/mcp4rhino](https://github.com/isque03/mcp4rhino)
+
 Rhino 8 plugin that embeds a local **MCP** (Model Context Protocol) HTTP server so AI agents (Claude Desktop, Cursor, etc.) can inspect and drive the active Rhino document.
 
 Inspired by the public behavior of [RhinoAiMCP (Food4Rhino)](https://www.food4rhino.com/en/app/rhinoaimcp), but this is a **separate clean-room MIT** project with its own name, package, and commands — not a fork or rename of that product.
