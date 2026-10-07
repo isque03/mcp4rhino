@@ -212,9 +212,10 @@ For **residential (IRC)** and **commercial (IBC)** design in Rhino, use project 
 
 ## Useful tools for agents
 
-- **Inspect:** `get_document_info`, `get_objects`, `get_building_model`, `query_elements`
+- **Inspect:** `get_document_info`, `get_document_units`, `get_objects`, `get_building_model`, `query_elements`
+- **Units / size:** `get_document_units`, `convert_length`, `measure_size`, `measure_distance` (returns `_in` / `_ft` / `_mm`). Create-tool numbers are **document model units** only. If the user names inches/feet/mm and that differs from `unit_system`, convert first, then verify after create. See [CHANGELOG.md](CHANGELOG.md).
 - **Geometry P0 — create:** `create_point`, `create_line`, `create_polyline`, `create_circle`, `create_arc`, `create_ellipse`, `create_polygon`, `create_rectangle`, `create_curve`
-- **Geometry P0 — edit:** `join_curves`, `trim_curve`, `split_curve`, `explode_objects`, `offset_curve`, `fillet_curve`, `extrude_curve`, booleans, `transform_objects`, layers, blocks
+- **Geometry P0 — edit:** `join_curves`, `trim_curve`, `split_curve`, `explode_objects`, `offset_curve`, `fillet_curve`, `extrude_curve`, booleans, `transform_objects`, layers, blocks, `set_document_units`
 - **Surfaces P0 — create:** `create_plane_surface`, `create_srf_pt`, `create_planar_surface`, `create_edge_surface`, `loft_surface`, `sweep1_surface`, `sweep2_surface`, `revolve_surface`, `rail_revolve_surface`, `network_surface`, `patch_surface`, `pipe_surface`, `extrude_curve_along_curve`
 - **Surfaces P0 — edit:** `fillet_surfaces`, `blend_surfaces`, `chamfer_surfaces`, `offset_surface`, `trim_surface`, `split_surface`, `join_surfaces`, `cap_planar_holes`
 - **Surfaces P0 — edges:** `list_surface_edges`, `dup_border`, `dup_edge`, `extract_isocurve`
