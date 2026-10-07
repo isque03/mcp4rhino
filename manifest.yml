@@ -1,0 +1,12 @@
+name: MCP4Rhino
+version: 0.3.0
+authors:
+  - MCP4Rhino contributors
+description: >
+  Rhino 8 plugin with a lightweight MCP HTTP server and hot-reloadable tools
+  so AI agents can drive Rhino and iterate without restarting.
+url: https://github.com/isque03/mcp4rhino
+keywords:
+  - mcp
+  - ai
+  - agent
