@@ -167,7 +167,7 @@ Later phases (see [docs/ARCHITECTURE_AGENT.md](docs/ARCHITECTURE_AGENT.md)):
 |-------|----------|
 | Architecture P1 | `create_level`, `create_wall`, `create_slab`, `create_door`, `create_window`, `create_stair`, `create_space`, `get_building_model` |
 | Documentation P2 | Sections, elevations, dims, tags, sheets, schedules, `export_dwg`, `export_images` |
-| Interop P3 | `export_ifc`, `clash_detect`, `quantity_takeoff`, links |
+| Interop P3 | `check_rhino_license`, `export_3dm` (requires valid license / active eval), `export_ifc`, `clash_detect`, `quantity_takeoff`, links |
 | Code P4 | `set_code_context`, `run_code_checks`, `get_code_report` (pre-check findings only) |
 
 Project skills: [`.cursor/skills/arch-*`](.cursor/skills/).
@@ -185,6 +185,7 @@ Project skills: [`.cursor/skills/arch-*`](.cursor/skills/).
 | `capture_viewport` on Mac | Scripted ViewCaptureToFile (does not pass `width`/`height` into the script). Default PNG path: `~/Library/Logs/MCP4Rhino/`. Embeds `image` when ≤ 1 MiB. |
 | `capture_viewport` on Windows | ViewCaptureToFile first; CaptureToBitmap fallback uses `width`/`height`. Default PNG path: `%LOCALAPPDATA%\MCP4Rhino\`. Same embed rules. |
 | `capture_viewport` has path but no image | Text may set `image_embedded: false` and `image_omitted_reason: "exceeds_max_bytes"` (plus `byte_length`, `max_embedded_png_bytes`). On Windows, retry smaller `width`/`height` (CaptureToBitmap path). On macOS, ViewCaptureToFile size is viewport-driven — open `path` if the agent can read the Rhino host disk, or capture a tighter view. Invalid/unreadable PNG fails the tool (JSON-RPC error), not omit-metadata. |
+| `export_3dm` fails with a license / evaluation message | Rhino is not allowing save (`RhinoApp.CanSave` is false: expired evaluation, expired Cloud Zoo lease, or inactive shared seat). Call `check_rhino_license`; renew or activate a valid Rhino license / evaluation before saving. |
 
 ## Changelog
 

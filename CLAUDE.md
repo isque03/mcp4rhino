@@ -220,6 +220,7 @@ powershell -ExecutionPolicy Bypass -File scripts/hot-reload-tools.ps1
 - On **Windows**, capture tries ViewCaptureToFile first, then `CaptureToBitmap` with `width`/`height`. Default PNG path: `%LOCALAPPDATA%\MCP4Rhino\` (or the `path` argument).
 - `capture_viewport` text metadata includes `path`, actual/requested sizes, `method`, `image_embedded`, and `byte_length`. When embedded, `content` also has `type: "image"` / `mimeType: "image/png"`. Sandboxed agents should use that image; only `Read` the path when they have host filesystem access. Oversize omit: `image_embedded: false`, `image_omitted_reason: "exceeds_max_bytes"`, `max_embedded_png_bytes` (1 MiB raw). Shrink `width`/`height` only helps when CaptureToBitmap wins (typically Windows); on macOS open `path` or reframe the view. Invalid PNG → tool error, not omit metadata.
 - The server does **not** start when the plugin loads. The user must run `MCP4Rhino`.
+- Saving with `export_3dm` requires a valid Rhino license or a non-expired evaluation (`RhinoApp.CanSave`). Call `check_rhino_license` first; do not save when `can_save` is false. Treat `days_until_expiration` as optional (null when not applicable); `saves_left` is always null on the current RhinoCommon build.
 
 ---
 
@@ -244,7 +245,7 @@ For **residential (IRC)** and **commercial (IBC)** design in Rhino, use project 
 - **Surfaces P0 — edit:** `fillet_surfaces`, `blend_surfaces`, `chamfer_surfaces`, `offset_surface`, `trim_surface`, `split_surface`, `join_surfaces`, `cap_planar_holes`
 - **Surfaces P0 — edges:** `list_surface_edges`, `dup_border`, `dup_edge`, `extract_isocurve`
 - **Architecture P1:** `create_level`, `create_wall` / `create_slab` / `create_roof`, `create_door` / `create_window`, `create_stair` / `create_ramp`, `create_space`
-- **Docs P2 / Interop P3 / Code P4:** sheets, `export_ifc`, `run_code_checks` (findings only — never “compliant”)
+- **Docs P2 / Interop P3 / Code P4:** sheets, `check_rhino_license`, `export_3dm` (gated on `can_save`), `export_ifc`, `run_code_checks` (findings only — never “compliant”)
 - **Camera:** view tools + `capture_viewport` (use the tool’s `image` block when `image_embedded` is true; do not require a local file Read)
 - **Iterate:** copy Tools and Logic DLLs, then `mcp4rhino_reload`
 

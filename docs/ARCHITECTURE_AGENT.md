@@ -9,7 +9,7 @@ Agents use MCP tools + Cursor skills under [`.cursor/skills/`](../.cursor/skills
 | P0 | `CurveFoundationTools` + `SurfaceFoundationTools` + `GeometryFoundationTools` | Curves, NURBS surfaces (see below), extrude, booleans, transforms, layers, blocks, units (`get_document_units`, `set_document_units`, `convert_length`, `measure_size`), `run_rhino_command` |
 | P1 | `ArchElementTools` | Levels, walls/slabs/roofs, doors/windows, stairs/ramps, spaces, types, building graph, `measure_distance` / `measure_area` / `measure_clear_width` |
 | P2 | `DocSheetTools` | Sections/elevations, dims/tags, sheets, schedules, DWG/PNG export, layer standard |
-| P3 | `InteropTools` | Minimal IFC export, OBJ/3DM, links, clash, quantity takeoff |
+| P3 | `InteropTools` | `check_rhino_license`, IFC/OBJ/3DM export (`export_3dm` gated on Rhino `CanSave`), links, clash, quantity takeoff |
 | P4 | `CodeCheckTools` | `set_code_context`, `run_code_checks`, `get_code_report` (IRC/IBC/ADA heuristics) |
 
 ### P0 curve/line tools (Rhino → MCP)
