@@ -40,7 +40,7 @@ Quote program, story count, approximate footprint, and style from the user. Note
 
 ### 3. Capture pack
 
-Save PNGs under the MCP4Rhino logs dir with stable names (macOS `~/Library/Logs/MCP4Rhino/`, Windows `%LOCALAPPDATA%\MCP4Rhino\`).
+Call `capture_viewport` with stable `path` names under the MCP4Rhino logs dir (macOS `~/Library/Logs/MCP4Rhino/`, Windows `%LOCALAPPDATA%\MCP4Rhino\`). The tool result includes an MCP **image** content block — use that for review. Only `Read` the path when the agent has filesystem access to the Rhino host.
 
 Optional: `run_rhino_command` with a shaded display script if available; note display mode in the report.
 
@@ -54,11 +54,11 @@ Views (Perspective unless noted):
 | `review-top.png` | `set_view` high +Z, target center, looking down |
 | `review-elev.png` | Camera on primary facade axis, target mid-height |
 
-Workflow tip: `set_view` to a good SE camera → `capture_viewport` with `path` → `orbit_view` for other corners → top via `set_view`. Avoid blind `zoom_extents` if junk geometry is still visible.
+Workflow tip: `set_view` to a good SE camera → `capture_viewport` with `path` → inspect the returned image → `orbit_view` for other corners → top via `set_view`. Avoid blind `zoom_extents` if junk geometry is still visible.
 
-### 4. Read every PNG
+### 4. Review every capture image
 
-Use the Read tool on each capture. For each view note:
+For each `capture_viewport` result, inspect the returned image (tool image content; or Read the path if available). For each view note:
 
 - What building parts are visible (walls, roof, openings, stair, porch).
 - Floating / detached / clipped / empty-story gaps.

@@ -26,6 +26,17 @@ Then [start the server in Rhino](#start-in-rhino).
 
 **Linux:** Rhino 8 has [no official Linux desktop](https://www.rhino3d.com/8/system-requirements/). Run Rhino on a Windows 11 VM/host, install with `install-yak.ps1` there, and point your Linux MCP client at `http://<windows-host>:4010/mcp`. Wine is unsupported.
 
+## Updating from source
+
+Already installed and pulling new commits?
+
+1. `git pull` (or check out the release / feature branch).
+2. **Tools/Logic only** (most new MCP tools): run `scripts/hot-reload-tools.sh` (macOS) or `hot-reload-tools.ps1` (Windows), then `MCP4RhinoReload` in Rhino — no restart.
+3. **Host `.rhp` / new Rhino commands / unsure:** re-run `install-yak`, **restart Rhino**, then `MCP4Rhino`.
+4. Confirm with `tools/list` or a changed tool. MCP URL stays `http://127.0.0.1:4010/mcp` unless you set `MCP4RHINO_PORT`.
+
+Agent-oriented detail: [CLAUDE.md — Upgrade from this source repo](CLAUDE.md#upgrade-from-this-source-repo-existing-install).
+
 ## Start in Rhino
 
 After you install the package on a supported host:
@@ -132,7 +143,7 @@ Core document and view tools:
 | `pan_view` | Screen-space pan (`right` / `up` in model units) |
 | `zoom_view` | Dolly toward or away from the target (`factor` > 1 zooms in) |
 | `zoom_extents` | Fit all objects (optional `ids`) |
-| `capture_viewport` | PNG screenshot (`width`/`height`/`view`/`path`; macOS uses ViewCaptureToFile) |
+| `capture_viewport` | PNG screenshot as MCP **image** content + path metadata when ≤ 1 MiB (`width`/`height`/`view`/`path`; macOS ViewCaptureToFile, Windows CaptureToBitmap fallback) |
 | `run_rhino_command` | Scripted Rhino command escape hatch |
 | `mcp4rhino_reload` | Hot-reload Tools and Logic without a Rhino restart |
 
@@ -171,7 +182,8 @@ Project skills: [`.cursor/skills/arch-*`](.cursor/skills/).
 | Tools or Logic code not updating | Copy both DLLs (`hot-reload-tools.sh` on macOS), then run `MCP4RhinoReload` / `mcp4rhino_reload`. Restart Rhino after host `.rhp` edits. |
 | Object is huge vs the size the user named (e.g. “32 inches” → tens of feet) | Document is likely Feet (or another unit) while the agent passed the inch number raw. Call `get_document_units`, `convert_length`, recreate, then `measure_size`. |
 | Unit change did not resize geometry | Pass `scale_existing: true` to `set_document_units` (fixed to actually scale). |
-| `capture_viewport` on Mac | Uses scripted ViewCaptureToFile. Default PNG path: `~/Library/Logs/MCP4Rhino/`. |
+| `capture_viewport` on Mac | Uses scripted ViewCaptureToFile. Default PNG path: `~/Library/Logs/MCP4Rhino/`. Result includes a base64 `image` content block for agents without filesystem access. |
+| `capture_viewport` on Windows | CaptureToBitmap fallback when needed. Default PNG path: `%LOCALAPPDATA%\MCP4Rhino\`. Same image content block in the tool result. |
 
 ## Changelog
 

@@ -94,7 +94,7 @@ See `.cursor/skills/arch-*` — bootstrap, program, massing, envelope, openings,
 
 1. `arch-modeling-iterate` — orchestrates build → check → improve
 2. `arch-model-coherence-pass` — non-visual levels/tags/roof-bearing/hosts
-3. `arch-model-visual-review` — multi-angle `capture_viewport`, Read PNGs, measurements vs brief
+3. `arch-model-visual-review` — multi-angle `capture_viewport` (image in tool result), measurements vs brief
 
 Then `arch-lod-gate` → `arch-design-review-pack` for human RA handoff.
 
