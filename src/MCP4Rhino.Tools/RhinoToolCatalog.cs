@@ -170,6 +170,11 @@ public static class RhinoToolCatalog
             },
             required = new[] { "view" },
         }),
+        Tool("set_illustration_style", "Apply a pale architectural display preset with dark edges and no grid. Creates or updates the MCP4Rhino Illustration preset; built-in modes are unchanged.", new
+        {
+            type = "object",
+            properties = new { view = new { type = "string" } },
+        }),
         Tool("set_view", "Set absolute camera location/target (optional up, perspective flag).", new
         {
             type = "object",
@@ -281,6 +286,7 @@ public static class RhinoToolCatalog
             "get_view" => ViewTools.GetView(args),
             "set_active_view" => ViewTools.SetActiveView(args),
             "set_view" => ViewTools.SetView(args),
+            "set_illustration_style" => ViewTools.SetIllustrationStyle(args),
             "orbit_view" => ViewTools.OrbitView(args),
             "pan_view" => ViewTools.PanView(args),
             "zoom_view" => ViewTools.ZoomView(args),

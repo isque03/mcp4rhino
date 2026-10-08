@@ -4,6 +4,10 @@
 
 MCP4Rhino is a Rhino 8 plugin. It hosts a local **MCP** (Model Context Protocol) HTTP server. AI agents such as Claude Desktop and Cursor can inspect and control the active Rhino document.
 
+![MCP4Rhino drawing an office park in Rhino](docs/media/mcp4rhino-office-park.gif)
+
+A 21-second time-lapse of actual MCP-driven Rhino construction, ending with a rising fly-around. [Watch the MP4](docs/media/mcp4rhino-office-park.mp4) · [Recreate the demo](docs/README_DEMO_PLAN.md)
+
 > If you use Claude or a similar agent with this repository, start with [`CLAUDE.md`](CLAUDE.md).
 
 ## Quick start
@@ -138,6 +142,7 @@ Core document and view tools:
 | `list_views` | Viewports and camera summaries |
 | `get_view` | Full camera state (`view` optional; default is the active view) |
 | `set_active_view` | Activate a view by name (`Perspective`, `Top`, …) |
+| `set_illustration_style` | Apply a pale architectural display preset with dark edges and no grid; preserves built-in display modes |
 | `set_view` | Set absolute `camera` and `target` (optional `up`) |
 | `orbit_view` | Relative yaw and pitch in degrees around the target |
 | `pan_view` | Screen-space pan (`right` / `up` in model units) |

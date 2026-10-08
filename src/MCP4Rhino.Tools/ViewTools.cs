@@ -53,6 +53,14 @@ internal static class ViewTools
         return JsonSerializer.Serialize(CameraState(view, vp));
     });
 
+    public static string SetIllustrationStyle(JsonObject args) => UiThread.Invoke(() =>
+    {
+        var (view, viewport) = Resolve(RequireDoc(), args);
+        IllustrationDisplay.Apply(viewport);
+        view.Redraw();
+        return JsonSerializer.Serialize(new { view = viewport.Name, style = "MCP4Rhino Illustration" });
+    });
+
     public static string SetView(JsonObject args) => UiThread.Invoke(() =>
     {
         var doc = RequireDoc();
