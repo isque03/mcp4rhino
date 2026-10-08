@@ -223,7 +223,9 @@ public static class RhinoToolCatalog
                 layer = new { type = "string", description = "Optional layer substring filter" },
             },
         }),
-        Tool("capture_viewport", "Capture a viewport to a PNG file and return its path.", new
+        Tool("capture_viewport",
+            $"Capture a viewport to PNG. Returns text metadata (path/size) plus an MCP image content block when the file is a valid PNG ≤ {McpContent.MaxEmbeddedPngBytes} bytes; larger files stay on disk (text only). Default path: OS logs dir (macOS ~/Library/Logs/MCP4Rhino/, Windows %LOCALAPPDATA%\\MCP4Rhino\\).",
+            new
         {
             type = "object",
             properties = new
@@ -256,6 +258,10 @@ public static class RhinoToolCatalog
         var args = @params?["arguments"] as JsonObject ?? new JsonObject();
 
         PluginLog.Info($"tools/call {name}");
+        // capture_viewport returns a full MCP result (text + optional image), not a plain string.
+        if (name == "capture_viewport")
+            return CaptureViewport(args);
+
         var text = name switch
         {
             "get_document_info" => GetDocumentInfo(),
@@ -279,7 +285,6 @@ public static class RhinoToolCatalog
             "pan_view" => ViewTools.PanView(args),
             "zoom_view" => ViewTools.ZoomView(args),
             "zoom_extents" => ViewTools.ZoomExtents(args),
-            "capture_viewport" => CaptureViewport(args),
             _ => CurveFoundationTools.TryCall(name, args)
                 ?? SurfaceFoundationTools.TryCall(name, args)
                 ?? GeometryFoundationTools.TryCall(name, args)
@@ -290,11 +295,7 @@ public static class RhinoToolCatalog
                 ?? throw new InvalidOperationException($"Unknown tool: {name}"),
         };
 
-        return new
-        {
-            content = new[] { new { type = "text", text } },
-            isError = false,
-        };
+        return McpContent.TextOnly(text);
     }
 
     private static object Tool(string name, string description, object inputSchema) => new
@@ -611,7 +612,54 @@ public static class RhinoToolCatalog
         return JsonSerializer.Serialize(new { deleted, missing });
     });
 
-    private static string CaptureViewport(JsonObject args) => UiThread.Invoke(() =>
+    private static object CaptureViewport(JsonObject args)
+    {
+        // Capture on UI thread only; read/base64 off the UI pump (can be multi-MB).
+        var captured = UiThread.Invoke(() => CaptureViewportToDisk(args));
+        var pngBytes = File.ReadAllBytes(captured.Path);
+        if (!McpContent.IsValidPng(pngBytes))
+            throw new InvalidOperationException($"Viewport capture wrote invalid PNG: {captured.Path}");
+
+        if (pngBytes.Length > McpContent.MaxEmbeddedPngBytes)
+        {
+            PluginLog.Info(
+                $"capture_viewport omit image embed ({pngBytes.Length} > {McpContent.MaxEmbeddedPngBytes} bytes): {captured.Path}");
+            var omitText = JsonSerializer.Serialize(new
+            {
+                path = captured.Path,
+                width = captured.Width,
+                height = captured.Height,
+                requested_width = captured.RequestedWidth,
+                requested_height = captured.RequestedHeight,
+                method = captured.Method,
+                view = captured.ViewName,
+                image_embedded = false,
+                image_omitted_reason = "exceeds_max_bytes",
+                max_embedded_png_bytes = McpContent.MaxEmbeddedPngBytes,
+                byte_length = pngBytes.Length,
+            });
+            return McpContent.TextOnly(omitText);
+        }
+
+        var text = JsonSerializer.Serialize(new
+        {
+            path = captured.Path,
+            width = captured.Width,
+            height = captured.Height,
+            requested_width = captured.RequestedWidth,
+            requested_height = captured.RequestedHeight,
+            method = captured.Method,
+            view = captured.ViewName,
+            image_embedded = true,
+            byte_length = pngBytes.Length,
+        });
+        return McpContent.TextAndPng(text, pngBytes);
+    }
+
+    private readonly record struct CapturedViewport(
+        string Path, int Width, int Height, int RequestedWidth, int RequestedHeight, string Method, string? ViewName);
+
+    private static CapturedViewport CaptureViewportToDisk(JsonObject args)
     {
         var doc = ToolHelpers.RequireDoc();
         var viewName = args["view"]?.GetValue<string>();
@@ -645,11 +693,7 @@ public static class RhinoToolCatalog
         var path = args["path"]?.GetValue<string>();
         if (string.IsNullOrWhiteSpace(path))
         {
-            var dir = Path.Combine(
-                System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
-                "Library", "Logs", "MCP4Rhino");
-            Directory.CreateDirectory(dir);
-            path = Path.Combine(dir, $"viewport-{DateTime.Now:yyyyMMdd-HHmmss}.png");
+            path = Path.Combine(ToolHelpers.LogsDir(), $"viewport-{DateTime.Now:yyyyMMdd-HHmmss}.png");
         }
         else
         {
@@ -662,17 +706,9 @@ public static class RhinoToolCatalog
         // Prefer RhinoView.CaptureToBitmap*; fall back to -_ViewCaptureToFile.
         var (actualWidth, actualHeight, method) = CaptureViewportToFile(view, path, width, height);
         PluginLog.Info($"capture_viewport wrote {path} ({actualWidth}x{actualHeight}) via {method}");
-        return JsonSerializer.Serialize(new
-        {
-            path,
-            width = actualWidth,
-            height = actualHeight,
-            requested_width = width,
-            requested_height = height,
-            method,
-            view = view.ActiveViewport?.Name,
-        });
-    });
+        return new CapturedViewport(
+            path, actualWidth, actualHeight, width, height, method, view.ActiveViewport?.Name);
+    }
 
     private static (int width, int height, string method) CaptureViewportToFile(
         RhinoView view, string path, int width, int height)
@@ -702,6 +738,10 @@ public static class RhinoToolCatalog
                     using var bitmap = attempt();
                     if (bitmap is null) continue;
                     bitmap.Save(path, ImageFormat.Png);
+                    if (!File.Exists(path) || new FileInfo(path).Length <= 32)
+                        continue;
+                    if (TryReadPngSize(path) is null)
+                        continue;
                     return (bitmap.Width, bitmap.Height, "CaptureToBitmap");
                 }
                 catch (MissingMethodException) { /* try next overload */ }

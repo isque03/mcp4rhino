@@ -223,11 +223,7 @@ public static class McpHost
             message = "Tools hot-reloaded. New tool code is active; HTTP server kept running.",
         });
 
-        return new
-        {
-            content = new[] { new { type = "text", text } },
-            isError = false,
-        };
+        return McpContent.TextOnly(text);
     }
 
     private static async Task WriteJsonAsync(HttpListenerContext ctx, object payload)

@@ -5,6 +5,16 @@ All notable changes to MCP4Rhino are recorded in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Package version lives in [manifest.yml](manifest.yml).
 
+## [Unreleased]
+
+### Changed
+
+- `capture_viewport` returns an MCP `image` content block (base64 PNG) plus text metadata with `path`, so sandboxed agents (Claude / Cursor) can see the capture without filesystem access. Text remains `content[0]` for existing clients. Embeds only valid PNGs ≤ 1 MiB raw; larger files stay on disk with `image_omitted_reason`. Read/base64 run off the Rhino UI thread.
+
+### Fixed
+
+- `capture_viewport` default path now uses `ToolHelpers.LogsDir()` (`%LOCALAPPDATA%\MCP4Rhino` on Windows, `~/Library/Logs/MCP4Rhino` on macOS) instead of always appending macOS `Library/Logs` under the user profile.
+
 ## [0.4.0] — 2026-10-07
 
 ### Added

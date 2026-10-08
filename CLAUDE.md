@@ -42,6 +42,62 @@ Then [finish in Rhino](#finish-in-rhino-agent-cannot-do-this).
 
 ---
 
+## Upgrade from this source repo (existing install)
+
+Use this when the user already installed MCP4Rhino and new commits land (after `git pull`, merging a PR, or checking out a feature branch). Do **not** tell them to re-clone or wipe the package folder unless install is broken.
+
+### 1. Update the source
+
+```bash
+git pull
+# or: git fetch && git checkout <branch> && git pull
+```
+
+Work from the **repo root** that matches the scripts they run (same clone they used to install).
+
+### 2. Pick the upgrade path
+
+| What changed in the pull | What to run | Rhino restart? |
+|--------------------------|-------------|----------------|
+| Only Tools / Logic (new or changed MCP tools, helpers) | Hot-reload script below, then `MCP4RhinoReload` or `mcp4rhino_reload` | **No** |
+| Host `.rhp`, new Rhino commands, Contracts, or you are unsure | Full install script (`install-yak`), then quit and reopen Rhino, then `MCP4Rhino` | **Yes** |
+| Docs / skills / `CLAUDE.md` only | Nothing to install | — |
+
+**When unsure, run the full install** (`install-yak.sh` / `install-yak.ps1`). It rebuilds and overwrites the package. Still restart Rhino afterward for host safety.
+
+### 3. Hot-reload (Tools + Logic only)
+
+macOS:
+
+```bash
+bash scripts/hot-reload-tools.sh
+# Rhino command line: MCP4RhinoReload
+# or MCP tool: mcp4rhino_reload
+```
+
+Windows 11:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/hot-reload-tools.ps1
+# Rhino: MCP4RhinoReload  — or MCP: mcp4rhino_reload
+```
+
+The MCP HTTP server can keep running across hot-reload. Clients on `http://127.0.0.1:4010/mcp` do not need a new URL unless `MCP4RHINO_PORT` changed.
+
+### 4. Full reinstall (host or uncertain)
+
+Same commands as [first-time install](#get-a-working-server-macos) / [Windows](#get-a-working-server-windows-11). Then [finish in Rhino](#finish-in-rhino-agent-cannot-do-this) (restart + `MCP4Rhino`).
+
+### 5. Confirm the new bits are live
+
+- `tools/list` shows new tool names / updated descriptions.
+- Call a changed tool (e.g. `capture_viewport` should return an `image` content block when the PNG is ≤ 1 MiB).
+- If behavior is still old: they hot-reloaded but needed a full install, or they did not run `MCP4RhinoReload` / restart.
+
+Claude Desktop / Cursor MCP config usually stays `npx mcp-remote http://localhost:4010/mcp` — no change for routine upgrades.
+
+---
+
 ## Linux
 
 Rhino 8 has no official Linux desktop. Use a **Windows 11 VM** or a remote Windows host. Run `scripts/install-yak.ps1` on that host. Point the Linux MCP client at `http://<windows-host>:4010/mcp`.
@@ -161,6 +217,7 @@ powershell -ExecutionPolicy Bypass -File scripts/hot-reload-tools.ps1
 - Run document and view mutations on the UI thread (`UiThread.Invoke`).
 - On **macOS**, `capture_viewport` uses `_-ViewCaptureToFile`. Do not use System.Drawing/GDI+. Default PNG path: `~/Library/Logs/MCP4Rhino/`.
 - On **Windows**, prefer `CaptureToBitmap` when it works. ViewCaptureToFile is also valid. Default PNG path: `%LOCALAPPDATA%\MCP4Rhino\` (or the `path` argument).
+- `capture_viewport` returns an MCP **image** content block (base64 PNG) plus text metadata with `path`. Sandboxed agents should use the image in the tool result; only `Read` the path when the agent has filesystem access.
 - The server does **not** start when the plugin loads. The user must run `MCP4Rhino`.
 
 ---
@@ -187,7 +244,7 @@ For **residential (IRC)** and **commercial (IBC)** design in Rhino, use project 
 - **Surfaces P0 — edges:** `list_surface_edges`, `dup_border`, `dup_edge`, `extract_isocurve`
 - **Architecture P1:** `create_level`, `create_wall` / `create_slab` / `create_roof`, `create_door` / `create_window`, `create_stair` / `create_ramp`, `create_space`
 - **Docs P2 / Interop P3 / Code P4:** sheets, `export_ifc`, `run_code_checks` (findings only — never “compliant”)
-- **Camera:** view tools + `capture_viewport`
+- **Camera:** view tools + `capture_viewport` (image is in the tool result; do not require a local file Read)
 - **Iterate:** copy Tools and Logic DLLs, then `mcp4rhino_reload`
 
 Surface face pick for fillet/chamfer: `face_index_*` or `pick_point_*` (required on multi-face breps). Edge pick for blend/dup_edge: `edge_index` or `pick_point` from `list_surface_edges`. Curve cutters for trim/split must be planar (or pass a surface/brep cutter). Full Rhino→MCP map: [docs/ARCHITECTURE_AGENT.md](docs/ARCHITECTURE_AGENT.md).
