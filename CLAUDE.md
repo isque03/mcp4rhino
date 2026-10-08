@@ -91,7 +91,8 @@ Same commands as [first-time install](#get-a-working-server-macos) / [Windows](#
 ### 5. Confirm the new bits are live
 
 - `tools/list` shows new tool names / updated descriptions.
-- Call a changed tool (e.g. `capture_viewport` should return an `image` content block when the PNG is ≤ 1 MiB).
+- Call a changed tool (e.g. `capture_viewport` text with `image_embedded: true` and a following `image` content block for typical default sizes).
+- Image-embed changes are Tools/Logic — hot-reload is enough. Host `.rhp` edits still need full install + restart.
 - If behavior is still old: they hot-reloaded but needed a full install, or they did not run `MCP4RhinoReload` / restart.
 
 Claude Desktop / Cursor MCP config usually stays `npx mcp-remote http://localhost:4010/mcp` — no change for routine upgrades.
@@ -215,9 +216,9 @@ powershell -ExecutionPolicy Bypass -File scripts/hot-reload-tools.ps1
 - Do not commit or push unless the user asks.
 - Do not edit Cursor plan files under `~/.cursor/plans/`.
 - Run document and view mutations on the UI thread (`UiThread.Invoke`).
-- On **macOS**, `capture_viewport` uses `_-ViewCaptureToFile`. Do not use System.Drawing/GDI+. Default PNG path: `~/Library/Logs/MCP4Rhino/`.
-- On **Windows**, prefer `CaptureToBitmap` when it works. ViewCaptureToFile is also valid. Default PNG path: `%LOCALAPPDATA%\MCP4Rhino\` (or the `path` argument).
-- `capture_viewport` returns an MCP **image** content block (base64 PNG) plus text metadata with `path`. Sandboxed agents should use the image in the tool result; only `Read` the path when the agent has filesystem access.
+- On **macOS**, `capture_viewport` uses `_-ViewCaptureToFile` (no System.Drawing/GDI+). The script does not take `width`/`height`. Default PNG path: `~/Library/Logs/MCP4Rhino/`.
+- On **Windows**, capture tries ViewCaptureToFile first, then `CaptureToBitmap` with `width`/`height`. Default PNG path: `%LOCALAPPDATA%\MCP4Rhino\` (or the `path` argument).
+- `capture_viewport` text metadata includes `path`, actual/requested sizes, `method`, `image_embedded`, and `byte_length`. When embedded, `content` also has `type: "image"` / `mimeType: "image/png"`. Sandboxed agents should use that image; only `Read` the path when they have host filesystem access. Oversize omit: `image_embedded: false`, `image_omitted_reason: "exceeds_max_bytes"`, `max_embedded_png_bytes` (1 MiB raw). Shrink `width`/`height` only helps when CaptureToBitmap wins (typically Windows); on macOS open `path` or reframe the view. Invalid PNG → tool error, not omit metadata.
 - The server does **not** start when the plugin loads. The user must run `MCP4Rhino`.
 
 ---
@@ -244,7 +245,7 @@ For **residential (IRC)** and **commercial (IBC)** design in Rhino, use project 
 - **Surfaces P0 — edges:** `list_surface_edges`, `dup_border`, `dup_edge`, `extract_isocurve`
 - **Architecture P1:** `create_level`, `create_wall` / `create_slab` / `create_roof`, `create_door` / `create_window`, `create_stair` / `create_ramp`, `create_space`
 - **Docs P2 / Interop P3 / Code P4:** sheets, `export_ifc`, `run_code_checks` (findings only — never “compliant”)
-- **Camera:** view tools + `capture_viewport` (image is in the tool result; do not require a local file Read)
+- **Camera:** view tools + `capture_viewport` (use the tool’s `image` block when `image_embedded` is true; do not require a local file Read)
 - **Iterate:** copy Tools and Logic DLLs, then `mcp4rhino_reload`
 
 Surface face pick for fillet/chamfer: `face_index_*` or `pick_point_*` (required on multi-face breps). Edge pick for blend/dup_edge: `edge_index` or `pick_point` from `list_surface_edges`. Curve cutters for trim/split must be planar (or pass a surface/brep cutter). Full Rhino→MCP map: [docs/ARCHITECTURE_AGENT.md](docs/ARCHITECTURE_AGENT.md).

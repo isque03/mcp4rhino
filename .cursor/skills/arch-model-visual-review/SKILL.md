@@ -40,7 +40,7 @@ Quote program, story count, approximate footprint, and style from the user. Note
 
 ### 3. Capture pack
 
-Call `capture_viewport` with stable `path` names under the MCP4Rhino logs dir (macOS `~/Library/Logs/MCP4Rhino/`, Windows `%LOCALAPPDATA%\MCP4Rhino\`). The tool result includes an MCP **image** content block — use that for review. Only `Read` the path when the agent has filesystem access to the Rhino host.
+Call `capture_viewport` with stable `path` names under the MCP4Rhino logs dir (macOS `~/Library/Logs/MCP4Rhino/`, Windows `%LOCALAPPDATA%\MCP4Rhino\`). When text has `image_embedded: true`, use the MCP **image** content block for review. If `image_omitted_reason` is set, tighten the view or `Read` the path when you have host filesystem access.
 
 Optional: `run_rhino_command` with a shaded display script if available; note display mode in the report.
 
