@@ -14,6 +14,10 @@ internal static class InteropTools
 {
     public static object[] ListTools() =>
     [
+        T("check_rhino_license",
+            "Report whether Rhino allows saving (valid license or active evaluation). " +
+            "Call before export_3dm; export_3dm fails when can_save is false.",
+            new { type = "object", properties = new { } }),
         T("export_ifc", "Export mcp4-tagged building model to a minimal IFC2x3 file.", new
         {
             type = "object",
@@ -31,12 +35,15 @@ internal static class InteropTools
             properties = new { path = new { type = "string" }, ids = new { type = "string" } },
             required = new[] { "path" },
         }),
-        T("export_3dm", "Save document or export selection to 3DM.", new
-        {
-            type = "object",
-            properties = new { path = new { type = "string" } },
-            required = new[] { "path" },
-        }),
+        T("export_3dm",
+            "Save the document to 3DM. Requires a valid Rhino license or non-expired evaluation " +
+            "(RhinoApp.CanSave). Call check_rhino_license first; fails with a clear error when saving is not allowed.",
+            new
+            {
+                type = "object",
+                properties = new { path = new { type = "string" } },
+                required = new[] { "path" },
+            }),
         T("link_external_model", "Import a file onto layer LINK::<name>.", new
         {
             type = "object",
@@ -65,6 +72,7 @@ internal static class InteropTools
 
     public static string? Dispatch(string name, JsonObject args) => name switch
     {
+        "check_rhino_license" => CheckRhinoLicense(),
         "export_ifc" => ExportIfc(args),
         "import_ifc" => ImportIfc(args),
         "export_obj" => ExportObj(args),
@@ -75,6 +83,9 @@ internal static class InteropTools
         "quantity_takeoff" => QuantityTakeoffTool(args),
         _ => null,
     };
+
+    private static string CheckRhinoLicense() =>
+        ToolHelpers.Json(RhinoLicenseStatus.Query().ToJsonObject());
 
     private static string ExportIfc(JsonObject args) => UiThread.Invoke(() =>
     {
@@ -122,6 +133,10 @@ internal static class InteropTools
 
     private static string Export3dm(JsonObject args) => UiThread.Invoke(() =>
     {
+        var license = RhinoLicenseStatus.Query();
+        if (!license.CanSave)
+            throw new InvalidOperationException(license.Message);
+
         var doc = ToolHelpers.RequireDoc();
         var path = ToolHelpers.Str(args, "path")!;
         Directory.CreateDirectory(Path.GetDirectoryName(path) ?? ".");

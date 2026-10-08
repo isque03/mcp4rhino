@@ -7,8 +7,13 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+### Added
+
+- You can ask whether Rhino allows saving with `check_rhino_license` before calling `export_3dm`. Response fields: `can_save`, `installation_type`, `installation_type_string`, `is_evaluation`, `days_until_expiration` (null when the license does not expire), `saves_left` (always null on RhinoCommon 8.21 — save-count API not exposed), and `message`.
+
 ### Changed
 
+- You can no longer save a `.3dm` via `export_3dm` when Rhino blocks saving (expired evaluation, expired lease, or inactive license seat). The tool returns a clear error; call `check_rhino_license` first.
 - You can review Rhino viewports from a sandboxed agent without opening a local file: `capture_viewport` returns text metadata with `path` plus an MCP `image` content block when the file is ≤ 1 MiB raw and starts with a PNG signature. Text stays `content[0]` for existing clients. Larger files stay on disk with `image_omitted_reason: "exceeds_max_bytes"`. Read/base64 run off the Rhino UI thread.
 
 ### Fixed

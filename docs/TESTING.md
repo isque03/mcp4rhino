@@ -34,6 +34,7 @@ dotnet test tests/MCP4Rhino.Tests -c Release
 | `CurveOpsTests` / `SurfaceOpsTests` | Curve/surface pure-logic helpers |
 | `McpJsonRpcTests` | `initialize` / `tools/list` / `tools/call` / errors |
 | `McpContentTests` | MCP text/image content builders; PNG signature validation; image embed helpers |
+| `RhinoLicenseStatusTests` | Save-gate allow/deny messages and evaluation classification from license snapshots |
 
 ## Rhino integration (manual)
 
@@ -43,5 +44,6 @@ After hot-reload, smoke one facade path:
 2. Call `create_wall` + `run_code_checks` from an MCP client
 3. Units smoke: `set_document_units` Feet → `convert_length` 32 in → create → `measure_size` (~32 in); with `scale_existing: true`, flip Inches→Feet and confirm geometry height ≈ /12
 4. Viewport capture (after Tools/Logic hot-reload): `capture_viewport` at default size usually returns text with `image_embedded: true` then `type: "image"` / `mimeType: "image/png"`. Confirm the model can describe the view without reading the file path. If omitted: text has `image_omitted_reason: "exceeds_max_bytes"` (no image block). Invalid PNG fails the call.
+5. License save gate: `check_rhino_license` returns `can_save` plus installation/eval fields. When `can_save` is false, `export_3dm` must fail with the same clear license/evaluation message and must not write a file. When `can_save` is true, `export_3dm` should write successfully.
 
 Full Rhino.Testing harness for ArchElement/ViewCapture is optional and out of the 80% gate.

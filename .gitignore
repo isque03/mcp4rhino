@@ -12,3 +12,8 @@ dist/
 
 # Test coverage outputs
 tests/**/coverage/
+
+# Artifacts
+artifacts/
+# Code Reviews
+.cursor/hostile-review/
