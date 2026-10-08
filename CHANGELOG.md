@@ -9,11 +9,12 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ### Changed
 
-- `capture_viewport` returns an MCP `image` content block (base64 PNG) plus text metadata with `path`, so sandboxed agents (Claude / Cursor) can see the capture without filesystem access. Text remains `content[0]` for existing clients. Embeds only valid PNGs ≤ 1 MiB raw; larger files stay on disk with `image_omitted_reason`. Read/base64 run off the Rhino UI thread.
+- You can review Rhino viewports from a sandboxed agent without opening a local file: `capture_viewport` returns text metadata with `path` plus an MCP `image` content block when the file is ≤ 1 MiB raw and starts with a PNG signature. Text stays `content[0]` for existing clients. Larger files stay on disk with `image_omitted_reason: "exceeds_max_bytes"`. Read/base64 run off the Rhino UI thread.
 
 ### Fixed
 
 - `capture_viewport` default path now uses `ToolHelpers.LogsDir()` (`%LOCALAPPDATA%\MCP4Rhino` on Windows, `~/Library/Logs/MCP4Rhino` on macOS) instead of always appending macOS `Library/Logs` under the user profile.
+- CaptureToBitmap success now requires a non-trivial file and a readable PNG header (same bar as ViewCaptureToFile), so empty/corrupt bitmap saves are not treated as success.
 
 ## [0.4.0] — 2026-10-07
 

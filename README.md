@@ -31,7 +31,7 @@ Then [start the server in Rhino](#start-in-rhino).
 Already installed and pulling new commits?
 
 1. `git pull` (or check out the release / feature branch).
-2. **Tools/Logic only** (most new MCP tools): run `scripts/hot-reload-tools.sh` (macOS) or `hot-reload-tools.ps1` (Windows), then `MCP4RhinoReload` in Rhino — no restart.
+2. **Tools/Logic only** (most new MCP tools, including `capture_viewport` image embed): run `scripts/hot-reload-tools.sh` (macOS) or `scripts/hot-reload-tools.ps1` (Windows), then `MCP4RhinoReload` in Rhino — no restart.
 3. **Host `.rhp` / new Rhino commands / unsure:** re-run `install-yak`, **restart Rhino**, then `MCP4Rhino`.
 4. Confirm with `tools/list` or a changed tool. MCP URL stays `http://127.0.0.1:4010/mcp` unless you set `MCP4RHINO_PORT`.
 
@@ -143,7 +143,7 @@ Core document and view tools:
 | `pan_view` | Screen-space pan (`right` / `up` in model units) |
 | `zoom_view` | Dolly toward or away from the target (`factor` > 1 zooms in) |
 | `zoom_extents` | Fit all objects (optional `ids`) |
-| `capture_viewport` | PNG screenshot as MCP **image** content + path metadata when ≤ 1 MiB (`width`/`height`/`view`/`path`; macOS ViewCaptureToFile, Windows CaptureToBitmap fallback) |
+| `capture_viewport` | PNG screenshot: text metadata (`path`, sizes, `image_embedded`) plus MCP **image** when file ≤ 1 MiB and passes PNG signature check (`width`/`height`/`view`/`path`; both OS try ViewCaptureToFile first, then CaptureToBitmap on Windows) |
 | `run_rhino_command` | Scripted Rhino command escape hatch |
 | `mcp4rhino_reload` | Hot-reload Tools and Logic without a Rhino restart |
 
@@ -182,8 +182,9 @@ Project skills: [`.cursor/skills/arch-*`](.cursor/skills/).
 | Tools or Logic code not updating | Copy both DLLs (`hot-reload-tools.sh` on macOS), then run `MCP4RhinoReload` / `mcp4rhino_reload`. Restart Rhino after host `.rhp` edits. |
 | Object is huge vs the size the user named (e.g. “32 inches” → tens of feet) | Document is likely Feet (or another unit) while the agent passed the inch number raw. Call `get_document_units`, `convert_length`, recreate, then `measure_size`. |
 | Unit change did not resize geometry | Pass `scale_existing: true` to `set_document_units` (fixed to actually scale). |
-| `capture_viewport` on Mac | Uses scripted ViewCaptureToFile. Default PNG path: `~/Library/Logs/MCP4Rhino/`. Result includes a base64 `image` content block for agents without filesystem access. |
-| `capture_viewport` on Windows | CaptureToBitmap fallback when needed. Default PNG path: `%LOCALAPPDATA%\MCP4Rhino\`. Same image content block in the tool result. |
+| `capture_viewport` on Mac | Scripted ViewCaptureToFile (does not pass `width`/`height` into the script). Default PNG path: `~/Library/Logs/MCP4Rhino/`. Embeds `image` when ≤ 1 MiB. |
+| `capture_viewport` on Windows | ViewCaptureToFile first; CaptureToBitmap fallback uses `width`/`height`. Default PNG path: `%LOCALAPPDATA%\MCP4Rhino\`. Same embed rules. |
+| `capture_viewport` has path but no image | Text may set `image_embedded: false` and `image_omitted_reason: "exceeds_max_bytes"` (plus `byte_length`, `max_embedded_png_bytes`). On Windows, retry smaller `width`/`height` (CaptureToBitmap path). On macOS, ViewCaptureToFile size is viewport-driven — open `path` if the agent can read the Rhino host disk, or capture a tighter view. Invalid/unreadable PNG fails the tool (JSON-RPC error), not omit-metadata. |
 
 ## Changelog
 
