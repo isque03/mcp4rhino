@@ -12,34 +12,38 @@ A 21-second time-lapse of actual MCP-driven Rhino construction, ending with a ri
 
 ## Quick start
 
-**Prerequisites:** [Rhino 8](https://www.rhino3d.com/), [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0), [Node.js](https://nodejs.org/) (`npx` for MCP clients).
+**Prerequisites:** [Rhino 8](https://www.rhino3d.com/). For AI clients, also [Node.js](https://nodejs.org/) (`npx`).
+
+### Install with Package Manager
+
+1. In Rhino: **Tools → Package Manager**.
+2. Search for **MCP4Rhino** and install.
+3. Restart Rhino, then [start the server](#start-in-rhino).
+
+### Install from a GitHub release
+
+If Package Manager search does not list MCP4Rhino yet, download the platform package from the [v0.4.0 release](https://github.com/isque03/mcp4rhino/releases/tag/v0.4.0):
+
+| Host | Package |
+|------|---------|
+| **macOS** | `MCP4Rhino-0.4.0-mac.yak` |
+| **Windows 11** | `MCP4Rhino-0.4.0-win.yak` |
+
+Then install with yak (paths below are the Rhino 8 defaults; override with env `YAK`):
 
 ```bash
-git clone https://github.com/isque03/mcp4rhino.git
-cd mcp4rhino
+# macOS
+"/Applications/Rhino 8.app/Contents/Resources/bin/yak" install path/to/MCP4Rhino-0.4.0-mac.yak
 ```
 
-| Host | Install |
-|------|---------|
-| **macOS** | `bash scripts/install-yak.sh` |
-| **Windows 11** | `powershell -ExecutionPolicy Bypass -File scripts/install-yak.ps1` |
+```powershell
+# Windows
+& "C:\Program Files\Rhino 8\System\Yak.exe" install path\to\MCP4Rhino-0.4.0-win.yak
+```
 
-Each script builds the solution, packs yak (`MCP4Rhino` **0.4.0**), and installs into the Rhino package folder. Override yak with env `YAK` if needed.
+Restart Rhino, then [start the server](#start-in-rhino).
 
-Then [start the server in Rhino](#start-in-rhino).
-
-**Linux:** Rhino 8 has [no official Linux desktop](https://www.rhino3d.com/8/system-requirements/). Run Rhino on a Windows 11 VM/host, install with `install-yak.ps1` there, and point your Linux MCP client at `http://<windows-host>:4010/mcp`. Wine is unsupported.
-
-## Updating from source
-
-Already installed and pulling new commits?
-
-1. `git pull` (or check out the release / feature branch).
-2. **Tools/Logic only** (most new MCP tools, including `capture_viewport` image embed): run `scripts/hot-reload-tools.sh` (macOS) or `scripts/hot-reload-tools.ps1` (Windows), then `MCP4RhinoReload` in Rhino — no restart.
-3. **Host `.rhp` / new Rhino commands / unsure:** re-run `install-yak`, **restart Rhino**, then `MCP4Rhino`.
-4. Confirm with `tools/list` or a changed tool. MCP URL stays `http://127.0.0.1:4010/mcp` unless you set `MCP4RHINO_PORT`.
-
-Agent-oriented detail: [CLAUDE.md — Upgrade from this source repo](CLAUDE.md#upgrade-from-this-source-repo-existing-install).
+**Linux:** Rhino 8 has [no official Linux desktop](https://www.rhino3d.com/8/system-requirements/). Run Rhino on a Windows 11 VM/host, install the **win** package there, and point your Linux MCP client at `http://<windows-host>:4010/mcp`. Wine is unsupported.
 
 ## Start in Rhino
 
@@ -68,6 +72,35 @@ After you install the package on a supported host:
 ```
 
 **Cursor and other clients** — connect with `npx mcp-remote http://localhost:4010/mcp`, or use the client HTTP MCP equivalent. If the client runs on Linux and Rhino runs in a Windows VM, replace `localhost` with the Windows host IP.
+
+## Build from source
+
+For contributors iterating on the plugin (requires [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)):
+
+```bash
+git clone https://github.com/isque03/mcp4rhino.git
+cd mcp4rhino
+```
+
+| Host | Install into Rhino |
+|------|--------------------|
+| **macOS** | `bash scripts/install-yak.sh` |
+| **Windows 11** | `powershell -ExecutionPolicy Bypass -File scripts/install-yak.ps1` |
+
+Each script builds the solution, writes `dist/MCP4Rhino-0.4.0-{mac,win}.yak`, and installs the host-platform package. Pack only (no install): `bash scripts/pack-yak.sh` or `scripts/pack-yak.ps1`. Override yak with env `YAK` if needed.
+
+**Publish to Package Manager (maintainers):** after `pack-yak`, run `yak login`, then `yak push dist/MCP4Rhino-0.4.0-mac.yak` and `yak push dist/MCP4Rhino-0.4.0-win.yak`.
+
+### Updating from source
+
+Already installed from this repo and pulling new commits?
+
+1. `git pull` (or check out the release / feature branch).
+2. **Tools/Logic only** (most new MCP tools, including `capture_viewport` image embed): run `scripts/hot-reload-tools.sh` (macOS) or `scripts/hot-reload-tools.ps1` (Windows), then `MCP4RhinoReload` in Rhino — no restart.
+3. **Host `.rhp` / new Rhino commands / unsure:** re-run `install-yak`, **restart Rhino**, then `MCP4Rhino`.
+4. Confirm with `tools/list` or a changed tool. MCP URL stays `http://127.0.0.1:4010/mcp` unless you set `MCP4RHINO_PORT`.
+
+Agent-oriented detail: [CLAUDE.md — Upgrade from this source repo](CLAUDE.md#upgrade-from-this-source-repo-existing-install).
 
 ## Run tests
 
@@ -183,7 +216,7 @@ Project skills: [`.cursor/skills/arch-*`](.cursor/skills/).
 |---------|-----|
 | Nothing listens on 4010 | Run `MCP4Rhino` in the Rhino **command line** (not Help). The server does not start when the plugin loads. |
 | Port bind error | Another process owns the port. Set `MCP4RHINO_PORT` and update the client URL. |
-| Commands not found | Install failed, or Rhino was not restarted after yak install. Re-run `bash scripts/install-yak.sh`, then restart Rhino. |
+| Commands not found | Install failed, or Rhino was not restarted after install. Reinstall via Package Manager or the GitHub `.yak`, restart Rhino. From source: `bash scripts/install-yak.sh`. |
 | Tools or Logic code not updating | Copy both DLLs (`hot-reload-tools.sh` on macOS), then run `MCP4RhinoReload` / `mcp4rhino_reload`. Restart Rhino after host `.rhp` edits. |
 | Object is huge vs the size the user named (e.g. “32 inches” → tens of feet) | Document is likely Feet (or another unit) while the agent passed the inch number raw. Call `get_document_units`, `convert_length`, recreate, then `measure_size`. |
 | Unit change did not resize geometry | Pass `scale_existing: true` to `set_document_units` (fixed to actually scale). |
