@@ -7,6 +7,10 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+### Changed
+
+- Docs clarify the **MCP4Rhino** menu path: under **Tools** on Windows; top-level menu bar on macOS.
+
 ## [0.5.3] — 2026-10-11
 
 ### Fixed
@@ -17,8 +21,8 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ### Added
 
-- **Tools → MCP4Rhino** menu (RUI) with Status, Start/Stop, Check for updates, and Report issue.
-- Eto **Status** dialog (`MCP4RhinoStatus` interactive / `MCP4RhinoStatusUI` from Tools menu) showing Running/Stopped, endpoint, log path, and Start/Stop/Copy/Updates/Log/Issue actions.
+- **MCP4Rhino** menu (RUI) with Status, Start/Stop, Check for updates, and Report issue (under **Tools** on Windows; top-level on macOS).
+- Eto **Status** dialog (`MCP4RhinoStatus` interactive / `MCP4RhinoStatusUI` from the menu) showing Running/Stopped, endpoint, log path, and Start/Stop/Copy/Updates/Log/Issue actions.
 - Commands `MCP4RhinoUpdates` (opens Package Manager) and `MCP4RhinoReportIssue` (opens GitHub Issues).
 - MCP `initialize` `instructions` plus host tool `get_support_info` with Issues URLs and filing tips.
 - README Package Manager screenshot updated; Feedback / Issues section.

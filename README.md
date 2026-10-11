@@ -78,7 +78,7 @@ flowchart TD
 4. Select the package published by **Agent Toolkit**.
 5. Click **Install** and apply the changes.
 6. Restart Rhino when prompted.
-7. After restart, MCP4Rhino usually starts on its own. Confirm with **Tools → MCP4Rhino → Status…** (or run `MCP4RhinoStatus`). If nothing is listening, use **Start server** or type `MCP4Rhino`.
+7. After restart, MCP4Rhino usually starts on its own. Confirm with **MCP4Rhino → Status…** (Windows: under **Tools**; macOS: top-level menu bar) or run `MCP4RhinoStatus`. If nothing is listening, use **Start server** or type `MCP4Rhino`.
 
 ![MCP4Rhino in Rhino Package Manager](docs/media/package-manager-mcp4rhino.png)
 
@@ -96,7 +96,7 @@ Download the universal `MCP4Rhino-<version>.yak` from the [latest release](https
 & "C:\Program Files\Rhino 8\System\Yak.exe" install path\to\MCP4Rhino-<version>.yak
 ```
 
-Restart Rhino, then confirm with **Tools → MCP4Rhino → Status…** or run `MCP4RhinoStatus` / `MCP4Rhino`.
+Restart Rhino, then confirm with **MCP4Rhino → Status…** (Windows: under **Tools**; macOS: top-level menu) or run `MCP4RhinoStatus` / `MCP4Rhino`.
 
 Building from this repository: [docs/INSTALL_FROM_SOURCE.md](docs/INSTALL_FROM_SOURCE.md).
 
@@ -173,9 +173,11 @@ Full tool list: [docs/MCP_TOOLS.md](docs/MCP_TOOLS.md).
 
 ## Documentation
 
+**User docs (Mintlify):** [mcp4rhinodocs](https://github.com/isque03/mcp4rhinodocs) — quickstart, how-tos, tool reference, and architecture (auto-deploys on push).
+
 | Doc | Audience |
 |-----|----------|
-| [docs/MCP_TOOLS.md](docs/MCP_TOOLS.md) | Tool reference |
+| [docs/MCP_TOOLS.md](docs/MCP_TOOLS.md) | Tool reference (repo mirror) |
 | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Diagnostics |
 | [docs/INSTALL_FROM_SOURCE.md](docs/INSTALL_FROM_SOURCE.md) | Source install |
 | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Contributors |
@@ -187,13 +189,13 @@ Full tool list: [docs/MCP_TOOLS.md](docs/MCP_TOOLS.md).
 
 Bugs and enhancement requests: [GitHub Issues](https://github.com/isque03/mcp4rhino/issues).
 
-From Rhino: **Tools → MCP4Rhino → Report issue…**, or ask your AI assistant to call `get_support_info` before filing (includes version, endpoint, and filing tips).
+From Rhino: **MCP4Rhino → Report issue…**, or ask your AI assistant to call `get_support_info` before filing (includes version, endpoint, and filing tips).
 
 ## Troubleshooting
 
 | Problem | What to try |
 |---------|-------------|
-| Assistant cannot connect | Open **Tools → MCP4Rhino → Status…**. Start the server if Stopped. Restart the AI client after changing MCP config. |
+| Assistant cannot connect | Open **MCP4Rhino → Status…**. Start the server if Stopped. Restart the AI client after changing MCP config. |
 | MCP4Rhino does not appear in Rhino | Check Package Manager install, restart Rhino, search commands for `MCP4Rhino`. |
 | Assistant cannot modify the model | Confirm Status shows Running, watch the Rhino command line for errors, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md). |
 
