@@ -13,19 +13,25 @@ namespace MCP4Rhino.Host;
 [ExcludeFromCodeCoverage]
 public sealed class StatusDialog : Dialog
 {
-    private readonly Label _state = new() { Font = new Font(SystemFont.Bold, 14) };
-    private readonly Label _version = new();
-    private readonly Label _endpoint = new();
-    private readonly Label _autostart = new();
-    private readonly Label _log = new();
+    private readonly Label _state = new()
+    {
+        Font = new Font(SystemFont.Bold, 14),
+        TextAlignment = TextAlignment.Left,
+    };
+    private readonly Label _version = LeftLabel();
+    private readonly Label _endpoint = LeftLabel();
+    private readonly Label _autostart = LeftLabel();
+    private readonly Label _log = LeftLabel();
     private readonly Button _start = new() { Text = "Start" };
     private readonly Button _stop = new() { Text = "Stop" };
     private Action? _afterClose;
 
+    private static Label LeftLabel() => new() { TextAlignment = TextAlignment.Left };
+
     public StatusDialog()
     {
         Title = "MCP4Rhino Status";
-        ClientSize = new Size(460, 280);
+        ClientSize = new Size(520, 280);
         Resizable = false;
         Padding = 12;
 
@@ -75,7 +81,8 @@ public sealed class StatusDialog : Dialog
         Content = new StackLayout
         {
             Spacing = 8,
-            HorizontalContentAlignment = HorizontalAlignment.Stretch,
+            HorizontalContentAlignment = HorizontalAlignment.Left,
+            VerticalContentAlignment = VerticalAlignment.Top,
             Items =
             {
                 _state,
@@ -87,12 +94,14 @@ public sealed class StatusDialog : Dialog
                 {
                     Orientation = Orientation.Horizontal,
                     Spacing = 8,
+                    HorizontalContentAlignment = HorizontalAlignment.Left,
                     Items = { _start, _stop, copy },
                 },
                 new StackLayout
                 {
                     Orientation = Orientation.Horizontal,
                     Spacing = 8,
+                    HorizontalContentAlignment = HorizontalAlignment.Left,
                     Items = { updates, logBtn, issue, close },
                 },
             },
