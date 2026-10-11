@@ -1,5 +1,4 @@
 using Rhino;
-using Rhino.ApplicationSettings;
 
 namespace MCP4Rhino.Logic;
 
@@ -20,24 +19,22 @@ public sealed record RhinoLicenseStatus(
         "A valid Rhino license or a non-expired evaluation is required to save. " +
         "Rhino currently reports that saving is not allowed (expired evaluation, expired lease, or inactive license seat).";
 
-    /// <summary>Build status from already-resolved fields (unit-testable).</summary>
+    /// <summary>Build status from already-resolved fields (unit-testable without RhinoCommon).</summary>
     public static RhinoLicenseStatus FromSnapshot(
         bool canSave,
-        Installation installationType,
+        string installationType,
+        bool isEvaluation,
         string? installationTypeString = null,
         int? daysUntilExpiration = null,
-        int? savesLeft = null)
-    {
-        var isEval = RhinoApp.IsInstallationEvaluation(installationType);
-        return new RhinoLicenseStatus(
+        int? savesLeft = null) =>
+        new(
             CanSave: canSave,
-            InstallationType: installationType.ToString(),
-            InstallationTypeString: installationTypeString ?? installationType.ToString(),
-            IsEvaluation: isEval,
+            InstallationType: installationType,
+            InstallationTypeString: installationTypeString ?? installationType,
+            IsEvaluation: isEvaluation,
             DaysUntilExpiration: daysUntilExpiration,
             SavesLeft: savesLeft,
             Message: canSave ? AllowedMessage : DeniedMessage);
-    }
 
     /// <summary>Query live RhinoApp license state.</summary>
     public static RhinoLicenseStatus Query()
@@ -59,7 +56,8 @@ public sealed record RhinoLicenseStatus(
 
         return FromSnapshot(
             RhinoApp.CanSave,
-            type,
+            type.ToString(),
+            RhinoApp.IsInstallationEvaluation(type),
             RhinoApp.InstallationTypeString,
             days,
             savesLeft: null);

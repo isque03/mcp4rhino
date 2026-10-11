@@ -27,7 +27,7 @@ DEST_ROOT="$(find_pkg_root)" || {
   exit 1
 }
 
-VER="$(cat "$DEST_ROOT/manifest.txt" 2>/dev/null || echo 0.4.0)"
+VER="$(cat "$DEST_ROOT/manifest.txt" 2>/dev/null || echo 0.5.0)"
 DEST="$DEST_ROOT/$VER/net8.0"
 TOOLS_OUT="$ROOT/src/MCP4Rhino.Tools/bin/Release/net8.0"
 

@@ -1270,7 +1270,7 @@ internal static class ArchElementTools
     private static string MeasureDistance(JsonObject args) => UiThread.Invoke(() =>
     {
         var doc = RequireDoc();
-        var model = doc.ModelUnitSystem;
+        var model = DocUnits(doc.ModelUnitSystem);
         if (args["a"] is not null || args["b"] is not null)
         {
             var a = ParsePoint(args["a"], "a"); var b = ParsePoint(args["b"], "b");

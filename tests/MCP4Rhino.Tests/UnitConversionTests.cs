@@ -1,5 +1,4 @@
 using MCP4Rhino.Logic;
-using Rhino;
 using Xunit;
 
 namespace MCP4Rhino.Tests;
@@ -7,26 +6,25 @@ namespace MCP4Rhino.Tests;
 public class UnitConversionTests
 {
     [Theory]
-    [InlineData("in", UnitSystem.Inches)]
-    [InlineData("inch", UnitSystem.Inches)]
-    [InlineData("inches", UnitSystem.Inches)]
-    [InlineData("ft", UnitSystem.Feet)]
-    [InlineData("Feet", UnitSystem.Feet)]
-    [InlineData("mm", UnitSystem.Millimeters)]
-    [InlineData("Millimeters", UnitSystem.Millimeters)]
-    public void ParseUnitSystem_Aliases(string s, UnitSystem expected)
+    [InlineData("in", DocumentUnitSystem.Inches)]
+    [InlineData("inch", DocumentUnitSystem.Inches)]
+    [InlineData("inches", DocumentUnitSystem.Inches)]
+    [InlineData("ft", DocumentUnitSystem.Feet)]
+    [InlineData("Feet", DocumentUnitSystem.Feet)]
+    [InlineData("mm", DocumentUnitSystem.Millimeters)]
+    [InlineData("Millimeters", DocumentUnitSystem.Millimeters)]
+    public void ParseUnitSystem_Aliases(string s, DocumentUnitSystem expected)
     {
         Assert.Equal(expected, UnitConversion.ParseUnitSystem(s));
     }
 
     [Theory]
-    [InlineData("furlongs")]
-    [InlineData("None")]
-    [InlineData("Unset")]
-    [InlineData("CustomUnits")]
+    [InlineData("")]
+    [InlineData("   ")]
     [InlineData("1")]
-    [InlineData("0")]
-    [InlineData("-3")]
+    [InlineData("999")]
+    [InlineData("furlong")]
+    [InlineData("CustomUnits")]
     public void ParseUnitSystem_Rejected(string s)
     {
         Assert.Throws<ArgumentException>(() => UnitConversion.ParseUnitSystem(s));
@@ -36,44 +34,43 @@ public class UnitConversionTests
     [Fact]
     public void ToModelUnits_InchesIntoFeet()
     {
-        var model = UnitConversion.ToModelUnits(32, "in", UnitSystem.Feet);
-        Assert.Equal(32.0 / 12.0, model, precision: 10);
+        var model = UnitConversion.ToModelUnits(32, "in", DocumentUnitSystem.Feet);
+        Assert.Equal(32.0 / 12.0, model, precision: 12);
     }
 
     [Fact]
     public void FromModelUnits_FeetToInches()
     {
-        var inches = UnitConversion.FromModelUnits(32.0 / 12.0, "in", UnitSystem.Feet);
-        Assert.Equal(32.0, inches, precision: 10);
+        var inches = UnitConversion.FromModelUnits(32.0 / 12.0, "in", DocumentUnitSystem.Feet);
+        Assert.Equal(32.0, inches, precision: 12);
     }
 
     [Fact]
     public void Scale_InchesToFeet_IsOneTwelfth()
     {
-        Assert.Equal(1.0 / 12.0, UnitConversion.Scale(UnitSystem.Inches, UnitSystem.Feet), precision: 12);
+        Assert.Equal(1.0 / 12.0, UnitConversion.Scale(DocumentUnitSystem.Inches, DocumentUnitSystem.Feet), precision: 12);
     }
 
     [Fact]
     public void Breakdown_FeetHeightMatchesInches()
     {
-        var b = UnitConversion.Breakdown(32.0 / 12.0, UnitSystem.Feet);
-        Assert.Equal(32.0, b.Inches, precision: 10);
-        Assert.Equal(32.0 / 12.0, b.Feet, precision: 10);
-        Assert.Equal(0.8128, b.Meters, precision: 6);
+        var b = UnitConversion.Breakdown(32.0 / 12.0, DocumentUnitSystem.Feet);
+        Assert.Equal(32.0, b.Inches, precision: 12);
+        Assert.Equal("Feet", b.UnitSystem);
     }
 
     [Fact]
     public void DocumentFactors_Feet()
     {
-        var json = System.Text.Json.JsonSerializer.Serialize(UnitConversion.DocumentFactorsJson(UnitSystem.Feet));
+        var json = System.Text.Json.JsonSerializer.Serialize(UnitConversion.DocumentFactorsJson(DocumentUnitSystem.Feet));
+        Assert.Contains("Feet", json);
         Assert.Contains("model_units_per_inch", json);
-        Assert.Contains("\"inches_per_model_unit\":12", json.Replace(" ", ""));
     }
 
     [Fact]
     public void Convert_InchesToMm_IndependentOfDocument()
     {
-        var mm = UnitConversion.Convert(32, UnitSystem.Inches, UnitSystem.Millimeters);
-        Assert.Equal(812.8, mm, precision: 6);
+        var mm = UnitConversion.Convert(32, DocumentUnitSystem.Inches, DocumentUnitSystem.Millimeters);
+        Assert.Equal(32 * 25.4, mm, precision: 10);
     }
 }

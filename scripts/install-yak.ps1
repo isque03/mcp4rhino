@@ -1,4 +1,4 @@
-# Build, pack, and install MCP4Rhino yak for Rhino 8 on Windows.
+# Pack universal .yak into dist/, then install it locally (Windows).
 # Run from repo root:  powershell -ExecutionPolicy Bypass -File scripts/install-yak.ps1
 $ErrorActionPreference = "Stop"
 
@@ -10,40 +10,18 @@ if (-not (Test-Path $Yak)) {
     throw "Yak not found at '$Yak'. Install Rhino 8 or set env YAK to Yak.exe."
 }
 
-dotnet build "$Root\MCP4Rhino.sln" -c Release
-if ($LASTEXITCODE -ne 0) { throw "dotnet build failed" }
+& (Join-Path $PSScriptRoot "pack-yak.ps1")
 
-$stage = Join-Path $env:TEMP ("mcp4rhino-yak-" + [guid]::NewGuid().ToString("n"))
-New-Item -ItemType Directory -Force -Path "$stage\net8.0" | Out-Null
+$manifest = Get-Content (Join-Path $Root "manifest.yml")
+$Version = ($manifest | Where-Object { $_ -match '^version:\s*(.+)$' } | ForEach-Object { $Matches[1].Trim() } | Select-Object -First 1)
+if (-not $Version) { throw "Could not read version from manifest.yml" }
 
-$hostOut = Join-Path $Root "src\MCP4Rhino\bin\Release\net8.0"
-$toolsOut = Join-Path $Root "src\MCP4Rhino.Tools\bin\Release\net8.0"
+$pkg = Join-Path $Root "dist\MCP4Rhino-$Version.yak"
+if (-not (Test-Path $pkg)) { throw "Expected package not found: $pkg" }
 
-Copy-Item "$hostOut\MCP4Rhino.rhp" "$stage\net8.0\"
-Copy-Item "$hostOut\MCP4Rhino.Contracts.dll" "$stage\net8.0\"
-$logicHost = Join-Path $hostOut "MCP4Rhino.Logic.dll"
-if (Test-Path $logicHost) { Copy-Item $logicHost "$stage\net8.0\" }
-Copy-Item "$toolsOut\MCP4Rhino.Tools.dll" "$stage\net8.0\"
-
-$skip = @("RhinoCommon.dll", "Rhino.UI.dll", "Eto.dll", "MCP4Rhino.rhp")
-Get-ChildItem "$toolsOut\*.dll" | Where-Object { $_.Name -notin $skip } |
-    Copy-Item -Destination "$stage\net8.0\" -Force
-
-Copy-Item (Join-Path $Root "manifest.yml") $stage
-
-Push-Location $stage
-try {
-    & $Yak build --platform win
-    if ($LASTEXITCODE -ne 0) { throw "yak build failed" }
-    $yakPkg = Get-ChildItem *.yak | Select-Object -First 1
-    if (-not $yakPkg) { throw "No .yak produced in $stage" }
-    & $Yak install $yakPkg.FullName
-    if ($LASTEXITCODE -ne 0) { throw "yak install failed" }
-    & $Yak list
-}
-finally {
-    Pop-Location
-}
+& $Yak install $pkg
+if ($LASTEXITCODE -ne 0) { throw "yak install failed" }
+& $Yak list
 
 Write-Host "Installed. In Rhino: MCP4Rhino once after host changes; MCP4RhinoReload or tool mcp4rhino_reload for tools-only."
-Write-Host "Package lands under %APPDATA%\*\Rhinoceros\packages\8.0\MCP4Rhino\ (or set RHINO_PACKAGES_DIR)."
+Write-Host "Package lands under %APPDATA%\*\Rhinoceros\packages\8.0\MCP4Rhino\. Hot-reload can use RHINO_PACKAGES_DIR."

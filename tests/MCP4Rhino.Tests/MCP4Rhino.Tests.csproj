@@ -34,6 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- No RhinoCommon: NuGet ships reference assemblies that cannot execute on CI. -->
     <ProjectReference Include="..\..\src\MCP4Rhino.Logic\MCP4Rhino.Logic.csproj" />
     <ProjectReference Include="..\..\src\MCP4Rhino.Contracts\MCP4Rhino.Contracts.csproj" />
   </ItemGroup>

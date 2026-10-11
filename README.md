@@ -12,34 +12,31 @@ A 21-second time-lapse of actual MCP-driven Rhino construction, ending with a ri
 
 ## Quick start
 
-**Prerequisites:** [Rhino 8](https://www.rhino3d.com/), [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0), [Node.js](https://nodejs.org/) (`npx` for MCP clients).
+**Prerequisites:** [Rhino 8](https://www.rhino3d.com/). For AI clients, also [Node.js](https://nodejs.org/) (`npx`).
+
+### Install from a GitHub release
+
+Download the universal package from the [latest release](https://github.com/isque03/mcp4rhino/releases): `MCP4Rhino-<version>.yak` (version from [manifest.yml](manifest.yml), currently **0.5.0**). One package works on macOS and Windows.
+
+Then install with yak (paths below are the Rhino 8 defaults; override with env `YAK`):
 
 ```bash
-git clone https://github.com/isque03/mcp4rhino.git
-cd mcp4rhino
+# macOS
+"/Applications/Rhino 8.app/Contents/Resources/bin/yak" install path/to/MCP4Rhino-<version>.yak
 ```
 
-| Host | Install |
-|------|---------|
-| **macOS** | `bash scripts/install-yak.sh` |
-| **Windows 11** | `powershell -ExecutionPolicy Bypass -File scripts/install-yak.ps1` |
+```powershell
+# Windows
+& "C:\Program Files\Rhino 8\System\Yak.exe" install path\to\MCP4Rhino-<version>.yak
+```
 
-Each script builds the solution, packs yak (`MCP4Rhino` **0.4.0**), and installs into the Rhino package folder. Override yak with env `YAK` if needed.
+Restart Rhino, then [start the server](#start-in-rhino).
 
-Then [start the server in Rhino](#start-in-rhino).
+### Package Manager (after publish)
 
-**Linux:** Rhino 8 has [no official Linux desktop](https://www.rhino3d.com/8/system-requirements/). Run Rhino on a Windows 11 VM/host, install with `install-yak.ps1` there, and point your Linux MCP client at `http://<windows-host>:4010/mcp`. Wine is unsupported.
+Once maintainers have pushed the package to McNeel’s yak server (`yak push`), you can install from Rhino: **Tools → Package Manager** → search **MCP4Rhino** → Install → restart Rhino → [start the server](#start-in-rhino). Until that push succeeds, use the GitHub `.yak` path above.
 
-## Updating from source
-
-Already installed and pulling new commits?
-
-1. `git pull` (or check out the release / feature branch).
-2. **Tools/Logic only** (most new MCP tools, including `capture_viewport` image embed): run `scripts/hot-reload-tools.sh` (macOS) or `scripts/hot-reload-tools.ps1` (Windows), then `MCP4RhinoReload` in Rhino — no restart.
-3. **Host `.rhp` / new Rhino commands / unsure:** re-run `install-yak`, **restart Rhino**, then `MCP4Rhino`.
-4. Confirm with `tools/list` or a changed tool. MCP URL stays `http://127.0.0.1:4010/mcp` unless you set `MCP4RHINO_PORT`.
-
-Agent-oriented detail: [CLAUDE.md — Upgrade from this source repo](CLAUDE.md#upgrade-from-this-source-repo-existing-install).
+**Linux:** Rhino 8 has [no official Linux desktop](https://www.rhino3d.com/8/system-requirements/). Run Rhino on a Windows 11 VM/host, install the same universal `.yak` there, and point your Linux MCP client at `http://<windows-host>:4010/mcp`. Wine is unsupported.
 
 ## Start in Rhino
 
@@ -69,6 +66,93 @@ After you install the package on a supported host:
 
 **Cursor and other clients** — connect with `npx mcp-remote http://localhost:4010/mcp`, or use the client HTTP MCP equivalent. If the client runs on Linux and Rhino runs in a Windows VM, replace `localhost` with the Windows host IP.
 
+## Build from source
+
+For contributors iterating on the plugin (requires [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)):
+
+```bash
+git clone https://github.com/isque03/mcp4rhino.git
+cd mcp4rhino
+```
+
+| Host | Install into Rhino |
+|------|--------------------|
+| **macOS** | `bash scripts/install-yak.sh` |
+| **Windows 11** | `powershell -ExecutionPolicy Bypass -File scripts/install-yak.ps1` |
+
+Each script builds the solution, writes `dist/MCP4Rhino-<version>.yak` (universal; version from [manifest.yml](manifest.yml)), and installs it. Pack only (no install): `bash scripts/pack-yak.sh` or `scripts/pack-yak.ps1`. Override yak with env `YAK` if needed.
+
+### Updating from source
+
+Already installed from this repo and pulling new commits?
+
+1. `git pull` (or check out the release / feature branch).
+2. **Tools/Logic only** (most new MCP tools, including `capture_viewport` image embed): run `scripts/hot-reload-tools.sh` (macOS) or `scripts/hot-reload-tools.ps1` (Windows), then `MCP4RhinoReload` in Rhino — no restart.
+3. **Host `.rhp` / new Rhino commands / unsure:** re-run `install-yak`, **restart Rhino**, then `MCP4Rhino`.
+4. Confirm with `tools/list` or a changed tool. MCP URL stays `http://127.0.0.1:4010/mcp` unless you set `MCP4RHINO_PORT`.
+
+Agent-oriented detail: [CLAUDE.md — Upgrade from this source repo](CLAUDE.md#upgrade-from-this-source-repo-existing-install).
+
+## CI and publishing
+
+GitHub Actions on this public repo (GitHub Free). Build never sees publishing secrets.
+
+### Automated builds (`build.yml`)
+
+On every pull request and every push to `main`:
+
+1. **Test** on `windows-latest` and `macos-latest` (.NET 8, NuGet cache, coverage gate).
+2. **Pack** one universal `MCP4Rhino-<version>.yak` on `ubuntu-latest` (standalone Yak CLI; Rhino not installed).
+3. Upload the `.yak` as the workflow artifact **`yak-packages`** (kept 14 days).
+
+No Rhino install is required; RhinoCommon comes from NuGet.
+
+### Download a development build
+
+1. Open the repo on GitHub → **Actions** → **Build**.
+2. Open a green run for your commit.
+3. Download **`yak-packages`** → `MCP4Rhino-<version>.yak`.
+4. `yak install` that file, restart Rhino, run `MCP4Rhino`.
+
+### Configure `YAK_TOKEN` (maintainers, one-time)
+
+1. Create Environment **`production`** (Settings → Environments). On public Free repos you can add **required reviewers**.
+2. Add environment secret **`YAK_TOKEN` only** (not a repository secret — same-repo PR workflows can read repo secrets). Yak does not use `YAK_USERNAME`.
+3. Generate the token locally (never commit it):
+
+```bash
+"/Applications/Rhino 8.app/Contents/Resources/bin/yak" login --ci
+```
+
+### Trigger a release (`publish.yml`)
+
+Publishing is **manual** and uses packages from a **prior successful Build** of the tagged commit (no rebuild). Agent checklist: [`.cursor/skills/publish/`](.cursor/skills/publish/).
+
+1. Merge to `main` and wait for **Build** to succeed on that commit.
+2. Ensure [manifest.yml](manifest.yml) `version` is what you want (e.g. `0.5.0`).
+3. Create and push tag `v0.5.0` on that same commit (`v` + manifest version).
+4. Confirm **Build** succeeded for that commit (tag push also runs Build if configured on the default branch tip; the tagged SHA must have a successful Build).
+5. **Actions → Publish → Run workflow** → enter tag `v0.5.0` → approve **`production`** if prompted.
+6. Workflow: download `yak-packages` → verify → reject duplicate Yak version → `yak push` → create GitHub Release with the `.yak` attached.
+
+### Verify publication
+
+- GitHub → **Releases** → assets include `MCP4Rhino-<version>.yak`.
+- `yak search MCP4Rhino` (or Rhino **Tools → Package Manager** → search **MCP4Rhino**) after McNeel’s index refreshes.
+
+### Troubleshooting
+
+| Problem | What to check |
+|---------|----------------|
+| Windows/macOS test failed | Open the matrix job log; NuGet/restore and coverage gate (≥80% Logic/Contracts). |
+| Pack failed | Ubuntu “Pack yak” job; Yak download SHA mismatch or `pack-yak.sh` missing outputs. |
+| Publish: no Build run | That commit never got a green **Build**. Re-run Build on the tag SHA, then publish again. |
+| Publish: version already exists | Bump `manifest.yml` (and tag), or `yak yank` the old version (cannot re-push the same version). |
+| Publish: missing `YAK_TOKEN` | Secret must be on Environment **`production`**, not only repo secrets. |
+| Package Manager empty | Publish may still be propagating; confirm `yak search` and the GitHub Release asset. |
+
+Local pack (developers): `bash scripts/pack-yak.sh` → `dist/MCP4Rhino-<version>.yak`.
+
 ## Run tests
 
 ```bash
@@ -79,7 +163,16 @@ bash scripts/test-coverage.sh
 
 ## Verify
 
-With Rhino open and `MCP4Rhino` already started:
+Local yak smoke (pack + install + archive/layout checks, then MCP probe):
+
+| Host | Command |
+|------|---------|
+| **macOS** | `bash scripts/smoke-local-yak.sh` |
+| **Windows** | `powershell -ExecutionPolicy Bypass -File scripts/smoke-local-yak.ps1` |
+
+If MCP is not up yet, the script exits `2` and prints Rhino steps. After you restart Rhino and run `MCP4Rhino`, finish with `--mcp-only` / `-McpOnly`.
+
+Or with Rhino open and `MCP4Rhino` already started:
 
 ```bash
 curl -sS -X POST http://127.0.0.1:4010/mcp \
@@ -183,7 +276,7 @@ Project skills: [`.cursor/skills/arch-*`](.cursor/skills/).
 |---------|-----|
 | Nothing listens on 4010 | Run `MCP4Rhino` in the Rhino **command line** (not Help). The server does not start when the plugin loads. |
 | Port bind error | Another process owns the port. Set `MCP4RHINO_PORT` and update the client URL. |
-| Commands not found | Install failed, or Rhino was not restarted after yak install. Re-run `bash scripts/install-yak.sh`, then restart Rhino. |
+| Commands not found | Install failed, or Rhino was not restarted after install. Reinstall via Package Manager or the GitHub `.yak`, restart Rhino. From source: `bash scripts/install-yak.sh`. |
 | Tools or Logic code not updating | Copy both DLLs (`hot-reload-tools.sh` on macOS), then run `MCP4RhinoReload` / `mcp4rhino_reload`. Restart Rhino after host `.rhp` edits. |
 | Object is huge vs the size the user named (e.g. “32 inches” → tens of feet) | Document is likely Feet (or another unit) while the agent passed the inch number raw. Call `get_document_units`, `convert_length`, recreate, then `measure_size`. |
 | Unit change did not resize geometry | Pass `scale_existing: true` to `set_document_units` (fixed to actually scale). |

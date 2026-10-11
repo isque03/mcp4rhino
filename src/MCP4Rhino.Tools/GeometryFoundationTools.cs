@@ -694,15 +694,15 @@ internal static class GeometryFoundationTools
         var us = UnitConversion.ParseUnitSystem(s);
         var prev = doc.ModelUnitSystem;
         var scaleExisting = Bool(args, "scale_existing");
-        var factor = UnitConversion.Scale(prev, us);
+        var factor = UnitConversion.Scale(DocUnits(prev), us);
         // Official Rhino path: scales objects, block defs, and tolerances when scaleExisting is true.
-        doc.AdjustModelUnitSystem(us, scaleExisting);
+        doc.AdjustModelUnitSystem(ToRhino(us), scaleExisting);
         doc.Views.Redraw();
         return JsonSerializer.Serialize(new
         {
             previous = prev.ToString(),
             unit_system = doc.ModelUnitSystem.ToString(),
-            scaled_existing = scaleExisting && prev != us,
+            scaled_existing = scaleExisting && DocUnits(prev) != us,
             scale_factor = factor,
             method = "AdjustModelUnitSystem",
         });
@@ -711,7 +711,7 @@ internal static class GeometryFoundationTools
     private static string GetDocumentUnits() => UiThread.Invoke(() =>
     {
         var doc = RequireDoc();
-        var factors = UnitConversion.DocumentFactorsJson(doc.ModelUnitSystem);
+        var factors = UnitConversion.DocumentFactorsJson(DocUnits(doc.ModelUnitSystem));
         // Merge tolerances onto the factor object for a single response.
         var node = JsonSerializer.SerializeToNode(factors)!.AsObject();
         node["absolute_tolerance"] = doc.ModelAbsoluteTolerance;
@@ -727,9 +727,10 @@ internal static class GeometryFoundationTools
         var fromUnit = Str(args, "from_unit") ?? throw new ArgumentException("from_unit required");
         var toUnit = Str(args, "to_unit");
         var from = UnitConversion.ParseUnitSystem(fromUnit);
-        var to = string.IsNullOrWhiteSpace(toUnit) ? doc.ModelUnitSystem : UnitConversion.ParseUnitSystem(toUnit!);
+        var model = DocUnits(doc.ModelUnitSystem);
+        var to = string.IsNullOrWhiteSpace(toUnit) ? model : UnitConversion.ParseUnitSystem(toUnit!);
         var result = UnitConversion.Convert(value, from, to);
-        var modelUnits = UnitConversion.Convert(value, from, doc.ModelUnitSystem);
+        var modelUnits = UnitConversion.Convert(value, from, model);
         // model_breakdown is always in document units (use model_units for create_*).
         // result_breakdown is result expressed in mm/in/ft/m (same numeric base as to_unit).
         return JsonSerializer.Serialize(new
@@ -740,7 +741,7 @@ internal static class GeometryFoundationTools
             result,
             model_units = modelUnits,
             document_unit_system = doc.ModelUnitSystem.ToString(),
-            model_breakdown = UnitConversion.BreakdownObject(modelUnits, doc.ModelUnitSystem),
+            model_breakdown = UnitConversion.BreakdownObject(modelUnits, model),
             result_breakdown = UnitConversion.BreakdownObject(result, to),
         });
     });
@@ -755,7 +756,7 @@ internal static class GeometryFoundationTools
         var sx = bb.Max.X - bb.Min.X;
         var sy = bb.Max.Y - bb.Min.Y;
         var sz = bb.Max.Z - bb.Min.Z;
-        var model = doc.ModelUnitSystem;
+        var model = DocUnits(doc.ModelUnitSystem);
         return JsonSerializer.Serialize(new
         {
             id = id.ToString(),
