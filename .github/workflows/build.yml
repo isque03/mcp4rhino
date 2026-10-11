@@ -1,0 +1,98 @@
+name: Build
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Cache NuGet packages
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore MCP4Rhino.sln
+
+      - name: Build
+        run: dotnet build MCP4Rhino.sln -c Release --no-restore
+
+      - name: Test with coverage (macOS)
+        if: runner.os == 'macOS'
+        run: bash scripts/test-coverage.sh
+
+      - name: Test with coverage (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/test-coverage.ps1
+
+  pack:
+    name: Pack yak
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Cache NuGet packages
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Download Yak CLI
+        id: yak
+        run: |
+          set -euo pipefail
+          YAK_PATH="$(bash scripts/ci-download-yak.sh)"
+          echo "path=${YAK_PATH}" >> "$GITHUB_OUTPUT"
+
+      - name: Pack universal yak package
+        env:
+          YAK: ${{ steps.yak.outputs.path }}
+        run: bash scripts/pack-yak.sh
+
+      - name: Upload yak package
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: yak-packages
+          path: dist/MCP4Rhino-*.yak
+          if-no-files-found: error
+          retention-days: 14

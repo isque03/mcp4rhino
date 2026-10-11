@@ -1,0 +1,141 @@
+name: Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish (must be vX.Y.Z matching manifest.yml). Example: v0.4.0"
+        required: true
+        type: string
+
+concurrency:
+  group: publish-yak
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Validate tag input
+        id: meta
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$INPUT_TAG" =~ ^v[0-9][0-9A-Za-z\.\-]*$ ]]; then
+            echo "tag must look like vX.Y.Z (got: ${INPUT_TAG})" >&2
+            exit 1
+          fi
+          echo "tag=${INPUT_TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout tag
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ steps.meta.outputs.tag }}
+
+      - name: Assert tag matches manifest version
+        env:
+          INPUT_TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          set -euo pipefail
+          VERSION="$(awk '/^version:/ { print $2; exit }' manifest.yml)"
+          EXPECTED="v${VERSION}"
+          if [[ "$INPUT_TAG" != "$EXPECTED" ]]; then
+            echo "Tag ${INPUT_TAG} does not match manifest.yml (expected ${EXPECTED})." >&2
+            exit 1
+          fi
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+          echo "SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Download yak package from successful Build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          rm -rf dist
+          mkdir -p dist
+          bash scripts/ci-download-build-artifact.sh "$SHA" dist
+          PKG="dist/MCP4Rhino-${VERSION}.yak"
+          if [[ ! -f "$PKG" ]]; then
+            # Artifact may nest one directory
+            found="$(find dist -name "MCP4Rhino-${VERSION}.yak" -type f | head -n 1 || true)"
+            if [[ -z "$found" ]]; then
+              echo "Downloaded artifact missing MCP4Rhino-${VERSION}.yak" >&2
+              find dist -type f >&2 || true
+              exit 1
+            fi
+            mkdir -p dist
+            cp "$found" "$PKG"
+          fi
+          bash scripts/verify-yak-package.sh "$PKG"
+
+      - name: Download Yak CLI
+        id: yak
+        run: |
+          set -euo pipefail
+          YAK_PATH="$(bash scripts/ci-download-yak.sh)"
+          echo "path=${YAK_PATH}" >> "$GITHUB_OUTPUT"
+
+      - name: Reject duplicate Yak version
+        env:
+          YAK: ${{ steps.yak.outputs.path }}
+          YAK_TOKEN: ${{ secrets.YAK_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${YAK_TOKEN:-}" ]]; then
+            echo "YAK_TOKEN secret is missing. Add it as a production environment secret only." >&2
+            exit 1
+          fi
+          # Search may fail if package name is new — treat empty as OK.
+          set +e
+          out="$("$YAK" search MCP4Rhino --all 2>/dev/null)"
+          rc=$?
+          set -e
+          if [[ $rc -eq 0 ]]; then
+            if echo "$out" | grep -Eiq "(^|[[:space:]])${VERSION}([[:space:]]|$)"; then
+              echo "MCP4Rhino ${VERSION} already exists on yak.rhino3d.com. Bump manifest version or yank first." >&2
+              echo "$out" >&2
+              exit 1
+            fi
+          fi
+          echo "No existing Yak listing for ${VERSION} (or package not yet published)."
+
+      - name: Push to Yak Package Manager
+        env:
+          YAK: ${{ steps.yak.outputs.path }}
+          YAK_TOKEN: ${{ secrets.YAK_TOKEN }}
+        run: |
+          set -euo pipefail
+          PKG="dist/MCP4Rhino-${VERSION}.yak"
+          test -f "$PKG"
+          if ! "$YAK" push "$PKG"; then
+            echo "FAILED PUBLISH: yak push failed for $PKG." >&2
+            exit 1
+          fi
+          echo "Pushed MCP4Rhino ${VERSION} (universal) to yak.rhino3d.com"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: MCP4Rhino ${{ env.VERSION }}
+          files: dist/MCP4Rhino-${{ env.VERSION }}.yak
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+          body: |
+            ## MCP4Rhino ${{ env.VERSION }}
+
+            Universal package (`MCP4Rhino-${{ env.VERSION }}.yak`) for Rhino 8 on macOS and Windows.
+
+            Install with `yak install`, restart Rhino, run `MCP4Rhino`.
+
+            Also published to McNeel's Package Manager (search **MCP4Rhino** after index refresh).
+
+            See [CHANGELOG.md](https://github.com/isque03/mcp4rhino/blob/${{ steps.meta.outputs.tag }}/CHANGELOG.md).
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

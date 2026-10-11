@@ -1,4 +1,4 @@
-# Build Release and produce mac + win .yak packages under dist/.
+# Build Release and produce one universal .yak under dist/ (mac + win).
 # Run from repo root:  powershell -ExecutionPolicy Bypass -File scripts/pack-yak.ps1
 $ErrorActionPreference = "Stop"
 
@@ -14,6 +14,9 @@ $manifest = Get-Content (Join-Path $Root "manifest.yml")
 $Version = ($manifest | Where-Object { $_ -match '^version:\s*(.+)$' } | ForEach-Object { $Matches[1].Trim() } | Select-Object -First 1)
 if (-not $Version) { throw "Could not read version from manifest.yml" }
 
+$icon = Join-Path $Root "icon.png"
+if (-not (Test-Path $icon)) { throw "Missing icon.png at repo root" }
+
 dotnet build "$Root\MCP4Rhino.sln" -c Release
 if ($LASTEXITCODE -ne 0) { throw "dotnet build failed" }
 
@@ -23,40 +26,75 @@ New-Item -ItemType Directory -Force -Path "$stage\net8.0" | Out-Null
 $hostOut = Join-Path $Root "src\MCP4Rhino\bin\Release\net8.0"
 $toolsOut = Join-Path $Root "src\MCP4Rhino.Tools\bin\Release\net8.0"
 
-Copy-Item "$hostOut\MCP4Rhino.rhp" "$stage\net8.0\"
-Copy-Item "$hostOut\MCP4Rhino.Contracts.dll" "$stage\net8.0\"
-$logicHost = Join-Path $hostOut "MCP4Rhino.Logic.dll"
-if (Test-Path $logicHost) { Copy-Item $logicHost "$stage\net8.0\" }
-Copy-Item "$toolsOut\MCP4Rhino.Tools.dll" "$stage\net8.0\"
+$required = @(
+    (Join-Path $hostOut "MCP4Rhino.rhp"),
+    (Join-Path $hostOut "MCP4Rhino.Contracts.dll"),
+    (Join-Path $hostOut "MCP4Rhino.Logic.dll"),
+    (Join-Path $toolsOut "MCP4Rhino.Tools.dll")
+)
+foreach ($path in $required) {
+    if (-not (Test-Path $path)) { throw "Required build output missing: $path" }
+}
+
+Copy-Item (Join-Path $hostOut "MCP4Rhino.rhp") "$stage\net8.0\"
+Copy-Item (Join-Path $hostOut "MCP4Rhino.Contracts.dll") "$stage\net8.0\"
+Copy-Item (Join-Path $hostOut "MCP4Rhino.Logic.dll") "$stage\net8.0\"
+Copy-Item (Join-Path $toolsOut "MCP4Rhino.Tools.dll") "$stage\net8.0\"
 
 $skip = @("RhinoCommon.dll", "Rhino.UI.dll", "Eto.dll", "MCP4Rhino.rhp")
 Get-ChildItem "$toolsOut\*.dll" | Where-Object { $_.Name -notin $skip } |
     Copy-Item -Destination "$stage\net8.0\" -Force
 
 Copy-Item (Join-Path $Root "manifest.yml") $stage
-Copy-Item (Join-Path $Root "icon.png") $stage
+Copy-Item $icon $stage
 
 $dist = Join-Path $Root "dist"
 New-Item -ItemType Directory -Force -Path $dist | Out-Null
+$dest = Join-Path $dist "MCP4Rhino-$Version.yak"
+Remove-Item $dest -ErrorAction SilentlyContinue
 Remove-Item (Join-Path $dist "MCP4Rhino-$Version-mac.yak") -ErrorAction SilentlyContinue
 Remove-Item (Join-Path $dist "MCP4Rhino-$Version-win.yak") -ErrorAction SilentlyContinue
 
 Push-Location $stage
 try {
-    foreach ($platform in @("mac", "win")) {
-        Get-ChildItem *.yak -ErrorAction SilentlyContinue | Remove-Item -Force
-        & $Yak build --platform $platform
-        if ($LASTEXITCODE -ne 0) { throw "yak build --platform $platform failed" }
-        $yakPkg = Get-ChildItem *.yak | Select-Object -First 1
-        if (-not $yakPkg) { throw "No .yak produced for platform $platform" }
-        $dest = Join-Path $dist "MCP4Rhino-$Version-$platform.yak"
-        Copy-Item $yakPkg.FullName $dest -Force
-        Write-Host "Wrote $dest"
+    Get-ChildItem *.yak -ErrorAction SilentlyContinue | Remove-Item -Force
+    & $Yak build
+    if ($LASTEXITCODE -ne 0) { throw "yak build failed" }
+    $yakPkg = Get-ChildItem *.yak -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $yakPkg -or $yakPkg.Extension -ne ".yak") {
+        throw "No .yak produced by yak build"
     }
+    Copy-Item $yakPkg.FullName $dest -Force
+    Write-Host "Wrote $dest"
 }
 finally {
     Pop-Location
 }
 
-Write-Host "Packed MCP4Rhino $Version → dist/MCP4Rhino-$Version-{mac,win}.yak"
-Write-Host "Publish checklist: yak login; yak push dist/MCP4Rhino-$Version-mac.yak; yak push dist/MCP4Rhino-$Version-win.yak"
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$zip = [System.IO.Compression.ZipFile]::OpenRead($dest)
+try {
+    $names = $zip.Entries | ForEach-Object { $_.FullName -replace '\\', '/' }
+    foreach ($need in @(
+            "icon.png", "manifest.yml",
+            "net8.0/MCP4Rhino.Logic.dll", "net8.0/MCP4Rhino.rhp",
+            "net8.0/MCP4Rhino.Tools.dll", "net8.0/MCP4Rhino.Contracts.dll"
+        )) {
+        if ($need -notin $names) { throw "Archive missing $need : $dest" }
+    }
+    $manifestEntry = $zip.Entries | Where-Object { ($_.FullName -replace '\\', '/') -eq "manifest.yml" } | Select-Object -First 1
+    $reader = New-Object System.IO.StreamReader($manifestEntry.Open())
+    $manifestText = $reader.ReadToEnd()
+    $reader.Close()
+    if ($manifestText -notmatch '(?m)^icon:\s*icon\.png\s*$') {
+        throw "manifest.yml in $dest missing icon: icon.png"
+    }
+    if ($manifestText -notmatch '(?m)^name:\s*MCP4Rhino\s*$') {
+        throw "manifest.yml in $dest unexpected name (expected MCP4Rhino)"
+    }
+}
+finally { $zip.Dispose() }
+Write-Host "OK package: $dest"
+
+Write-Host "Packed MCP4Rhino $Version → $dest"
+Write-Host "Publish checklist: yak login; yak push $dest"

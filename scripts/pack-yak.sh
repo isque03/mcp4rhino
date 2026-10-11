@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build Release and produce mac + win .yak packages under dist/.
+# Build Release and produce one universal .yak under dist/ (mac + win).
 # Run from repo root:  bash scripts/pack-yak.sh
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -17,6 +17,8 @@ if [[ -z "$VERSION" ]]; then
   exit 1
 fi
 
+[[ -f "$ROOT/icon.png" ]] || { echo "Missing icon.png at repo root" >&2; exit 1; }
+
 dotnet build "$ROOT/MCP4Rhino.sln" -c Release
 
 STAGE="$(mktemp -d)/mcp4rhino-yak"
@@ -24,10 +26,21 @@ mkdir -p "$STAGE/net8.0"
 HOST_OUT="$ROOT/src/MCP4Rhino/bin/Release/net8.0"
 TOOLS_OUT="$ROOT/src/MCP4Rhino.Tools/bin/Release/net8.0"
 
+require_file() {
+  local path="$1"
+  [[ -f "$path" ]] || { echo "Required build output missing: $path" >&2; exit 1; }
+}
+
+require_file "$HOST_OUT/MCP4Rhino.rhp"
+require_file "$HOST_OUT/MCP4Rhino.Contracts.dll"
+require_file "$HOST_OUT/MCP4Rhino.Logic.dll"
+require_file "$TOOLS_OUT/MCP4Rhino.Tools.dll"
+
 cp "$HOST_OUT/MCP4Rhino.rhp" "$STAGE/net8.0/"
 cp "$HOST_OUT/MCP4Rhino.Contracts.dll" "$STAGE/net8.0/"
-[[ -f "$HOST_OUT/MCP4Rhino.Logic.dll" ]] && cp "$HOST_OUT/MCP4Rhino.Logic.dll" "$STAGE/net8.0/"
+cp "$HOST_OUT/MCP4Rhino.Logic.dll" "$STAGE/net8.0/"
 cp "$TOOLS_OUT/MCP4Rhino.Tools.dll" "$STAGE/net8.0/"
+
 # Tools deps (e.g. System.Drawing.Common) — skip RhinoCommon
 shopt -s nullglob
 for f in "$TOOLS_OUT"/*.dll; do
@@ -37,27 +50,39 @@ for f in "$TOOLS_OUT"/*.dll; do
   esac
   cp "$f" "$STAGE/net8.0/"
 done
+shopt -u nullglob
 
 cp "$ROOT/manifest.yml" "$STAGE/"
 cp "$ROOT/icon.png" "$STAGE/"
 
 DIST="$ROOT/dist"
 mkdir -p "$DIST"
-rm -f "$DIST/MCP4Rhino-${VERSION}-mac.yak" "$DIST/MCP4Rhino-${VERSION}-win.yak"
+DEST="$DIST/MCP4Rhino-${VERSION}.yak"
+rm -f "$DEST" "$DIST/MCP4Rhino-${VERSION}-mac.yak" "$DIST/MCP4Rhino-${VERSION}-win.yak"
 
 cd "$STAGE"
-for platform in mac win; do
-  rm -f ./*.yak
-  "$YAK" build --platform "$platform"
-  built="$(ls -1 ./*.yak | head -n 1)"
-  if [[ -z "$built" ]]; then
-    echo "yak build --platform $platform produced no .yak" >&2
+rm -f ./*.yak
+# Plain build → rh8_*-any.yak (managed net8.0 plugin; no OS-specific natives staged).
+"$YAK" build
+shopt -s nullglob
+yaks=( ./*.yak )
+shopt -u nullglob
+if [[ ${#yaks[@]} -eq 0 || ! -f "${yaks[0]}" ]]; then
+  echo "yak build produced no .yak" >&2
+  exit 1
+fi
+built="${yaks[0]}"
+case "$built" in
+  *.yak) ;;
+  *)
+    echo "yak build produced unexpected file: $built" >&2
     exit 1
-  fi
-  dest="$DIST/MCP4Rhino-${VERSION}-${platform}.yak"
-  cp "$built" "$dest"
-  echo "Wrote $dest"
-done
+    ;;
+esac
+cp "$built" "$DEST"
+echo "Wrote $DEST"
 
-echo "Packed MCP4Rhino $VERSION → dist/MCP4Rhino-${VERSION}-{mac,win}.yak"
-echo "Publish checklist: yak login && yak push dist/MCP4Rhino-${VERSION}-mac.yak && yak push dist/MCP4Rhino-${VERSION}-win.yak"
+bash "$ROOT/scripts/verify-yak-package.sh" "$DEST"
+
+echo "Packed MCP4Rhino $VERSION → $DEST"
+echo "Publish checklist: yak login && yak push $DEST"

@@ -8,7 +8,7 @@ Use these names and values:
 - Default port: **4010** (override with `MCP4RHINO_PORT`)
 - Do not invent other ports
 
-Prefer Package Manager for end users. Use source install scripts only when developing from this repo. Human-oriented docs: [README.md](README.md).
+Prefer GitHub `.yak` install for end users until Package Manager search lists MCP4Rhino (requires maintainer `yak push`). Use source install scripts only when developing from this repo. Human-oriented docs: [README.md](README.md).
 
 ---
 
@@ -16,9 +16,9 @@ Prefer Package Manager for end users. Use source install scripts only when devel
 
 Prerequisites: Rhino 8. For AI clients, Node.js (`npx`).
 
-1. In Rhino: **Tools → Package Manager** → search **MCP4Rhino** → Install.
-2. If search has no hit: install the platform `.yak` from the [GitHub releases](https://github.com/isque03/mcp4rhino/releases) (`MCP4Rhino-0.4.0-mac.yak` / `MCP4Rhino-0.4.0-win.yak`) via `yak install`.
-3. Restart Rhino, then [finish in Rhino](#finish-in-rhino-agent-cannot-do-this).
+1. Download the universal `.yak` from [GitHub releases](https://github.com/isque03/mcp4rhino/releases) (`MCP4Rhino-<version>.yak`; version in [manifest.yml](manifest.yml)).
+2. `yak install` that file, then [finish in Rhino](#finish-in-rhino-agent-cannot-do-this).
+3. After maintainers publish with `yak push`: **Tools → Package Manager** → search **MCP4Rhino** also works.
 
 ---
 
@@ -30,7 +30,7 @@ Prerequisites: Rhino 8, .NET 8 SDK, Node.js (`npx`). Use this when iterating on 
 bash scripts/install-yak.sh
 ```
 
-Packs `dist/MCP4Rhino-0.4.0-{mac,win}.yak` and installs the mac package under Application Support (`*/Rhinoceros/packages/8.0/MCP4Rhino/`). Manifest version **0.4.0** — see [manifest.yml](manifest.yml). Pack only: `bash scripts/pack-yak.sh`. Override with `YAK` / `RHINO_PACKAGES_DIR` if needed.
+Packs `dist/MCP4Rhino-<version>.yak` (universal) and installs under Application Support (`*/Rhinoceros/packages/8.0/MCP4Rhino/`). Version from [manifest.yml](manifest.yml). Pack only: `bash scripts/pack-yak.sh`. Override yak with `YAK` if needed.
 
 Then [finish in Rhino](#finish-in-rhino-agent-cannot-do-this).
 
@@ -46,7 +46,7 @@ From the repo root in **PowerShell**:
 powershell -ExecutionPolicy Bypass -File scripts/install-yak.ps1
 ```
 
-Packs both platform `.yak` files under `dist/` and installs the win package under `%APPDATA%\*\Rhinoceros\packages\8.0\MCP4Rhino\`. Pack only: `scripts/pack-yak.ps1`. Optional: `YAK` (path to Yak.exe), `RHINO_PACKAGES_DIR`.
+Packs `dist/MCP4Rhino-<version>.yak` (universal) and installs under `%APPDATA%\*\Rhinoceros/packages/8.0/MCP4Rhino\`. Pack only: `scripts/pack-yak.ps1`. Optional: `YAK` (path to Yak.exe). Hot-reload scripts may use `RHINO_PACKAGES_DIR`.
 
 Then [finish in Rhino](#finish-in-rhino-agent-cannot-do-this).
 
@@ -192,8 +192,14 @@ If the connection is refused: Rhino is not running, or the user has not run `MCP
 | [src/MCP4Rhino.Tools/](src/MCP4Rhino.Tools/) | Tool implementations (`RhinoToolCatalog`, surface/curve tools, …) | Hot-reload — no restart |
 | [src/MCP4Rhino.Logic/](src/MCP4Rhino.Logic/) | Pure helpers (`SurfaceOps`, `CurveOps`, …); loaded with Tools in the collectible ALC | Hot-reload with Tools (copy `MCP4Rhino.Logic.dll`) |
 | [src/MCP4Rhino.Contracts/](src/MCP4Rhino.Contracts/) | Shared bridge interfaces | Usually with host |
-| [scripts/pack-yak.sh](scripts/pack-yak.sh) / [pack-yak.ps1](scripts/pack-yak.ps1) | Build Release → `dist/MCP4Rhino-*-{mac,win}.yak` | — |
+| [scripts/pack-yak.sh](scripts/pack-yak.sh) / [pack-yak.ps1](scripts/pack-yak.ps1) | Build Release → universal `dist/MCP4Rhino-<version>.yak` | — |
+| [scripts/verify-yak-package.sh](scripts/verify-yak-package.sh) | Archive content checks (icon, Logic, `.rhp`, …) | — |
+| [scripts/ci-download-yak.sh](scripts/ci-download-yak.sh) | Pin standalone Yak CLI + SHA256 for CI | — |
 | [scripts/install-yak.sh](scripts/install-yak.sh) / [install-yak.ps1](scripts/install-yak.ps1) | Pack + local yak install (macOS / Windows) | Restart Rhino after |
+| [scripts/smoke-local-yak.sh](scripts/smoke-local-yak.sh) / [smoke-local-yak.ps1](scripts/smoke-local-yak.ps1) | Local install + package checks + MCP `tools/list` probe | Restart + `MCP4Rhino` if exit 2 |
+| [`.github/workflows/build.yml`](.github/workflows/build.yml) | PR/`main`: win+mac tests, ubuntu universal yak artifact (no secrets) | — |
+| [`.github/workflows/publish.yml`](.github/workflows/publish.yml) | Manual: download Build artifact → Yak push + GitHub Release (`production` / `YAK_TOKEN`) | — |
+| [scripts/test-coverage.ps1](scripts/test-coverage.ps1) | Windows coverage gate (same as `test-coverage.sh`) | — |
 | [scripts/hot-reload-tools.sh](scripts/hot-reload-tools.sh) / [hot-reload-tools.ps1](scripts/hot-reload-tools.ps1) | Tools + Logic build and copy into package | Then `mcp4rhino_reload` |
 | [examples/claude_desktop_config.json](examples/claude_desktop_config.json) | Claude Desktop MCP client snippet | — |
 
