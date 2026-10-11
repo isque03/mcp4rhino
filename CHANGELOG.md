@@ -7,6 +7,19 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.5.1] — 2026-10-11
+
+### Added
+
+- MCP server **auto-starts** on Rhino Idle after plugin load (opt out with `MCP4RHINO_AUTOSTART=0` / `false` / `no`).
+- `MCP4RhinoStatus` command prints running state, endpoint, log path, and autostart flag.
+- End-user README rewrite (Package Manager first) plus docs: `INSTALL_FROM_SOURCE`, `DEVELOPMENT`, `MCP_TOOLS`, `TROUBLESHOOTING`, `PUBLISHING`, `CONTRIBUTING`.
+
+### Changed
+
+- Yak Package Manager description is user-facing (Claude/Cursor / natural language modeling).
+- Plugin `LoadTime` is `AtStartup` with deferred Idle bind (avoids requiring a manual `MCP4Rhino` for first connect).
+
 ## [0.5.0] — 2026-10-11
 
 ### Added

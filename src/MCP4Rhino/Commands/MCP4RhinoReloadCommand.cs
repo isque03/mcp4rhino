@@ -20,14 +20,12 @@ public class MCP4RhinoReloadCommand : Command
 
     protected override Result RunCommand(RhinoDoc doc, RunMode mode)
     {
-        RhinoApp.WriteLine("MCP4Rhino: hot-reloading tools…");
+        RhinoApp.WriteLine("MCP4Rhino: reloading tools…");
         try
         {
             // Keep HTTP server running — only swap the collectible tools assembly.
             ToolLoader.Reload();
-            RhinoApp.WriteLine($"MCP4Rhino: tools loaded from {ToolLoader.LoadedFrom}");
-            if (McpHost.IsRunning)
-                RhinoApp.WriteLine($"MCP4Rhino: MCP still on {McpHost.Endpoint} (no restart needed)");
+            RhinoApp.WriteLine($"MCP4Rhino: tools reloaded{(McpHost.IsRunning ? $" — still on {McpHost.Endpoint}" : "")}");
             return Result.Success;
         }
         catch (Exception ex)

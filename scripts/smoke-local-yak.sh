@@ -79,10 +79,9 @@ print_rhino_steps() {
 
 Next (manual — Rhino cannot be started from this script):
   1. Quit and reopen Rhino 8.
-  2. Confirm load message: MCP4Rhino … loaded…
-  3. In the Rhino command line (not Help): MCP4Rhino
-  4. Expect: MCP server started: http://localhost:${PORT}
-  5. Re-run: bash scripts/smoke-local-yak.sh --mcp-only
+  2. Wait for Idle auto-start (or run MCP4Rhino / MCP4RhinoStatus).
+  3. Expect: MCP4Rhino ready: http://127.0.0.1:${PORT}/mcp
+  4. Re-run: bash scripts/smoke-local-yak.sh --mcp-only
 
 Logs: ~/Library/Logs/MCP4Rhino/mcp4rhino.log
 EOF
