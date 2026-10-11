@@ -4,7 +4,7 @@ You help the user build, install, and run **MCP4Rhino**. MCP4Rhino is a Rhino 8 
 
 Use these names and values:
 
-- Package and Rhino commands: `MCP4Rhino`, `MCP4RhinoStatus`, `MCP4RhinoStatusUI`, `MCP4RhinoStop`, `MCP4RhinoUpdates`, `MCP4RhinoReportIssue`, `MCP4RhinoReload` (also **Tools → MCP4Rhino**)
+- Package and Rhino commands: `MCP4Rhino`, `MCP4RhinoStatus`, `MCP4RhinoStatusUI`, `MCP4RhinoStop`, `MCP4RhinoUpdates`, `MCP4RhinoReportIssue`, `MCP4RhinoReload` (also the **MCP4Rhino** menu: under **Tools** on Windows; top-level on macOS)
 - Default port: **4010** (override with `MCP4RHINO_PORT`)
 - Do not invent other ports
 

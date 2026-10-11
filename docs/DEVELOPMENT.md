@@ -31,11 +31,11 @@ Then in Rhino: `MCP4RhinoReload` (or MCP tool `mcp4rhino_reload`). After host `.
 | `MCP4Rhino` | Start the MCP HTTP server (also used if auto-start was skipped) |
 | `MCP4RhinoStop` | Stop the server |
 | `MCP4RhinoStatus` | Command-line summary; Status dialog when run interactively (not scripted) |
-| `MCP4RhinoStatusUI` | Always opens Status dialog (used by Tools → MCP4Rhino → Status…) |
+| `MCP4RhinoStatusUI` | Always opens Status dialog (menu **Status…**; RUI macros are scripted) |
 | `MCP4RhinoUpdates` | Open Rhino Package Manager |
 | `MCP4RhinoReportIssue` | Open GitHub Issues in the browser |
 | `MCP4RhinoReload` | Hot-reload `MCP4Rhino.Tools.dll` (+ Logic) |
-| Tools menu | **Tools → MCP4Rhino** (from `MCP4Rhino.rui` next to the `.rhp`) |
+| MCP4Rhino menu | From `MCP4Rhino.rui` next to the `.rhp`: under **Tools** on Windows; top-level **MCP4Rhino** on macOS |
 | `MCP4RHINO_PORT` | Listen port (default **4010**) |
 | `MCP4RHINO_AUTOSTART` | Set to `0` / `false` / `no` to disable Idle auto-start |
 | `MCP4RHINO_TOOLS_PATH` | Override directory containing `MCP4Rhino.Tools.dll` |
