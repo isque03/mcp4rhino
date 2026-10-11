@@ -78,10 +78,9 @@ function Write-RhinoSteps {
     Write-Host ""
     Write-Host "Next (manual — Rhino cannot be started from this script):"
     Write-Host "  1. Quit and reopen Rhino 8."
-    Write-Host "  2. Confirm load message: MCP4Rhino … loaded…"
-    Write-Host "  3. In the Rhino command line (not Help): MCP4Rhino"
-    Write-Host "  4. Expect: MCP server started: http://localhost:$Port"
-    Write-Host "  5. Re-run: powershell -ExecutionPolicy Bypass -File scripts/smoke-local-yak.ps1 -McpOnly"
+    Write-Host "  2. Wait for Idle auto-start (or run MCP4Rhino / MCP4RhinoStatus)."
+    Write-Host "  3. Expect: MCP4Rhino ready: http://127.0.0.1:$Port/mcp"
+    Write-Host "  4. Re-run: powershell -ExecutionPolicy Bypass -File scripts/smoke-local-yak.ps1 -McpOnly"
     Write-Host "Logs: %LOCALAPPDATA%\MCP4Rhino\mcp4rhino.log"
 }
 

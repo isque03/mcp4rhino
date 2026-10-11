@@ -23,11 +23,12 @@ public class MCP4RhinoStopCommand : Command
         PluginLog.Info("Command MCP4RhinoStop invoked");
         if (!McpHost.IsRunning)
         {
-            PluginLog.Info("MCP server is not running");
+            RhinoApp.WriteLine("MCP4Rhino: already stopped.");
             return Result.Nothing;
         }
 
         McpHost.Stop();
+        RhinoApp.WriteLine("MCP4Rhino: stopped. Run MCP4Rhino to start again.");
         PluginLog.Info("MCP server stopped");
         return Result.Success;
     }

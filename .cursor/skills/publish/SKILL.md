@@ -18,7 +18,7 @@ Human docs: [README.md](../../../README.md) (CI and publishing). Workflows:
 ## Hard rules
 
 - Publish only from a **merged `main` commit** (or the tagged SHA that is on `main`). Never publish from an open feature PR tip unless the user explicitly overrides.
-- **Tag after merge.** Tag = `v` + [manifest.yml](../../../manifest.yml) `version` (e.g. `0.5.0` → `v0.5.0`).
+- **Tag after merge.** Tag = `v` + [manifest.yml](../../../manifest.yml) `version` (e.g. `0.5.1` → `v0.5.1`).
 - Publish downloads **`yak-packages`** from a successful **Build** for that commit — it does not rebuild.
 - Never echo, commit, or paste `YAK_TOKEN`. Token lives only as Environment secret **`production`**.
 - Never run `yak push` locally as a substitute for `publish.yml` unless the user explicitly asks for an emergency path.

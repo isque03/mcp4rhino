@@ -1,13 +1,17 @@
 name: MCP4Rhino
-version: 0.5.0
+version: 0.5.1
 authors:
   - Agent Toolkit
 description: >
-  Rhino 8 plugin with a lightweight MCP HTTP server and hot-reloadable tools
-  so AI agents can drive Rhino and iterate without restarting.
+  Connect Rhino 8 to Claude, Cursor, and other AI assistants to create, edit,
+  and analyze 3D models using natural language.
 url: https://github.com/isque03/mcp4rhino
 icon: icon.png
 keywords:
   - mcp
   - ai
   - agent
+  - claude
+  - cursor
+  - architecture
+  - rhino
