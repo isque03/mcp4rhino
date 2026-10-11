@@ -34,6 +34,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Copy RhinoCommon into the test output so CI runners (no Rhino install) can load Logic. -->
+    <PackageReference Include="RhinoCommon" Version="8.21.25188.17001" />
     <ProjectReference Include="..\..\src\MCP4Rhino.Logic\MCP4Rhino.Logic.csproj" />
     <ProjectReference Include="..\..\src\MCP4Rhino.Contracts\MCP4Rhino.Contracts.csproj" />
   </ItemGroup>
