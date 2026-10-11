@@ -7,13 +7,17 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-10-11
+
 ### Added
 
 - Pack-only scripts write one universal `dist/MCP4Rhino-<version>.yak` (`yak build` → `rh8_*-any`; icon + hard-require Logic/host outputs).
 - Local smoke scripts `scripts/smoke-local-yak.sh` / `.ps1` pack+install, check archive/install layout, then probe MCP `tools/list`.
 - GitHub Actions: **Build** (Windows + macOS tests, ubuntu universal yak artifact) and manual **Publish** (download Build artifact → `yak push` + GitHub Release; `production` / `YAK_TOKEN` only).
+- Agent skill [`.cursor/skills/publish/`](.cursor/skills/publish/) for the merge → Build → tag → Publish checklist.
 - Quick start installs from the GitHub universal `.yak`; Package Manager after `yak push`; source install under Build from source.
 - You can ask whether Rhino allows saving with `check_rhino_license` before calling `export_3dm`. Response fields: `can_save`, `installation_type`, `installation_type_string`, `is_evaluation`, `days_until_expiration` (null when the license does not expire), `saves_left` (always null on RhinoCommon 8.21 — save-count API not exposed), and `message`.
+- Unit/coverage tests run on CI without Rhino installed (`DocumentUnitSystem` + pure license snapshots; NuGet RhinoCommon is reference-only).
 
 ### Changed
 

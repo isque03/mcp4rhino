@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag to publish (must be vX.Y.Z matching manifest.yml). Example: v0.4.0"
+        description: "Release tag to publish (must be vX.Y.Z matching manifest.yml). Example: v0.5.0"
         required: true
         type: string
 

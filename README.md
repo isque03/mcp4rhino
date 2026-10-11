@@ -16,7 +16,7 @@ A 21-second time-lapse of actual MCP-driven Rhino construction, ending with a ri
 
 ### Install from a GitHub release
 
-Download the universal package from the [latest release](https://github.com/isque03/mcp4rhino/releases): `MCP4Rhino-<version>.yak` (version from [manifest.yml](manifest.yml), currently **0.4.0**). One package works on macOS and Windows.
+Download the universal package from the [latest release](https://github.com/isque03/mcp4rhino/releases): `MCP4Rhino-<version>.yak` (version from [manifest.yml](manifest.yml), currently **0.5.0**). One package works on macOS and Windows.
 
 Then install with yak (paths below are the Rhino 8 defaults; override with env `YAK`):
 
@@ -126,13 +126,13 @@ No Rhino install is required; RhinoCommon comes from NuGet.
 
 ### Trigger a release (`publish.yml`)
 
-Publishing is **manual** and uses packages from a **prior successful Build** of the tagged commit (no rebuild).
+Publishing is **manual** and uses packages from a **prior successful Build** of the tagged commit (no rebuild). Agent checklist: [`.cursor/skills/publish/`](.cursor/skills/publish/).
 
 1. Merge to `main` and wait for **Build** to succeed on that commit.
-2. Ensure [manifest.yml](manifest.yml) `version` is what you want (e.g. `0.4.0`).
-3. Create and push tag `v0.4.0` on that same commit (`v` + manifest version).
+2. Ensure [manifest.yml](manifest.yml) `version` is what you want (e.g. `0.5.0`).
+3. Create and push tag `v0.5.0` on that same commit (`v` + manifest version).
 4. Confirm **Build** succeeded for that commit (tag push also runs Build if configured on the default branch tip; the tagged SHA must have a successful Build).
-5. **Actions → Publish → Run workflow** → enter tag `v0.4.0` → approve **`production`** if prompted.
+5. **Actions → Publish → Run workflow** → enter tag `v0.5.0` → approve **`production`** if prompted.
 6. Workflow: download `yak-packages` → verify → reject duplicate Yak version → `yak push` → create GitHub Release with the `.yak` attached.
 
 ### Verify publication

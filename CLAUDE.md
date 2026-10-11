@@ -199,6 +199,7 @@ If the connection is refused: Rhino is not running, or the user has not run `MCP
 | [scripts/smoke-local-yak.sh](scripts/smoke-local-yak.sh) / [smoke-local-yak.ps1](scripts/smoke-local-yak.ps1) | Local install + package checks + MCP `tools/list` probe | Restart + `MCP4Rhino` if exit 2 |
 | [`.github/workflows/build.yml`](.github/workflows/build.yml) | PR/`main`: win+mac tests, ubuntu universal yak artifact (no secrets) | — |
 | [`.github/workflows/publish.yml`](.github/workflows/publish.yml) | Manual: download Build artifact → Yak push + GitHub Release (`production` / `YAK_TOKEN`) | — |
+| [`.cursor/skills/publish/`](.cursor/skills/publish/) | Agent skill: merge → green Build → tag `vX.Y.Z` → dispatch Publish → verify | — |
 | [scripts/test-coverage.ps1](scripts/test-coverage.ps1) | Windows coverage gate (same as `test-coverage.sh`) | — |
 | [scripts/hot-reload-tools.sh](scripts/hot-reload-tools.sh) / [hot-reload-tools.ps1](scripts/hot-reload-tools.ps1) | Tools + Logic build and copy into package | Then `mcp4rhino_reload` |
 | [examples/claude_desktop_config.json](examples/claude_desktop_config.json) | Claude Desktop MCP client snippet | — |
@@ -243,7 +244,7 @@ powershell -ExecutionPolicy Bypass -File scripts/hot-reload-tools.ps1
 
 ## Architecture workflow
 
-For **residential (IRC)** and **commercial (IBC)** design in Rhino, use project skills in [`.cursor/skills/`](.cursor/skills/). Roadmap: [docs/ARCHITECTURE_AGENT.md](docs/ARCHITECTURE_AGENT.md).
+For **residential (IRC)** and **commercial (IBC)** design in Rhino, use project skills in [`.cursor/skills/`](.cursor/skills/). Roadmap: [docs/ARCHITECTURE_AGENT.md](docs/ARCHITECTURE_AGENT.md). For Yak / GitHub Releases, use the [`publish`](.cursor/skills/publish/) skill (never `yak push` with a pasted token).
 
 - MCP endpoint: `http://127.0.0.1:4010/mcp` (the user must run `MCP4Rhino` first).
 - Store element semantics with **`mcp4:`** user-text keys (`set_user_text` or dedicated arch tools).
