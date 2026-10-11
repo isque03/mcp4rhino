@@ -7,6 +7,12 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.5.3] — 2026-10-11
+
+### Fixed
+
+- Status dialog labels and buttons are left-aligned (Mac Eto was right-aligning the modal content).
+
 ## [0.5.2] — 2026-10-11
 
 ### Added

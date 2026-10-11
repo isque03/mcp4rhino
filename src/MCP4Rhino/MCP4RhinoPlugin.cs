@@ -2,6 +2,7 @@ using System.Reflection;
 using Rhino;
 using Rhino.PlugIns;
 using MCP4Rhino.Host;
+using MCP4Rhino.Logic;
 
 namespace MCP4Rhino;
 
@@ -25,7 +26,7 @@ public class MCP4RhinoPlugin : PlugIn
 
     protected override LoadReturnCode OnLoad(ref string errorMessage)
     {
-        var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.5.2";
+        var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? McpJsonRpc.ServerVersion;
         PluginLog.Info($"OnLoad LoadTime=AtStartup version={version} log={PluginLog.LogPath} autostart={McpHostBootstrap.AutostartEnabled}");
         RhinoApp.WriteLine($"MCP4Rhino {version} loaded.");
 

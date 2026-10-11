@@ -6,7 +6,7 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>MCP4Rhino.Logic</RootNamespace>
     <AssemblyName>MCP4Rhino.Logic</AssemblyName>
-    <Version>0.5.2</Version>
+    <Version>0.5.3</Version>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="RhinoCommon" Version="8.21.25188.17001" ExcludeAssets="runtime" />
