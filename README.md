@@ -173,9 +173,11 @@ Full tool list: [docs/MCP_TOOLS.md](docs/MCP_TOOLS.md).
 
 ## Documentation
 
+**User docs (Mintlify):** [mcp4rhinodocs](https://github.com/isque03/mcp4rhinodocs) — quickstart, how-tos, tool reference, and architecture (auto-deploys on push).
+
 | Doc | Audience |
 |-----|----------|
-| [docs/MCP_TOOLS.md](docs/MCP_TOOLS.md) | Tool reference |
+| [docs/MCP_TOOLS.md](docs/MCP_TOOLS.md) | Tool reference (repo mirror) |
 | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Diagnostics |
 | [docs/INSTALL_FROM_SOURCE.md](docs/INSTALL_FROM_SOURCE.md) | Source install |
 | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Contributors |
