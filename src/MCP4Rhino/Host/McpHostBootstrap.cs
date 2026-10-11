@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using MCP4Rhino.Logic;
 using Rhino;
 
 namespace MCP4Rhino.Host;
@@ -32,13 +33,7 @@ public static class McpHostBootstrap
         }
     }
 
-    public static int ResolvePort()
-    {
-        var env = Environment.GetEnvironmentVariable("MCP4RHINO_PORT");
-        if (!string.IsNullOrWhiteSpace(env) && int.TryParse(env, out var parsed) && parsed is > 0 and < 65536)
-            return parsed;
-        return McpHost.DefaultPort;
-    }
+    public static int ResolvePort() => SupportInfo.ResolvePort();
 
     /// <summary>
     /// Load tools and start the HTTP MCP host if not already running.
@@ -86,7 +81,7 @@ public static class McpHostBootstrap
         if (McpHost.IsRunning)
             RhinoApp.WriteLine($"  endpoint: {McpHost.Endpoint}");
         else
-            RhinoApp.WriteLine($"  endpoint (when started): http://127.0.0.1:{ResolvePort()}/mcp");
+            RhinoApp.WriteLine($"  endpoint (when started): {SupportInfo.ConfiguredEndpoint()}");
         RhinoApp.WriteLine($"  autostart: {(AutostartEnabled ? "on" : "off")} (env MCP4RHINO_AUTOSTART)");
         RhinoApp.WriteLine($"  log: {PluginLog.LogPath}");
         if (!string.IsNullOrEmpty(ToolLoader.LoadedFrom))

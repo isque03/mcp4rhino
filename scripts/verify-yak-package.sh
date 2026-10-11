@@ -10,7 +10,7 @@ if [[ -z "$PKG" || ! -f "$PKG" ]]; then
 fi
 
 listing="$(unzip -l "$PKG")"
-for need in icon.png manifest.yml net8.0/MCP4Rhino.Logic.dll net8.0/MCP4Rhino.rhp net8.0/MCP4Rhino.Tools.dll net8.0/MCP4Rhino.Contracts.dll; do
+for need in icon.png manifest.yml net8.0/MCP4Rhino.Logic.dll net8.0/MCP4Rhino.rhp net8.0/MCP4Rhino.Tools.dll net8.0/MCP4Rhino.Contracts.dll net8.0/MCP4Rhino.rui; do
   echo "$listing" | grep -q "$need" || {
     echo "Archive missing $need: $PKG" >&2
     exit 1

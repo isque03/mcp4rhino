@@ -29,6 +29,9 @@ public class McpJsonRpcTests
         Assert.NotNull(init);
         Assert.Contains(McpJsonRpc.ProtocolVersion, init!.ToJsonString());
         Assert.Contains(McpJsonRpc.ServerName, init.ToJsonString());
+        Assert.Contains("instructions", init.ToJsonString());
+        Assert.Contains("github.com/isque03/mcp4rhino/issues", init.ToJsonString());
+        Assert.Contains("get_support_info", init.ToJsonString());
 
         var ping = McpJsonRpc.Dispatch(JsonNode.Parse("""{"jsonrpc":"2.0","id":2,"method":"ping"}"""), new FakeTools());
         Assert.NotNull(ping?["result"]);
@@ -40,6 +43,7 @@ public class McpJsonRpcTests
         var tools = new FakeTools();
         var list = McpJsonRpc.Dispatch(JsonNode.Parse("""{"jsonrpc":"2.0","id":3,"method":"tools/list","params":{}}"""), tools);
         Assert.Contains("echo", list!.ToJsonString());
+        Assert.Contains("get_support_info", list.ToJsonString());
         Assert.DoesNotContain("mcp4rhino_reload", list.ToJsonString());
 
         var call = McpJsonRpc.Dispatch(JsonNode.Parse("""
@@ -47,6 +51,29 @@ public class McpJsonRpcTests
             """), tools);
         Assert.Contains("hi", call!.ToJsonString());
         Assert.Null(call["error"]);
+
+        var support = McpJsonRpc.Dispatch(JsonNode.Parse("""
+            {"jsonrpc":"2.0","id":9,"method":"tools/call","params":{"name":"get_support_info","arguments":{}}}
+            """), tools);
+        Assert.Null(support?["error"]);
+        Assert.Contains(SupportInfo.IssuesUrl, support!.ToJsonString());
+        Assert.Contains(McpJsonRpc.ServerVersion, support.ToJsonString());
+        Assert.Contains("filing_tips", support.ToJsonString());
+
+        var live = McpJsonRpc.Dispatch(
+            JsonNode.Parse("""
+                {"jsonrpc":"2.0","id":10,"method":"tools/call","params":{"name":"get_support_info","arguments":{}}}
+                """),
+            tools,
+            supportContext: () => new SupportContext(
+                "http://127.0.0.1:4555/mcp",
+                "/tmp/live-mcp4rhino.log",
+                ServerRunning: true));
+        var liveJson = live!.ToJsonString();
+        Assert.Contains("4555", liveJson);
+        Assert.Contains("live-mcp4rhino.log", liveJson);
+        Assert.Contains("server_running", liveJson);
+        Assert.Contains("true", liveJson);
     }
 
     [Fact]

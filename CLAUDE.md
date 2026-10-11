@@ -4,7 +4,7 @@ You help the user build, install, and run **MCP4Rhino**. MCP4Rhino is a Rhino 8 
 
 Use these names and values:
 
-- Package and Rhino commands: `MCP4Rhino`, `MCP4RhinoStatus`, `MCP4RhinoStop`, `MCP4RhinoReload`
+- Package and Rhino commands: `MCP4Rhino`, `MCP4RhinoStatus`, `MCP4RhinoStatusUI`, `MCP4RhinoStop`, `MCP4RhinoUpdates`, `MCP4RhinoReportIssue`, `MCP4RhinoReload` (also **Tools → MCP4Rhino**)
 - Default port: **4010** (override with `MCP4RHINO_PORT`)
 - Do not invent other ports
 
@@ -197,7 +197,7 @@ If the connection is refused: Rhino is not running, auto-start has not fired yet
 | [src/MCP4Rhino.Logic/](src/MCP4Rhino.Logic/) | Pure helpers (`SurfaceOps`, `CurveOps`, …); loaded with Tools in the collectible ALC | Hot-reload with Tools (copy `MCP4Rhino.Logic.dll`) |
 | [src/MCP4Rhino.Contracts/](src/MCP4Rhino.Contracts/) | Shared bridge interfaces | Usually with host |
 | [scripts/pack-yak.sh](scripts/pack-yak.sh) / [pack-yak.ps1](scripts/pack-yak.ps1) | Build Release → universal `dist/MCP4Rhino-<version>.yak` | — |
-| [scripts/verify-yak-package.sh](scripts/verify-yak-package.sh) | Archive content checks (icon, Logic, `.rhp`, …) | — |
+| [scripts/verify-yak-package.sh](scripts/verify-yak-package.sh) | Archive content checks (icon, Logic, `.rhp`, `.rui`, …) | — |
 | [scripts/ci-download-yak.sh](scripts/ci-download-yak.sh) | Pin standalone Yak CLI + SHA256 for CI | — |
 | [scripts/install-yak.sh](scripts/install-yak.sh) / [install-yak.ps1](scripts/install-yak.ps1) | Pack + local yak install (macOS / Windows) | Restart Rhino after |
 | [scripts/smoke-local-yak.sh](scripts/smoke-local-yak.sh) / [smoke-local-yak.ps1](scripts/smoke-local-yak.ps1) | Local install + package checks + MCP `tools/list` probe | Restart if exit 2 |
@@ -263,6 +263,7 @@ For **residential (IRC)** and **commercial (IBC)** design in Rhino, use project 
 
 Full inventory: [docs/MCP_TOOLS.md](docs/MCP_TOOLS.md).
 
+- **Support:** `get_support_info` (version, endpoint, log path, GitHub Issues URLs) before filing bugs/enhancements at https://github.com/isque03/mcp4rhino/issues
 - **Inspect:** `get_document_info`, `get_document_units`, `get_objects`, `get_building_model`, `query_elements`
 - **Units / size:** `get_document_units`, `convert_length`, `measure_size`, `measure_distance` (returns `_in` / `_ft` / `_mm`). Create-tool numbers are **document model units** only. If the user names inches/feet/mm and that differs from `unit_system`, convert first, then verify after create. See [CHANGELOG.md](CHANGELOG.md).
 - **Geometry — create:** `create_point`, `create_line`, `create_polyline`, `create_circle`, `create_arc`, `create_ellipse`, `create_polygon`, `create_rectangle`, `create_curve`

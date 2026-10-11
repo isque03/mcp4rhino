@@ -34,11 +34,13 @@ require_file() {
 require_file "$HOST_OUT/MCP4Rhino.rhp"
 require_file "$HOST_OUT/MCP4Rhino.Contracts.dll"
 require_file "$HOST_OUT/MCP4Rhino.Logic.dll"
+require_file "$HOST_OUT/MCP4Rhino.rui"
 require_file "$TOOLS_OUT/MCP4Rhino.Tools.dll"
 
 cp "$HOST_OUT/MCP4Rhino.rhp" "$STAGE/net8.0/"
 cp "$HOST_OUT/MCP4Rhino.Contracts.dll" "$STAGE/net8.0/"
 cp "$HOST_OUT/MCP4Rhino.Logic.dll" "$STAGE/net8.0/"
+cp "$HOST_OUT/MCP4Rhino.rui" "$STAGE/net8.0/"
 cp "$TOOLS_OUT/MCP4Rhino.Tools.dll" "$STAGE/net8.0/"
 
 # Tools deps (e.g. System.Drawing.Common) — skip RhinoCommon

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RhinoUI major_ver="5" minor_ver="0" guid="39ad9ae9-8e01-4833-8c44-e2c9234d1cae" localize="False" default_language_id="1033">
+  <extend_rhino_menus>
+    <menu guid="cf3a043c-8567-4562-a281-c146c64daa6b">
+      <text>
+        <locale_1033>Extend Rhino Menus</locale_1033>
+      </text>
+      <menu guid="36220732-83da-4f42-9a29-1bb6e3362f4f" ExtendRhinoMenu="Too&amp;ls">
+        <text>
+          <locale_1033>MCP4Rhino</locale_1033>
+        </text>
+        <menu_item guid="f6c64f0f-4a4a-42d1-b11c-f0c813bc09b7">
+          <text>
+            <locale_1033>Status…</locale_1033>
+          </text>
+          <macro_id>445191a4-c60f-4fe1-aad3-3322cdee86d1</macro_id>
+        </menu_item>
+        <menu_item guid="dc5c80af-aa36-4b4f-8267-3e5da74ce2b4">
+          <text>
+            <locale_1033>Start server</locale_1033>
+          </text>
+          <macro_id>cc0aaf81-b0e5-479d-ac88-c906658dc5b6</macro_id>
+        </menu_item>
+        <menu_item guid="fbd9985b-b6c2-4aa2-9a89-5cbcc62dce0f">
+          <text>
+            <locale_1033>Stop server</locale_1033>
+          </text>
+          <macro_id>ddac49b3-b36a-4c26-921f-c7bb4f7167f9</macro_id>
+        </menu_item>
+        <menu_item guid="62dca820-88cf-47b0-ad43-de98bf01663b" item_type="separator" />
+        <menu_item guid="d001ed13-6afd-4f6b-a14c-6cf3bd53ff41">
+          <text>
+            <locale_1033>Check for updates…</locale_1033>
+          </text>
+          <macro_id>5ddd3b10-06e3-4c76-9b2d-f4d634a4e8c7</macro_id>
+        </menu_item>
+        <menu_item guid="a0537078-1688-4705-8d0e-7d35c01b0ae0">
+          <text>
+            <locale_1033>Report issue…</locale_1033>
+          </text>
+          <macro_id>af7bc9be-059d-4790-a89f-1c739c4b92e4</macro_id>
+        </menu_item>
+      </menu>
+    </menu>
+  </extend_rhino_menus>
+  <menus />
+  <tool_bar_groups />
+  <tool_bars />
+  <macros>
+    <macro_item guid="445191a4-c60f-4fe1-aad3-3322cdee86d1">
+      <text>
+        <locale_1033>Status…</locale_1033>
+      </text>
+      <tooltip>
+        <locale_1033>Show MCP4Rhino status</locale_1033>
+      </tooltip>
+      <help_text>
+        <locale_1033>Opens the MCP4Rhino status dialog.</locale_1033>
+      </help_text>
+      <button_text>
+        <locale_1033>Status…</locale_1033>
+      </button_text>
+      <menu_text>
+        <locale_1033>Status…</locale_1033>
+      </menu_text>
+      <script>! _MCP4RhinoStatusUI</script>
+    </macro_item>
+    <macro_item guid="cc0aaf81-b0e5-479d-ac88-c906658dc5b6">
+      <text>
+        <locale_1033>Start server</locale_1033>
+      </text>
+      <tooltip>
+        <locale_1033>Start the MCP4Rhino HTTP server</locale_1033>
+      </tooltip>
+      <help_text>
+        <locale_1033>Starts the local MCP server.</locale_1033>
+      </help_text>
+      <button_text>
+        <locale_1033>Start server</locale_1033>
+      </button_text>
+      <menu_text>
+        <locale_1033>Start server</locale_1033>
+      </menu_text>
+      <script>! _MCP4Rhino</script>
+    </macro_item>
+    <macro_item guid="ddac49b3-b36a-4c26-921f-c7bb4f7167f9">
+      <text>
+        <locale_1033>Stop server</locale_1033>
+      </text>
+      <tooltip>
+        <locale_1033>Stop the MCP4Rhino HTTP server</locale_1033>
+      </tooltip>
+      <help_text>
+        <locale_1033>Stops the local MCP server.</locale_1033>
+      </help_text>
+      <button_text>
+        <locale_1033>Stop server</locale_1033>
+      </button_text>
+      <menu_text>
+        <locale_1033>Stop server</locale_1033>
+      </menu_text>
+      <script>! _MCP4RhinoStop</script>
+    </macro_item>
+    <macro_item guid="5ddd3b10-06e3-4c76-9b2d-f4d634a4e8c7">
+      <text>
+        <locale_1033>Check for updates…</locale_1033>
+      </text>
+      <tooltip>
+        <locale_1033>Open Package Manager to update MCP4Rhino</locale_1033>
+      </tooltip>
+      <help_text>
+        <locale_1033>Opens Rhino Package Manager.</locale_1033>
+      </help_text>
+      <button_text>
+        <locale_1033>Check for updates…</locale_1033>
+      </button_text>
+      <menu_text>
+        <locale_1033>Check for updates…</locale_1033>
+      </menu_text>
+      <script>! _MCP4RhinoUpdates</script>
+    </macro_item>
+    <macro_item guid="af7bc9be-059d-4790-a89f-1c739c4b92e4">
+      <text>
+        <locale_1033>Report issue…</locale_1033>
+      </text>
+      <tooltip>
+        <locale_1033>Open GitHub Issues for MCP4Rhino</locale_1033>
+      </tooltip>
+      <help_text>
+        <locale_1033>Opens the GitHub new-issue page in your browser.</locale_1033>
+      </help_text>
+      <button_text>
+        <locale_1033>Report issue…</locale_1033>
+      </button_text>
+      <menu_text>
+        <locale_1033>Report issue…</locale_1033>
+      </menu_text>
+      <script>! _MCP4RhinoReportIssue</script>
+    </macro_item>
+  </macros>
+  <bitmaps />
+</RhinoUI>

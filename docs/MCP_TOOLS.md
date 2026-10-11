@@ -25,7 +25,10 @@ Default endpoint: `http://127.0.0.1:4010/mcp`.
 | `set_view` / `orbit_view` / `pan_view` / `zoom_view` / `zoom_extents` | Camera |
 | `capture_viewport` | PNG screenshot (+ MCP image when ≤ 1 MiB) |
 | `run_rhino_command` | Scripted Rhino command escape hatch |
+| `get_support_info` | Version, endpoint, log path, GitHub Issues URLs, filing tips |
 | `mcp4rhino_reload` | Hot-reload Tools and Logic |
+
+`initialize` also returns MCP `instructions` pointing agents at [GitHub Issues](https://github.com/isque03/mcp4rhino/issues) and `get_support_info` before filing bugs or enhancements.
 
 ## Curves and solids
 

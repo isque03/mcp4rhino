@@ -30,6 +30,7 @@ $required = @(
     (Join-Path $hostOut "MCP4Rhino.rhp"),
     (Join-Path $hostOut "MCP4Rhino.Contracts.dll"),
     (Join-Path $hostOut "MCP4Rhino.Logic.dll"),
+    (Join-Path $hostOut "MCP4Rhino.rui"),
     (Join-Path $toolsOut "MCP4Rhino.Tools.dll")
 )
 foreach ($path in $required) {
@@ -39,6 +40,7 @@ foreach ($path in $required) {
 Copy-Item (Join-Path $hostOut "MCP4Rhino.rhp") "$stage\net8.0\"
 Copy-Item (Join-Path $hostOut "MCP4Rhino.Contracts.dll") "$stage\net8.0\"
 Copy-Item (Join-Path $hostOut "MCP4Rhino.Logic.dll") "$stage\net8.0\"
+Copy-Item (Join-Path $hostOut "MCP4Rhino.rui") "$stage\net8.0\"
 Copy-Item (Join-Path $toolsOut "MCP4Rhino.Tools.dll") "$stage\net8.0\"
 
 $skip = @("RhinoCommon.dll", "Rhino.UI.dll", "Eto.dll", "MCP4Rhino.rhp")
@@ -78,7 +80,8 @@ try {
     foreach ($need in @(
             "icon.png", "manifest.yml",
             "net8.0/MCP4Rhino.Logic.dll", "net8.0/MCP4Rhino.rhp",
-            "net8.0/MCP4Rhino.Tools.dll", "net8.0/MCP4Rhino.Contracts.dll"
+            "net8.0/MCP4Rhino.Tools.dll", "net8.0/MCP4Rhino.Contracts.dll",
+            "net8.0/MCP4Rhino.rui"
         )) {
         if ($need -notin $names) { throw "Archive missing $need : $dest" }
     }
