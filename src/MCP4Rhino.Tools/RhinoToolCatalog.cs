@@ -385,26 +385,26 @@ public static class RhinoToolCatalog
                 var sx = bbox.Max.X - bbox.Min.X;
                 var sy = bbox.Max.Y - bbox.Min.Y;
                 var sz = bbox.Max.Z - bbox.Min.Z;
-                var model = doc.ModelUnitSystem;
+                var model = ToolHelpers.DocUnits(doc.ModelUnitSystem);
                 bboxPayload = new
                 {
                     min = new[] { bbox.Min.X, bbox.Min.Y, bbox.Min.Z },
                     max = new[] { bbox.Max.X, bbox.Max.Y, bbox.Max.Z },
                     size = new[] { sx, sy, sz },
                     size_in = new[] {
-                        UnitConversion.Convert(sx, model, UnitSystem.Inches),
-                        UnitConversion.Convert(sy, model, UnitSystem.Inches),
-                        UnitConversion.Convert(sz, model, UnitSystem.Inches),
+                        UnitConversion.Convert(sx, model, DocumentUnitSystem.Inches),
+                        UnitConversion.Convert(sy, model, DocumentUnitSystem.Inches),
+                        UnitConversion.Convert(sz, model, DocumentUnitSystem.Inches),
                     },
                     size_ft = new[] {
-                        UnitConversion.Convert(sx, model, UnitSystem.Feet),
-                        UnitConversion.Convert(sy, model, UnitSystem.Feet),
-                        UnitConversion.Convert(sz, model, UnitSystem.Feet),
+                        UnitConversion.Convert(sx, model, DocumentUnitSystem.Feet),
+                        UnitConversion.Convert(sy, model, DocumentUnitSystem.Feet),
+                        UnitConversion.Convert(sz, model, DocumentUnitSystem.Feet),
                     },
                     size_mm = new[] {
-                        UnitConversion.Convert(sx, model, UnitSystem.Millimeters),
-                        UnitConversion.Convert(sy, model, UnitSystem.Millimeters),
-                        UnitConversion.Convert(sz, model, UnitSystem.Millimeters),
+                        UnitConversion.Convert(sx, model, DocumentUnitSystem.Millimeters),
+                        UnitConversion.Convert(sy, model, DocumentUnitSystem.Millimeters),
+                        UnitConversion.Convert(sz, model, DocumentUnitSystem.Millimeters),
                     },
                     unit_system = model.ToString(),
                 };

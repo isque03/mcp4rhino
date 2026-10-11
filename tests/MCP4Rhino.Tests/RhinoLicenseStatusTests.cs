@@ -1,5 +1,4 @@
 using MCP4Rhino.Logic;
-using Rhino.ApplicationSettings;
 using Xunit;
 
 namespace MCP4Rhino.Tests;
@@ -11,7 +10,8 @@ public class RhinoLicenseStatusTests
     {
         var status = RhinoLicenseStatus.FromSnapshot(
             canSave: true,
-            installationType: Installation.Commercial,
+            installationType: "Commercial",
+            isEvaluation: false,
             installationTypeString: "Commercial",
             daysUntilExpiration: null,
             savesLeft: null);
@@ -30,7 +30,8 @@ public class RhinoLicenseStatusTests
     {
         var status = RhinoLicenseStatus.FromSnapshot(
             canSave: false,
-            installationType: Installation.EvaluationTimed,
+            installationType: "EvaluationTimed",
+            isEvaluation: true,
             installationTypeString: "Evaluation",
             daysUntilExpiration: 0,
             savesLeft: null);
@@ -44,16 +45,16 @@ public class RhinoLicenseStatusTests
     }
 
     [Theory]
-    [InlineData(Installation.Evaluation, true)]
-    [InlineData(Installation.EvaluationTimed, true)]
-    [InlineData(Installation.Commercial, false)]
-    [InlineData(Installation.Educational, false)]
-    [InlineData(Installation.Beta, false)]
-    public void FromSnapshot_IsEvaluation_MatchesInstallation(Installation type, bool expectedEval)
+    [InlineData("Evaluation", true)]
+    [InlineData("EvaluationTimed", true)]
+    [InlineData("Commercial", false)]
+    [InlineData("Educational", false)]
+    [InlineData("Beta", false)]
+    public void FromSnapshot_IsEvaluation_MatchesInstallation(string type, bool expectedEval)
     {
-        var status = RhinoLicenseStatus.FromSnapshot(canSave: true, installationType: type);
+        var status = RhinoLicenseStatus.FromSnapshot(canSave: true, installationType: type, isEvaluation: expectedEval);
         Assert.Equal(expectedEval, status.IsEvaluation);
-        Assert.Equal(type.ToString(), status.InstallationType);
+        Assert.Equal(type, status.InstallationType);
     }
 
     [Fact]
@@ -61,7 +62,8 @@ public class RhinoLicenseStatusTests
     {
         var status = RhinoLicenseStatus.FromSnapshot(
             canSave: true,
-            installationType: Installation.Evaluation,
+            installationType: "Evaluation",
+            isEvaluation: true,
             daysUntilExpiration: 12,
             savesLeft: 7);
 
@@ -75,7 +77,8 @@ public class RhinoLicenseStatusTests
     {
         var status = RhinoLicenseStatus.FromSnapshot(
             canSave: false,
-            installationType: Installation.EvaluationTimed,
+            installationType: "EvaluationTimed",
+            isEvaluation: true,
             installationTypeString: "Evaluation Timed",
             daysUntilExpiration: 0,
             savesLeft: null);

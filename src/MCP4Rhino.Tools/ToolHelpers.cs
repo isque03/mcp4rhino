@@ -187,6 +187,11 @@ internal static class ToolHelpers
     public static double Metres(RhinoDoc doc, double metres) =>
         metres * RhinoMath.UnitScale(UnitSystem.Meters, doc.ModelUnitSystem);
 
+    /// <summary>Cast Rhino document units to Logic's ordinal-compatible enum.</summary>
+    public static DocumentUnitSystem DocUnits(UnitSystem us) => (DocumentUnitSystem)(byte)us;
+
+    public static UnitSystem ToRhino(DocumentUnitSystem us) => (UnitSystem)(byte)us;
+
     public const string KindKey = "mcp4:kind";
     public const string LevelKey = "mcp4:level";
     public const string TypeKey = "mcp4:type_id";
