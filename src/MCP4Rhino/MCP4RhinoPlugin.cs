@@ -25,9 +25,11 @@ public class MCP4RhinoPlugin : PlugIn
 
     protected override LoadReturnCode OnLoad(ref string errorMessage)
     {
-        var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.5.1";
+        var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.5.2";
         PluginLog.Info($"OnLoad LoadTime=AtStartup version={version} log={PluginLog.LogPath} autostart={McpHostBootstrap.AutostartEnabled}");
         RhinoApp.WriteLine($"MCP4Rhino {version} loaded.");
+
+        TryLoadRui();
 
         if (McpHostBootstrap.AutostartEnabled)
         {
@@ -40,6 +42,71 @@ public class MCP4RhinoPlugin : PlugIn
         }
 
         return LoadReturnCode.Success;
+    }
+
+    private static void TryLoadRui()
+    {
+        try
+        {
+            var dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            if (string.IsNullOrEmpty(dir))
+            {
+                RhinoApp.WriteLine("MCP4Rhino: Tools menu unavailable (plugin path unknown). Use MCP4RhinoStatus / MCP4Rhino commands.");
+                return;
+            }
+
+            var ruiPath = Path.Combine(dir, "MCP4Rhino.rui");
+            if (!File.Exists(ruiPath))
+            {
+                RhinoApp.WriteLine(
+                    "MCP4Rhino: MCP4Rhino.rui missing next to plugin; Tools → MCP4Rhino unavailable. " +
+                    "Use MCP4RhinoStatus / MCP4Rhino commands.");
+                PluginLog.Info($"RUI missing at {ruiPath}");
+                return;
+            }
+
+            var byPath = RhinoApp.ToolbarFiles.FindByPath(ruiPath);
+            if (byPath is not null)
+            {
+                PluginLog.Info($"RUI already loaded from package path {ruiPath}");
+                return;
+            }
+
+            var byName = RhinoApp.ToolbarFiles.FindByName("MCP4Rhino", ignoreCase: true);
+            if (byName is not null)
+            {
+                var existing = byName.Path ?? "";
+                if (!string.Equals(existing, ruiPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    RhinoApp.WriteLine(
+                        $"MCP4Rhino: Tools menu was loaded from a different path ({existing}). " +
+                        $"Opening package RUI: {ruiPath}");
+                }
+                else
+                {
+                    PluginLog.Info("RUI already loaded (same path via name lookup)");
+                    return;
+                }
+            }
+
+            var opened = RhinoApp.ToolbarFiles.Open(ruiPath);
+            if (opened is null)
+            {
+                RhinoApp.WriteLine(
+                    "MCP4Rhino: failed to load Tools menu (RUI Open returned null). " +
+                    "Use MCP4RhinoStatus / MCP4Rhino commands.");
+                PluginLog.Info($"RUI Open returned null for {ruiPath}");
+                return;
+            }
+
+            RhinoApp.WriteLine("MCP4Rhino: Tools → MCP4Rhino menu loaded.");
+            PluginLog.Info($"RUI loaded from {ruiPath}");
+        }
+        catch (Exception ex)
+        {
+            PluginLog.Info($"RUI load skipped: {ex.Message}");
+            RhinoApp.WriteLine("MCP4Rhino: Tools menu unavailable; use MCP4RhinoStatus / MCP4Rhino commands.");
+        }
     }
 
     private void HookIdleOnce()

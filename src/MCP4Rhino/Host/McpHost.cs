@@ -14,7 +14,7 @@ namespace MCP4Rhino.Host;
 [ExcludeFromCodeCoverage]
 public static class McpHost
 {
-    public const int DefaultPort = 4010;
+    public const int DefaultPort = SupportInfo.DefaultPort;
 
     private static HttpListener? _listener;
     private static CancellationTokenSource? _cts;
@@ -22,7 +22,7 @@ public static class McpHost
 
     public static bool IsRunning => _listener is { IsListening: true };
 
-    public static int Port { get; private set; } = DefaultPort;
+    public static int Port { get; private set; } = SupportInfo.DefaultPort;
 
     public static string Endpoint => $"http://127.0.0.1:{Port}/mcp";
 
@@ -184,7 +184,12 @@ public static class McpHost
     }
 
     private static JsonNode? Dispatch(JsonNode? req) =>
-        McpJsonRpc.Dispatch(req, ToolProvider.Instance, HotReload);
+        McpJsonRpc.Dispatch(req, ToolProvider.Instance, HotReload, LiveSupport);
+
+    private static SupportContext LiveSupport() => new(
+        Endpoint: IsRunning ? Endpoint : SupportInfo.ConfiguredEndpoint(),
+        LogPath: PluginLog.LogPath,
+        ServerRunning: IsRunning);
 
     private sealed class ToolProvider : IMcpToolProvider
     {

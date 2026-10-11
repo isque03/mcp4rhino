@@ -30,7 +30,7 @@ function Test-YakArchive([string]$YakPath) {
     $zip = [System.IO.Compression.ZipFile]::OpenRead($YakPath)
     try {
         $names = $zip.Entries | ForEach-Object { $_.FullName -replace '\\', '/' }
-        foreach ($need in @("icon.png", "manifest.yml", "net8.0/MCP4Rhino.Logic.dll", "net8.0/MCP4Rhino.rhp")) {
+        foreach ($need in @("icon.png", "manifest.yml", "net8.0/MCP4Rhino.Logic.dll", "net8.0/MCP4Rhino.rhp", "net8.0/MCP4Rhino.rui")) {
             if ($need -notin $names) { throw "Archive missing $need : $YakPath" }
         }
         $manifestEntry = $zip.Entries | Where-Object { ($_.FullName -replace '\\', '/') -eq "manifest.yml" } | Select-Object -First 1

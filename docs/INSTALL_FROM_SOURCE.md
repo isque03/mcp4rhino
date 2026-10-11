@@ -23,7 +23,7 @@ Pack only (no install):
 
 Override the Yak CLI with env `YAK` if needed.
 
-After install: restart Rhino. By default the MCP server auto-starts shortly after Rhino is idle. Confirm with `MCP4RhinoStatus`, or run `MCP4Rhino` if auto-start is disabled.
+After install: restart Rhino. By default the MCP server auto-starts shortly after Rhino is idle. Confirm with **Tools → MCP4Rhino → Status…** or `MCP4RhinoStatus`, or run `MCP4Rhino` if auto-start is disabled.
 
 ## Updating from source
 

@@ -22,6 +22,20 @@ public class MCP4RhinoStatusCommand : Command
     {
         PluginLog.Info("Command MCP4RhinoStatus invoked");
         McpHostBootstrap.WriteStatus();
+
+        // Scripted / RUI-macro script runners must not block on a modal (F1).
+        if (mode != RunMode.Interactive)
+            return Result.Success;
+
+        try
+        {
+            StatusDialog.ShowStatus();
+        }
+        catch (Exception ex)
+        {
+            PluginLog.Info($"Status dialog failed: {ex.Message}");
+            RhinoApp.WriteLine($"MCP4Rhino: status dialog unavailable ({ex.Message}). See command-line summary above.");
+        }
         return Result.Success;
     }
 }

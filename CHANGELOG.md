@@ -7,6 +7,20 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.5.2] — 2026-10-11
+
+### Added
+
+- **Tools → MCP4Rhino** menu (RUI) with Status, Start/Stop, Check for updates, and Report issue.
+- Eto **Status** dialog (`MCP4RhinoStatus` interactive / `MCP4RhinoStatusUI` from Tools menu) showing Running/Stopped, endpoint, log path, and Start/Stop/Copy/Updates/Log/Issue actions.
+- Commands `MCP4RhinoUpdates` (opens Package Manager) and `MCP4RhinoReportIssue` (opens GitHub Issues).
+- MCP `initialize` `instructions` plus host tool `get_support_info` with Issues URLs and filing tips.
+- README Package Manager screenshot updated; Feedback / Issues section.
+
+### Changed
+
+- Package version **0.5.2**; yak packs include `MCP4Rhino.rui`.
+
 ## [0.5.1] — 2026-10-11
 
 ### Added

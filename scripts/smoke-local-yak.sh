@@ -71,6 +71,7 @@ verify_installed() {
   [[ -f "$ver_dir/manifest.yml" ]] || { echo "Installed package missing manifest.yml under $ver_dir" >&2; exit 1; }
   [[ -f "$ver_dir/net8.0/MCP4Rhino.Logic.dll" ]] || { echo "Installed package missing Logic.dll under $ver_dir/net8.0" >&2; exit 1; }
   [[ -f "$ver_dir/net8.0/MCP4Rhino.rhp" ]] || { echo "Installed package missing .rhp under $ver_dir/net8.0" >&2; exit 1; }
+  [[ -f "$ver_dir/net8.0/MCP4Rhino.rui" ]] || { echo "Installed package missing .rui under $ver_dir/net8.0" >&2; exit 1; }
   echo "OK installed: $ver_dir"
 }
 
