@@ -116,7 +116,7 @@ Claude Desktop / Cursor MCP config usually stays `npx mcp-remote http://localhos
 
 ## Linux
 
-Rhino 8 has no official Linux desktop. Use a **Windows 11 VM** or a remote Windows host. Install MCP4Rhino there (Package Manager, the universal `.yak` from GitHub, or `scripts/install-yak.ps1` from source). Point the Linux MCP client at `http://<windows-host>:4010/mcp`.
+Rhino 8 has no official Linux desktop. Use a **Windows 11 VM** or a remote Windows host. Install MCP4Rhino there (Package Manager, the universal `.yak` from GitHub, or `scripts/install-yak.ps1` from source). The MCP server binds `127.0.0.1` only — a Linux client cannot connect via the Windows LAN IP. Run the AI client on the same machine as Rhino, or SSH-tunnel port 4010 (`ssh -L 4010:127.0.0.1:4010 user@windows-host`) and use `http://127.0.0.1:4010/mcp`.
 
 ---
 
