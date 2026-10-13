@@ -36,9 +36,9 @@ Create walls, floors, roofs, doors, windows, stairs, spaces, and related element
 
 ### Drawings and documentation
 
-Generate elevations, sections, dimensions, tags, sheets, and exports (PDF, DWG, images).
+Create section cutting planes and elevation baselines with named views, place dimensions and tags, register sheets in the document, and export (PDF is best-effort; DWG and images also available).
 
-> “Create an elevation drawing of the front facade.”
+> “Create a section through the building and an elevation view of the front facade.”
 
 ### Design review
 
@@ -100,7 +100,7 @@ Restart Rhino, then confirm with **MCP4Rhino → Status…** (Windows: under **T
 
 Building from this repository: [docs/INSTALL_FROM_SOURCE.md](docs/INSTALL_FROM_SOURCE.md).
 
-**Linux:** Rhino 8 has no official Linux desktop. Run Rhino on Windows, install the same package there, and point your Linux AI client at `http://<windows-host>:4010/mcp`.
+**Linux:** Rhino 8 has no official Linux desktop. Run Rhino and MCP4Rhino on Windows or macOS. The MCP server listens on `127.0.0.1` only, so a remote Linux AI client cannot reach it via the Windows LAN IP. Run the AI client on the same machine as Rhino, or SSH-tunnel port 4010 (for example `ssh -L 4010:127.0.0.1:4010 user@windows-host`) and point the client at `http://127.0.0.1:4010/mcp`.
 
 ## Connect your AI assistant
 
@@ -150,10 +150,10 @@ You should get a summary from the active document. Then try a small create or me
 | Geometry | Create and edit curves, surfaces, and solids |
 | Architecture | Levels, walls, slabs, roofs, openings, stairs, spaces |
 | Inspection | List objects, measure size and distance, query the model |
-| Drawings | Sections, elevations, dimensions, tags, sheets, exports |
+| Drawings | Section planes + named views, elevation baselines, dimensions, tags, sheet registry, exports |
 | Visualization | Camera control, illustration display, viewport capture |
 | Analysis | Clash checks and preliminary code pre-checks |
-| File export | Save `.3dm` (when Rhino allows), IFC, DWG, PDF, images |
+| File export | Save `.3dm` (when Rhino allows); minimal IFC2X3 for tagged elements (bounding boxes); DWG; PDF (best-effort); images |
 
 Full tool list: [docs/MCP_TOOLS.md](docs/MCP_TOOLS.md).
 

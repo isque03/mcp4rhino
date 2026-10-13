@@ -10,7 +10,7 @@ For common end-user issues, see the short table in [README.md](../README.md#trou
 | Port bind error | Another process owns the port. Set `MCP4RHINO_PORT` and update the client URL. |
 | Commands not found | Install failed, or Rhino was not restarted after install. Reinstall via Package Manager or the GitHub `.yak`, restart Rhino. From source: see [INSTALL_FROM_SOURCE.md](INSTALL_FROM_SOURCE.md). |
 | Claude / Cursor cannot connect | Rhino must be running and MCP4Rhino listening. Restart the AI client after editing MCP config. Confirm the URL is `http://127.0.0.1:4010/mcp` (or your custom port). Node.js/`npx` required for `mcp-remote`. |
-| AI client on Linux, Rhino on Windows VM | Replace `localhost` with the Windows host IP in the MCP config. |
+| AI client remote / Linux, Rhino on Windows | The server binds `127.0.0.1` only. Do not use the Windows LAN IP. Run the client on the same machine as Rhino, or SSH-tunnel port 4010 and use `http://127.0.0.1:4010/mcp`. |
 
 ## Tools and updates (developers)
 
@@ -54,4 +54,4 @@ curl -sS -X POST http://127.0.0.1:4010/mcp \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
 ```
 
-Or open `http://127.0.0.1:4010/` in a browser for a plain OK response when the server is up.
+Or open `http://127.0.0.1:4010/mcp` in a browser (GET) for a plain `MCP4Rhino OK` response when the server is up. Root `/` returns 404.

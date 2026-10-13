@@ -2,7 +2,7 @@
 
 Thanks for helping improve MCP4Rhino.
 
-- **End-user docs:** [README.md](README.md)
+- **End-user docs:** [mcp4rhino.mintlify.app](https://mcp4rhino.mintlify.app/) (product overview: [README.md](README.md))
 - **Build and install from this repo:** [docs/INSTALL_FROM_SOURCE.md](docs/INSTALL_FROM_SOURCE.md)
 - **Development workflow:** [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)
 - **Agent playbook (Cursor / Claude Code):** [CLAUDE.md](CLAUDE.md)

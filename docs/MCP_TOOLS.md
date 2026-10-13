@@ -34,7 +34,11 @@ Default endpoint: `http://127.0.0.1:4010/mcp`.
 
 - **Create:** `create_point`, `create_line`, `create_polyline`, `create_circle`, `create_arc`, `create_ellipse`, `create_polygon`, `create_rectangle`, `create_curve`
 - **Edit:** `join_curves`, `trim_curve`, `split_curve`, `explode_objects`, `offset_curve`, `fillet_curve`, `extrude_curve`
-- **Other:** boolean tools, `transform_objects`, layers, blocks, `set_document_units`, `get_geometry`, `select_objects`, `clear_selection`
+- **Boolean:** `boolean_difference`, `boolean_union`, `boolean_intersection`
+- **Layers:** `list_layers`, `create_layer`, `set_layer_props`
+- **Blocks:** `create_block_definition`, `insert_block`, `list_blocks`
+- **Other:** `transform_objects`, `set_document_units`, `get_geometry`, `select_objects`, `clear_selection`
+- **Not available:** `execute_csharp` (registered but returns unavailable — no in-process Roslyn; use `run_rhino_command` or dedicated tools)
 
 ## Surfaces
 
@@ -46,17 +50,17 @@ Surface face pick for fillet/chamfer: `face_index_*` or `pick_point_*`. Edge pic
 
 ## Architecture
 
-`set_project_info`, `get_project_info`, `create_level`, `list_levels`, `set_active_level`, `create_grid`, `create_site`, `create_building`, `create_wall`, `create_slab`, `create_roof`, `create_column`, `create_beam`, `create_door`, `create_window`, `create_stair`, `create_ramp`, `create_railing`, `create_curtain_wall`, `create_space`, `update_space`, `list_spaces`, `apply_opening`, element types, `get_building_model`, `query_elements`, `measure_distance`, `measure_area`, `measure_clear_width`.
+`set_project_info`, `get_project_info`, `create_level`, `list_levels`, `set_active_level`, `create_grid`, `create_site`, `create_building`, `create_wall`, `create_slab`, `create_roof`, `create_column`, `create_beam`, `create_door`, `create_window`, `create_stair`, `create_ramp`, `create_railing`, `create_curtain_wall`, `create_space`, `update_space`, `list_spaces`, `apply_opening`, `list_element_types`, `upsert_element_type`, `get_building_model`, `query_elements`, `measure_distance`, `measure_area`, `measure_clear_width`.
 
 Semantic tags use `mcp4:` user-text keys on model objects (see project skills under [`.cursor/skills/`](../.cursor/skills/)).
 
 ## Drawings and documentation
 
-`create_section`, `create_elevation`, `create_detail_view`, `create_dimension`, `create_text`, `create_leader`, `create_hatch`, room/door/window tags, `create_schedule`, `create_sheet`, `list_sheets`, `place_view_on_sheet`, `export_pdf`, `export_dwg`, `export_images`, `apply_layer_standard`.
+`create_section` (cutting plane + named view looking at the cut), `create_elevation` (baseline + view direction), `create_detail_view` (named camera/target), `create_dimension`, `create_text`, `create_leader`, `create_hatch`, `create_room_tag`, `create_door_tag`, `create_window_tag`, `create_schedule`, `create_sheet` / `list_sheets` / `place_view_on_sheet` (document sheet registry — not layout geometry), `export_pdf` (best-effort print/script), `export_dwg`, `export_images`, `apply_layer_standard`.
 
 ## Interop and analysis
 
-`check_rhino_license`, `export_3dm` (requires valid license / active eval — call `check_rhino_license` first), `export_ifc`, `clash_detect`, `quantity_takeoff`, and related link helpers as listed in Tools.
+`check_rhino_license`, `export_3dm` (requires valid license / active eval — call `check_rhino_license` first), `export_ifc` (minimal IFC2X3: tagged `mcp4` elements as bounding boxes only), `import_ifc` (metadata-only — storey GUIDs / path note; no geometry import), `export_obj`, `link_external_model`, `list_links`, `clash_detect`, `quantity_takeoff`.
 
 ## Code checks
 
