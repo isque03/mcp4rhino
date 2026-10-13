@@ -173,7 +173,7 @@ Full tool list: [docs/MCP_TOOLS.md](docs/MCP_TOOLS.md).
 
 ## Documentation
 
-**User docs (Mintlify):** [mcp4rhinodocs](https://github.com/isque03/mcp4rhinodocs) — quickstart, how-tos, tool reference, and architecture (auto-deploys on push).
+**User docs (Mintlify):** [mcp4rhino.mintlify.app](https://mcp4rhino.mintlify.app/) — quickstart, how-tos, and tool reference.
 
 | Doc | Audience |
 |-----|----------|
