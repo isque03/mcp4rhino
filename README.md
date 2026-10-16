@@ -34,6 +34,14 @@ Create walls, floors, roofs, doors, windows, stairs, spaces, and related element
 
 > “Create a staircase connecting these two floors.”
 
+### Parametric design with Grasshopper
+
+Create native, editable Grasshopper definitions, connect components, adjust parameters, inspect data trees, and explicitly bake geometry into Rhino.
+
+> “Create a Grasshopper facade with adjustable panel count, spacing, and depth.”
+
+Agents can learn the workflow through `gh_help` or the bundled [parametric design skill](skills/grasshopper-parametric-design/SKILL.md). See [Grasshopper support](docs/GRASSHOPPER.md) for setup, supported components and examples.
+
 ### Drawings and documentation
 
 Create section cutting planes and elevation baselines with named views, place dimensions and tags, register sheets in the document, and export (PDF is best-effort; DWG and images also available).

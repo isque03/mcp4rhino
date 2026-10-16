@@ -14,6 +14,7 @@ public static class SupportInfo
 
     public static string ServerInstructions { get; } =
         "MCP4Rhino drives the active Rhino 8 document for AI assistants. " +
+        "For Grasshopper and parametric design, start with gh_help(topic: index); use discovery before constructing graphs. " +
         "File bugs and enhancement requests at https://github.com/isque03/mcp4rhino/issues. " +
         "Call get_support_info before filing so the report includes version, endpoint, and log path. " +
         "Include MCP4Rhino version, Rhino version, OS, steps to reproduce, expected vs actual behavior, " +

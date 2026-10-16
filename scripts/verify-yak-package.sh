@@ -10,12 +10,17 @@ if [[ -z "$PKG" || ! -f "$PKG" ]]; then
 fi
 
 listing="$(unzip -l "$PKG")"
-for need in icon.png manifest.yml net8.0/MCP4Rhino.Logic.dll net8.0/MCP4Rhino.rhp net8.0/MCP4Rhino.Tools.dll net8.0/MCP4Rhino.Contracts.dll net8.0/MCP4Rhino.rui; do
+for need in icon.png manifest.yml net8.0/MCP4Rhino.Logic.dll net8.0/MCP4Rhino.rhp net8.0/MCP4Rhino.Tools.dll net8.0/MCP4Rhino.Contracts.dll net8.0/MCP4Rhino.rui net8.0/MCP4Rhino.Grasshopper.dll skills/grasshopper-parametric-design/SKILL.md; do
   echo "$listing" | grep -q "$need" || {
     echo "Archive missing $need: $PKG" >&2
     exit 1
   }
 done
+
+if echo "$listing" | grep -Eq 'net8.0/(Grasshopper|GH_IO|RhinoCommon)\.dll'; then
+  echo "Archive must not bundle Rhino/Grasshopper SDK assemblies: $PKG" >&2
+  exit 1
+fi
 
 manifest="$(unzip -p "$PKG" manifest.yml)"
 echo "$manifest" | grep -q '^icon: icon.png' || {

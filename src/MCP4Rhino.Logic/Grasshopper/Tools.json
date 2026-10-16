@@ -1,0 +1,748 @@
+[
+  {
+    "name": "gh_help",
+    "description": "Learn parametric design and this server. Topics: index, quickstart, design, data-trees, workflow, debugging, examples/array, examples/facade, examples/loft. Works without Grasshopper.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "topic": {
+          "type": "string"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "gh_status",
+    "description": "Check Grasshopper availability, runtime state and v1 limits without loading the editor.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "gh_search_components",
+    "description": "Search installed components; inspect support status. Discovery initializes Grasshopper.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "gh_describe_components",
+    "description": "Inspect component types, actual port IDs, defaults and access modes. Discovery initializes Grasshopper.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "component_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "maxItems": 50
+        }
+      },
+      "required": [
+        "component_ids"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "gh_list_documents",
+    "description": "List open Grasshopper definitions and attached MCP sessions. Initializes Grasshopper.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "gh_open_document",
+    "description": "Create a separate visible definition, open a .gh/.ghx file, or explicitly attach an existing document. Returns a session and revision.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "create",
+            "open",
+            "attach"
+          ]
+        },
+        "path": {
+          "type": "string"
+        },
+        "document_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "request_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "gh_inspect_document",
+    "description": "Inspect graph, actual port IDs, persistent values, support and diagnostics.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string"
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        }
+      },
+      "required": [
+        "session_id"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "gh_apply_patch",
+    "description": "Apply a validated batch under one undo record. Uses temporary node aliases. solve defaults false. gh_help(workflow) explains operations.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string"
+        },
+        "expected_revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "operations": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "op": {
+                    "const": "add"
+                  },
+                  "alias": {
+                    "type": "string"
+                  },
+                  "component_id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "position": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                },
+                "required": [
+                  "op",
+                  "alias",
+                  "component_id"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "op": {
+                    "const": "remove"
+                  },
+                  "node": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "op",
+                  "node"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "op": {
+                    "const": "connect"
+                  },
+                  "source": {
+                    "type": "object",
+                    "properties": {
+                      "node": {
+                        "type": "string"
+                      },
+                      "port": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "node",
+                      "port"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "target": {
+                    "type": "object",
+                    "properties": {
+                      "node": {
+                        "type": "string"
+                      },
+                      "port": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "node",
+                      "port"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "op",
+                  "source",
+                  "target"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "op": {
+                    "const": "disconnect"
+                  },
+                  "source": {
+                    "type": "object",
+                    "properties": {
+                      "node": {
+                        "type": "string"
+                      },
+                      "port": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "node",
+                      "port"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "target": {
+                    "type": "object",
+                    "properties": {
+                      "node": {
+                        "type": "string"
+                      },
+                      "port": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "node",
+                      "port"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "op",
+                  "source",
+                  "target"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "op": {
+                    "const": "set_value"
+                  },
+                  "node": {
+                    "type": "string"
+                  },
+                  "port": {
+                    "type": "string"
+                  },
+                  "tree": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "path": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "minItems": 1
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      },
+                      "required": [
+                        "path",
+                        "items"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 2000
+                  }
+                },
+                "required": [
+                  "op",
+                  "node",
+                  "port",
+                  "tree"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "op": {
+                    "const": "set_slider"
+                  },
+                  "node": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "number"
+                  },
+                  "minimum": {
+                    "type": "number"
+                  },
+                  "maximum": {
+                    "type": "number"
+                  },
+                  "integer": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "op",
+                  "node",
+                  "value"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "op": {
+                    "const": "set_properties"
+                  },
+                  "node": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "position": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "preview": {
+                    "type": "boolean"
+                  },
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "op",
+                  "node"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "op": {
+                    "const": "set_mapping"
+                  },
+                  "node": {
+                    "type": "string"
+                  },
+                  "port": {
+                    "type": "string"
+                  },
+                  "mapping": {
+                    "enum": [
+                      "none",
+                      "flatten",
+                      "graft"
+                    ]
+                  },
+                  "simplify": {
+                    "type": "boolean"
+                  },
+                  "reverse": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "op",
+                  "node",
+                  "port"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 100
+        },
+        "solve": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "session_id",
+        "expected_revision",
+        "request_id",
+        "operations"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "gh_solve",
+    "description": "Queue an incremental solve and immediately return a job ID. Heavy solves may block Rhino UI.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string"
+        },
+        "expected_revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600
+        }
+      },
+      "required": [
+        "session_id",
+        "expected_revision",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "gh_get_job",
+    "description": "Poll job state and component diagnostics without waiting for the Rhino UI.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "job_id"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "gh_cancel_job",
+    "description": "Cancel a queued job or request cooperative cancellation of a running solve. Running jobs retain their execution slot.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "job_id"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "gh_read_output",
+    "description": "Read a current output tree in bounded pages. Complex geometry stays in Rhino; returns summaries and bounds.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string"
+        },
+        "result_id": {
+          "type": "string"
+        },
+        "node": {
+          "type": "string"
+        },
+        "port": {
+          "type": "string"
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        }
+      },
+      "required": [
+        "session_id",
+        "result_id",
+        "node",
+        "port"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "gh_bake",
+    "description": "Explicitly bake selected current output ports as an additive snapshot, with one Rhino undo record.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string"
+        },
+        "expected_revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "result_id": {
+          "type": "string"
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "node": {
+                "type": "string"
+              },
+              "port": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "node",
+              "port"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 100
+        },
+        "layer": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "session_id",
+        "expected_revision",
+        "request_id",
+        "result_id",
+        "outputs"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "gh_save_document",
+    "description": "Explicitly save a .gh or .ghx definition. Existing paths require overwrite:true.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string"
+        },
+        "expected_revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "overwrite": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "session_id",
+        "expected_revision",
+        "request_id",
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "gh_close_document",
+    "description": "Close an owned definition, or detach an attached definition. Unsaved owned definitions require discard:true.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string"
+        },
+        "expected_revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "discard": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "session_id",
+        "expected_revision",
+        "request_id"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    }
+  }
+]

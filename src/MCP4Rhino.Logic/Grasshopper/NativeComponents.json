@@ -1,0 +1,52 @@
+{
+  "Grasshopper": [
+    "Grasshopper.Kernel.Special.GH_NumberSlider",
+    "Grasshopper.Kernel.Parameters.Param_Number",
+    "Grasshopper.Kernel.Parameters.Param_Integer",
+    "Grasshopper.Kernel.Parameters.Param_Boolean",
+    "Grasshopper.Kernel.Parameters.Param_String",
+    "Grasshopper.Kernel.Parameters.Param_Point",
+    "Grasshopper.Kernel.Parameters.Param_Vector",
+    "Grasshopper.Kernel.Parameters.Param_Plane",
+    "Grasshopper.Kernel.Parameters.Param_Interval",
+    "Grasshopper.Kernel.Parameters.Param_Curve",
+    "Grasshopper.Kernel.Parameters.Param_Brep",
+    "Grasshopper.Kernel.Parameters.Param_Surface",
+    "Grasshopper.Kernel.Parameters.Param_Mesh",
+    "Grasshopper.Kernel.Parameters.Param_Geometry"
+  ],
+  "MathComponents": [
+    "MathComponents.FunctionComponents.Component_Series",
+    "MathComponents.FunctionComponents.Component_Range",
+    "MathComponents.OperatorComponents.Component_VariableAddition",
+    "MathComponents.OperatorComponents.Component_VariableSubtraction",
+    "MathComponents.OperatorComponents.Component_VariableMultiplication",
+    "MathComponents.OperatorComponents.Operator_Division",
+    "MathComponents.ArrayComponents.Component_ListItemVariable",
+    "MathComponents.ArrayComponents.Component_Dispatch",
+    "MathComponents.DomainComponents.Component_ConstructDomain"
+  ],
+  "VectorComponents": [
+    "VectorComponents.PointComponents.Component_ConstructPoint",
+    "VectorComponents.VectorComponents.Component_ConstructVector",
+    "VectorComponents.VectorComponents.Component_UnitVectorX",
+    "VectorComponents.VectorComponents.Component_UnitVectorY",
+    "VectorComponents.VectorComponents.Component_UnitVectorZ"
+  ],
+  "CurveComponents": [
+    "CurveComponents.Component_Line",
+    "CurveComponents.Component_Circle",
+    "CurveComponents.Component_Rectangle"
+  ],
+  "SurfaceComponents": [
+    "SurfaceComponents.SurfaceComponents.Component_Extrude",
+    "SurfaceComponents.SurfaceComponents.Component_LoftSurface",
+    "SurfaceComponents.AnalysisComponents.Component_AreaProperties",
+    "SurfaceComponents.AnalysisComponents.Component_VolumeProperties"
+  ],
+  "XformComponents": [
+    "LinearXForms.Component_Move",
+    "LinearXForms.Component_Rotate",
+    "LinearXForms.Component_Scale"
+  ]
+}

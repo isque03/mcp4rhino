@@ -1,0 +1,246 @@
+{
+  "components": {
+    "circle": "CurveComponents.Component_Circle",
+    "loft": "SurfaceComponents.SurfaceComponents.Component_LoftSurface"
+  },
+  "operations": [
+    {
+      "op": "add",
+      "alias": "profiles",
+      "component_id": "$circle",
+      "name": "profiles"
+    },
+    {
+      "op": "set_value",
+      "node": "profiles",
+      "port": "in:0",
+      "tree": [
+        {
+          "path": [
+            0
+          ],
+          "items": [
+            {
+              "type": "plane",
+              "origin": {
+                "type": "point",
+                "value": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "x_axis": {
+                "type": "vector",
+                "value": [
+                  1,
+                  0,
+                  0
+                ]
+              },
+              "y_axis": {
+                "type": "vector",
+                "value": [
+                  0,
+                  1,
+                  0
+                ]
+              }
+            },
+            {
+              "type": "plane",
+              "origin": {
+                "type": "point",
+                "value": [
+                  0,
+                  0,
+                  2
+                ]
+              },
+              "x_axis": {
+                "type": "vector",
+                "value": [
+                  1,
+                  0,
+                  0
+                ]
+              },
+              "y_axis": {
+                "type": "vector",
+                "value": [
+                  0,
+                  1,
+                  0
+                ]
+              }
+            },
+            {
+              "type": "plane",
+              "origin": {
+                "type": "point",
+                "value": [
+                  0,
+                  0,
+                  4
+                ]
+              },
+              "x_axis": {
+                "type": "vector",
+                "value": [
+                  1,
+                  0,
+                  0
+                ]
+              },
+              "y_axis": {
+                "type": "vector",
+                "value": [
+                  0,
+                  1,
+                  0
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "path": [
+            1
+          ],
+          "items": [
+            {
+              "type": "plane",
+              "origin": {
+                "type": "point",
+                "value": [
+                  10,
+                  0,
+                  0
+                ]
+              },
+              "x_axis": {
+                "type": "vector",
+                "value": [
+                  1,
+                  0,
+                  0
+                ]
+              },
+              "y_axis": {
+                "type": "vector",
+                "value": [
+                  0,
+                  1,
+                  0
+                ]
+              }
+            },
+            {
+              "type": "plane",
+              "origin": {
+                "type": "point",
+                "value": [
+                  10,
+                  0,
+                  2
+                ]
+              },
+              "x_axis": {
+                "type": "vector",
+                "value": [
+                  1,
+                  0,
+                  0
+                ]
+              },
+              "y_axis": {
+                "type": "vector",
+                "value": [
+                  0,
+                  1,
+                  0
+                ]
+              }
+            },
+            {
+              "type": "plane",
+              "origin": {
+                "type": "point",
+                "value": [
+                  10,
+                  0,
+                  4
+                ]
+              },
+              "x_axis": {
+                "type": "vector",
+                "value": [
+                  1,
+                  0,
+                  0
+                ]
+              },
+              "y_axis": {
+                "type": "vector",
+                "value": [
+                  0,
+                  1,
+                  0
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "op": "set_value",
+      "node": "profiles",
+      "port": "in:1",
+      "tree": [
+        {
+          "path": [
+            0
+          ],
+          "items": [
+            1,
+            1.2,
+            0.8
+          ]
+        },
+        {
+          "path": [
+            1
+          ],
+          "items": [
+            2,
+            2.2,
+            1.8
+          ]
+        }
+      ]
+    },
+    {
+      "op": "add",
+      "alias": "loft",
+      "component_id": "$loft",
+      "name": "loft"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "profiles",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "loft",
+        "port": "in:0"
+      }
+    }
+  ],
+  "output": {
+    "node": "loft",
+    "port": "out:0"
+  },
+  "expected_count": 2
+}

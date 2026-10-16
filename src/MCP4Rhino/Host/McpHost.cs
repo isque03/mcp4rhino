@@ -200,11 +200,14 @@ public static class McpHost
             ToolLoader.EnsureLoaded();
             var bridge = ToolLoader.Bridge
                 ?? throw new InvalidOperationException("Tools bridge not loaded.");
-            return bridge.ListTools();
+            return bridge.ListTools().Concat(MCP4Rhino.Logic.Grasshopper.GhToolCatalog.ListTools()).ToArray();
         }
 
         public object CallTool(JsonNode? @params)
         {
+            var name = @params?["name"]?.GetValue<string>() ?? "";
+            if (MCP4Rhino.Logic.Grasshopper.GhToolCatalog.Contains(name))
+                return GrasshopperHost.Call(name, @params?["arguments"] as JsonObject ?? new JsonObject());
             ToolLoader.EnsureLoaded();
             var bridge = ToolLoader.Bridge
                 ?? throw new InvalidOperationException("Tools bridge not loaded.");

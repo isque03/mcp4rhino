@@ -9,6 +9,14 @@
     <Version>0.5.3</Version>
   </PropertyGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Grasshopper/Tools.json" LogicalName="GrasshopperTools.json" />
+    <EmbeddedResource Include="Grasshopper/NativeComponents.json" LogicalName="GrasshopperNativeComponents.json" />
+    <EmbeddedResource Include="../../skills/grasshopper-parametric-design/**/*.md">
+      <LogicalName>GrasshopperHelp/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="../../skills/grasshopper-parametric-design/assets/*.json">
+      <LogicalName>GrasshopperExample/%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
     <PackageReference Include="RhinoCommon" Version="8.21.25188.17001" ExcludeAssets="runtime" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.11" />
     <ProjectReference Include="..\MCP4Rhino.Contracts\MCP4Rhino.Contracts.csproj" />

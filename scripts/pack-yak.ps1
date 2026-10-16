@@ -25,6 +25,7 @@ New-Item -ItemType Directory -Force -Path "$stage\net8.0" | Out-Null
 
 $hostOut = Join-Path $Root "src\MCP4Rhino\bin\Release\net8.0"
 $toolsOut = Join-Path $Root "src\MCP4Rhino.Tools\bin\Release\net8.0"
+$ghOut = Join-Path $Root "src\MCP4Rhino.Grasshopper\bin\Release\net8.0"
 
 $required = @(
     (Join-Path $hostOut "MCP4Rhino.rhp"),
@@ -32,6 +33,7 @@ $required = @(
     (Join-Path $hostOut "MCP4Rhino.Logic.dll"),
     (Join-Path $hostOut "MCP4Rhino.rui"),
     (Join-Path $toolsOut "MCP4Rhino.Tools.dll")
+    (Join-Path $ghOut "MCP4Rhino.Grasshopper.dll")
 )
 foreach ($path in $required) {
     if (-not (Test-Path $path)) { throw "Required build output missing: $path" }
@@ -42,8 +44,10 @@ Copy-Item (Join-Path $hostOut "MCP4Rhino.Contracts.dll") "$stage\net8.0\"
 Copy-Item (Join-Path $hostOut "MCP4Rhino.Logic.dll") "$stage\net8.0\"
 Copy-Item (Join-Path $hostOut "MCP4Rhino.rui") "$stage\net8.0\"
 Copy-Item (Join-Path $toolsOut "MCP4Rhino.Tools.dll") "$stage\net8.0\"
+Copy-Item (Join-Path $ghOut "MCP4Rhino.Grasshopper.dll") "$stage\net8.0\"
+Copy-Item (Join-Path $Root "skills") (Join-Path $stage "skills") -Recurse
 
-$skip = @("RhinoCommon.dll", "Rhino.UI.dll", "Eto.dll", "MCP4Rhino.rhp")
+$skip = @("RhinoCommon.dll", "Rhino.UI.dll", "Eto.dll", "Grasshopper.dll", "GH_IO.dll", "MCP4Rhino.rhp")
 Get-ChildItem "$toolsOut\*.dll" | Where-Object { $_.Name -notin $skip } |
     Copy-Item -Destination "$stage\net8.0\" -Force
 
@@ -82,8 +86,12 @@ try {
             "net8.0/MCP4Rhino.Logic.dll", "net8.0/MCP4Rhino.rhp",
             "net8.0/MCP4Rhino.Tools.dll", "net8.0/MCP4Rhino.Contracts.dll",
             "net8.0/MCP4Rhino.rui"
+            "net8.0/MCP4Rhino.Grasshopper.dll", "skills/grasshopper-parametric-design/SKILL.md"
         )) {
         if ($need -notin $names) { throw "Archive missing $need : $dest" }
+    }
+    if ($names | Where-Object { $_ -match '^net8.0/(Grasshopper|GH_IO|RhinoCommon)\.dll$' }) {
+        throw "Archive must not bundle Rhino/Grasshopper SDK assemblies"
     }
     $manifestEntry = $zip.Entries | Where-Object { ($_.FullName -replace '\\', '/') -eq "manifest.yml" } | Select-Object -First 1
     $reader = New-Object System.IO.StreamReader($manifestEntry.Open())
@@ -97,6 +105,8 @@ try {
     }
 }
 finally { $zip.Dispose() }
+$skillZip = Join-Path $dist "MCP4Rhino-$Version-skills.zip"
+Compress-Archive -Path (Join-Path $Root "skills\*") -DestinationPath $skillZip -Force
 Write-Host "OK package: $dest"
 
 Write-Host "Packed MCP4Rhino $Version → $dest"

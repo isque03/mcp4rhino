@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Version>0.5.3</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- NuGet's net7 asset injects WindowsDesktop even on macOS. Download the pinned SDK
+         and reference its compile assemblies explicitly; Rhino supplies all runtime/UI assemblies. -->
+    <PackageDownload Include="Grasshopper" Version="[8.21.25188.17001]" />
+    <PackageReference Include="RhinoCommon" Version="8.21.25188.17001" ExcludeAssets="runtime" />
+    <Reference Include="Grasshopper" HintPath="$(NuGetPackageRoot)grasshopper/8.21.25188.17001/lib/net7.0/Grasshopper.dll" Private="false" />
+    <Reference Include="GH_IO" HintPath="$(NuGetPackageRoot)grasshopper/8.21.25188.17001/lib/net7.0/GH_IO.dll" Private="false" />
+    <ProjectReference Include="../MCP4Rhino.Contracts/MCP4Rhino.Contracts.csproj" />
+    <ProjectReference Include="../MCP4Rhino.Logic/MCP4Rhino.Logic.csproj" />
+  </ItemGroup>
+</Project>

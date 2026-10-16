@@ -124,7 +124,9 @@ jobs:
         with:
           tag_name: ${{ steps.meta.outputs.tag }}
           name: MCP4Rhino ${{ env.VERSION }}
-          files: dist/MCP4Rhino-${{ env.VERSION }}.yak
+          files: |
+            dist/MCP4Rhino-${{ env.VERSION }}.yak
+            dist/MCP4Rhino-${{ env.VERSION }}-skills.zip
           fail_on_unmatched_files: true
           generate_release_notes: true
           body: |

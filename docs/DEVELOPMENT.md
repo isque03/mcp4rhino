@@ -54,3 +54,8 @@ Coverage gate: `bash scripts/test-coverage.sh` (≥80% line on Logic + Contracts
 ## Demo assets
 
 Office-park time-lapse plan: [README_DEMO_PLAN.md](README_DEMO_PLAN.md).
+# Grasshopper runtime
+
+The persistent `MCP4Rhino.Grasshopper` adapter is loaded lazily by the host and survives Tools hot reload.
+Changes to this adapter, its host loader, or shared contracts require a full package install and Rhino restart.
+See [GRASSHOPPER.md](GRASSHOPPER.md) for architecture, skills and integration checks.

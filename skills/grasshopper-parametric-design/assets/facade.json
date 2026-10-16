@@ -1,0 +1,413 @@
+{
+  "components": {
+    "divide": "MathComponents.OperatorComponents.Operator_Division",
+    "domain": "MathComponents.DomainComponents.Component_ConstructDomain",
+    "extrude": "SurfaceComponents.SurfaceComponents.Component_Extrude",
+    "move": "LinearXForms.Component_Move",
+    "multiply": "MathComponents.OperatorComponents.Component_VariableMultiplication",
+    "rectangle": "CurveComponents.Component_Rectangle",
+    "series": "MathComponents.FunctionComponents.Component_Series",
+    "slider": "Grasshopper.Kernel.Special.GH_NumberSlider",
+    "unit_y": "VectorComponents.VectorComponents.Component_UnitVectorY",
+    "vector": "VectorComponents.VectorComponents.Component_ConstructVector"
+  },
+  "operations": [
+    {
+      "op": "add",
+      "alias": "width",
+      "component_id": "$slider",
+      "name": "width"
+    },
+    {
+      "op": "set_slider",
+      "node": "width",
+      "value": 20,
+      "minimum": 1,
+      "maximum": 100,
+      "integer": false
+    },
+    {
+      "op": "add",
+      "alias": "height",
+      "component_id": "$slider",
+      "name": "height"
+    },
+    {
+      "op": "set_slider",
+      "node": "height",
+      "value": 6,
+      "minimum": 1,
+      "maximum": 30,
+      "integer": false
+    },
+    {
+      "op": "add",
+      "alias": "count",
+      "component_id": "$slider",
+      "name": "count"
+    },
+    {
+      "op": "set_slider",
+      "node": "count",
+      "value": 5,
+      "minimum": 1,
+      "maximum": 100,
+      "integer": true
+    },
+    {
+      "op": "add",
+      "alias": "fill",
+      "component_id": "$slider",
+      "name": "fill"
+    },
+    {
+      "op": "set_slider",
+      "node": "fill",
+      "value": 0.8,
+      "minimum": 0.1,
+      "maximum": 1,
+      "integer": false
+    },
+    {
+      "op": "add",
+      "alias": "depth",
+      "component_id": "$slider",
+      "name": "depth"
+    },
+    {
+      "op": "set_slider",
+      "node": "depth",
+      "value": 0.4,
+      "minimum": 0.01,
+      "maximum": 3,
+      "integer": false
+    },
+    {
+      "op": "add",
+      "alias": "spacing",
+      "component_id": "$divide",
+      "name": "spacing"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "width",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "spacing",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "count",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "spacing",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "panel_width",
+      "component_id": "$multiply",
+      "name": "panel_width"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "spacing",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "panel_width",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "fill",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "panel_width",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "x_domain",
+      "component_id": "$domain",
+      "name": "x_domain"
+    },
+    {
+      "op": "set_value",
+      "node": "x_domain",
+      "port": "in:0",
+      "tree": [
+        {
+          "path": [
+            0
+          ],
+          "items": [
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "panel_width",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "x_domain",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "z_domain",
+      "component_id": "$domain",
+      "name": "z_domain"
+    },
+    {
+      "op": "set_value",
+      "node": "z_domain",
+      "port": "in:0",
+      "tree": [
+        {
+          "path": [
+            0
+          ],
+          "items": [
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "height",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "z_domain",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "profile",
+      "component_id": "$rectangle",
+      "name": "profile"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "x_domain",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "profile",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "z_domain",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "profile",
+        "port": "in:2"
+      }
+    },
+    {
+      "op": "set_value",
+      "node": "profile",
+      "port": "in:0",
+      "tree": [
+        {
+          "path": [
+            0
+          ],
+          "items": [
+            {
+              "type": "plane",
+              "origin": {
+                "type": "point",
+                "value": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "x_axis": {
+                "type": "vector",
+                "value": [
+                  1,
+                  0,
+                  0
+                ]
+              },
+              "y_axis": {
+                "type": "vector",
+                "value": [
+                  0,
+                  0,
+                  1
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "op": "add",
+      "alias": "positions",
+      "component_id": "$series",
+      "name": "positions"
+    },
+    {
+      "op": "set_value",
+      "node": "positions",
+      "port": "in:0",
+      "tree": [
+        {
+          "path": [
+            0
+          ],
+          "items": [
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "spacing",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "positions",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "count",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "positions",
+        "port": "in:2"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "translation",
+      "component_id": "$vector",
+      "name": "translation"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "positions",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "translation",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "move",
+      "component_id": "$move",
+      "name": "move"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "profile",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "move",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "translation",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "move",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "direction",
+      "component_id": "$unit_y",
+      "name": "direction"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "depth",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "direction",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "extrude",
+      "component_id": "$extrude",
+      "name": "extrude"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "move",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "extrude",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "direction",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "extrude",
+        "port": "in:1"
+      }
+    }
+  ],
+  "output": {
+    "node": "extrude",
+    "port": "out:0"
+  },
+  "expected_count": 5
+}

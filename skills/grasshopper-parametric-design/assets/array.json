@@ -1,0 +1,143 @@
+{
+  "components": {
+    "circle": "CurveComponents.Component_Circle",
+    "move": "LinearXForms.Component_Move",
+    "series": "MathComponents.FunctionComponents.Component_Series",
+    "slider": "Grasshopper.Kernel.Special.GH_NumberSlider",
+    "vector": "VectorComponents.VectorComponents.Component_ConstructVector"
+  },
+  "operations": [
+    {
+      "op": "add",
+      "alias": "count",
+      "component_id": "$slider",
+      "name": "count"
+    },
+    {
+      "op": "set_slider",
+      "node": "count",
+      "value": 5,
+      "minimum": 1,
+      "maximum": 100,
+      "integer": true
+    },
+    {
+      "op": "add",
+      "alias": "positions",
+      "component_id": "$series",
+      "name": "positions"
+    },
+    {
+      "op": "set_value",
+      "node": "positions",
+      "port": "in:0",
+      "tree": [
+        {
+          "path": [
+            0
+          ],
+          "items": [
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "op": "set_value",
+      "node": "positions",
+      "port": "in:1",
+      "tree": [
+        {
+          "path": [
+            0
+          ],
+          "items": [
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "count",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "positions",
+        "port": "in:2"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "translation",
+      "component_id": "$vector",
+      "name": "translation"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "positions",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "translation",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "profile",
+      "component_id": "$circle",
+      "name": "profile"
+    },
+    {
+      "op": "set_value",
+      "node": "profile",
+      "port": "in:1",
+      "tree": [
+        {
+          "path": [
+            0
+          ],
+          "items": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "op": "add",
+      "alias": "move",
+      "component_id": "$move",
+      "name": "move"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "profile",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "move",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "translation",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "move",
+        "port": "in:1"
+      }
+    }
+  ],
+  "output": {
+    "node": "move",
+    "port": "out:0"
+  },
+  "expected_count": 5
+}

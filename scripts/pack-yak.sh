@@ -25,6 +25,7 @@ STAGE="$(mktemp -d)/mcp4rhino-yak"
 mkdir -p "$STAGE/net8.0"
 HOST_OUT="$ROOT/src/MCP4Rhino/bin/Release/net8.0"
 TOOLS_OUT="$ROOT/src/MCP4Rhino.Tools/bin/Release/net8.0"
+GH_OUT="$ROOT/src/MCP4Rhino.Grasshopper/bin/Release/net8.0"
 
 require_file() {
   local path="$1"
@@ -36,19 +37,22 @@ require_file "$HOST_OUT/MCP4Rhino.Contracts.dll"
 require_file "$HOST_OUT/MCP4Rhino.Logic.dll"
 require_file "$HOST_OUT/MCP4Rhino.rui"
 require_file "$TOOLS_OUT/MCP4Rhino.Tools.dll"
+require_file "$GH_OUT/MCP4Rhino.Grasshopper.dll"
 
 cp "$HOST_OUT/MCP4Rhino.rhp" "$STAGE/net8.0/"
 cp "$HOST_OUT/MCP4Rhino.Contracts.dll" "$STAGE/net8.0/"
 cp "$HOST_OUT/MCP4Rhino.Logic.dll" "$STAGE/net8.0/"
 cp "$HOST_OUT/MCP4Rhino.rui" "$STAGE/net8.0/"
 cp "$TOOLS_OUT/MCP4Rhino.Tools.dll" "$STAGE/net8.0/"
+cp "$GH_OUT/MCP4Rhino.Grasshopper.dll" "$STAGE/net8.0/"
+cp -R "$ROOT/skills" "$STAGE/skills"
 
 # Tools deps (e.g. System.Drawing.Common) — skip RhinoCommon
 shopt -s nullglob
 for f in "$TOOLS_OUT"/*.dll; do
   base="$(basename "$f")"
   case "$base" in
-    RhinoCommon.dll|Rhino.UI.dll|Eto.dll|MCP4Rhino.rhp) continue ;;
+    RhinoCommon.dll|Rhino.UI.dll|Eto.dll|Grasshopper.dll|GH_IO.dll|MCP4Rhino.rhp) continue ;;
   esac
   cp "$f" "$STAGE/net8.0/"
 done
@@ -85,6 +89,7 @@ cp "$built" "$DEST"
 echo "Wrote $DEST"
 
 bash "$ROOT/scripts/verify-yak-package.sh" "$DEST"
+python3 "$ROOT/scripts/package-agent-skills.py"
 
 echo "Packed MCP4Rhino $VERSION → $DEST"
 echo "Publish checklist: yak login && yak push $DEST"

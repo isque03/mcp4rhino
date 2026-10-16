@@ -1,4 +1,4 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -11,6 +11,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCP4Rhino.Tools", "src\MCP4Rhino.Tools\MCP4Rhino.Tools.csproj", "{22222222-2222-2222-2222-222222222222}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCP4Rhino.Tests", "tests\MCP4Rhino.Tests\MCP4Rhino.Tests.csproj", "{44444444-4444-4444-4444-444444444444}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1C1DFA4B-C587-4150-9BDB-21C6592DDE27}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCP4Rhino.Grasshopper", "src\MCP4Rhino.Grasshopper\MCP4Rhino.Grasshopper.csproj", "{80AB8114-DF8F-4FBE-A0DD-E84F0383F295}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,5 +42,12 @@ Global
 		{44444444-4444-4444-4444-444444444444}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44444444-4444-4444-4444-444444444444}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44444444-4444-4444-4444-444444444444}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80AB8114-DF8F-4FBE-A0DD-E84F0383F295}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80AB8114-DF8F-4FBE-A0DD-E84F0383F295}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80AB8114-DF8F-4FBE-A0DD-E84F0383F295}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80AB8114-DF8F-4FBE-A0DD-E84F0383F295}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{80AB8114-DF8F-4FBE-A0DD-E84F0383F295} = {1C1DFA4B-C587-4150-9BDB-21C6592DDE27}
 	EndGlobalSection
 EndGlobal

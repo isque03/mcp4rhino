@@ -65,3 +65,8 @@ Semantic tags use `mcp4:` user-text keys on model objects (see project skills un
 ## Code checks
 
 `set_code_context`, `run_code_checks`, `get_code_report` — **findings only**. Never claim legal “code compliant” status or an RA stamp.
+# Grasshopper tools
+
+Native parametric design tools and help are documented in [GRASSHOPPER.md](GRASSHOPPER.md).
+Start with `gh_help` or `gh_status`. Component discovery and definition operations initialize Grasshopper lazily.
+The fixed catalog includes discovery, document lifecycle, batched graph editing, queued solves, paginated output and explicit additive baking.

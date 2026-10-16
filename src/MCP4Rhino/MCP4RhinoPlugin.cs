@@ -139,6 +139,7 @@ public class MCP4RhinoPlugin : PlugIn
                 _idleHooked = false;
             }
             PluginLog.Info("OnShutdown");
+            GrasshopperHost.Shutdown();
             McpHost.Stop();
         }
         catch

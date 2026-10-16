@@ -17,3 +17,5 @@ tests/**/coverage/
 artifacts/
 # Code Reviews
 .cursor/hostile-review/
+# Generated from the portable canonical skill by package-agent-skills.py --cursor
+.cursor/skills/grasshopper-parametric-design/
