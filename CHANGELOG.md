@@ -7,6 +7,21 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.6.0-alpha] — 2026-10-19
+
+### Added
+
+- Experimental Grasshopper 1 support for Rhino 8: native editable definitions, component discovery, batched graph edits, queued incremental solves, paginated tree inspection, and explicit additive snapshot baking.
+- Portable parametric-design agent skill and `gh_help` covering design reasoning, data trees, repair workflows, and array/facade/loft examples.
+- Opt-in prerelease distribution through Rhino Package Manager and a GitHub prerelease, with the matching skill ZIP and standalone native smoke runner.
+
+### Testing status
+
+- This alpha is published for licensed native testing. Compilation, pure unit tests, help/recipe contracts, and package validation do not establish native graph, undo, solve, bake, or persistence behavior.
+- Initial native target: Rhino 8.35 and its bundled Grasshopper 1 on Windows and macOS. Record results for each platform; stable promotion remains blocked until native acceptance checks pass.
+- Install: enable **Include pre-releases** in `PackageManager`, choose `0.6.0-alpha`, install/update, apply, and restart Rhino. Confirm `get_support_info` reports the alpha, then start with `gh_help` and `gh_status`.
+- Rollback: uninstall the alpha, explicitly reinstall stable `0.5.3`, disable prerelease selection, and restart. Clearing the prerelease checkbox alone does not downgrade the installed plugin. Use disposable documents; see [the tester checklist](docs/GRASSHOPPER.md#alpha-tester-checklist).
+
 ### Changed
 
 - Docs clarify the **MCP4Rhino** menu path: under **Tools** on Windows; top-level menu bar on macOS.

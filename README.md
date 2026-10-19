@@ -36,6 +36,8 @@ Create walls, floors, roofs, doors, windows, stairs, spaces, and related element
 
 ### Parametric design with Grasshopper
 
+**Experimental in 0.6.0-alpha.** In Rhino `PackageManager`, enable **Include pre-releases**, select MCP4Rhino `0.6.0-alpha`, install/update, apply, and restart Rhino completely. Stable users can stay on `0.5.3`. Native Grasshopper runtime validation is assigned to alpha testers; see the [tester checklist and rollback instructions](docs/GRASSHOPPER.md#alpha-tester-checklist).
+
 Create native, editable Grasshopper definitions, connect components, adjust parameters, inspect data trees, and explicitly bake geometry into Rhino.
 
 > “Create a Grasshopper facade with adjustable panel count, spacing, and depth.”

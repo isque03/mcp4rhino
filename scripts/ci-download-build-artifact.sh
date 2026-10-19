@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
-# Find the latest successful Build workflow run for a commit and download yak-packages.
-# Usage: bash scripts/ci-download-build-artifact.sh <git-sha> [dest-dir]
-# Requires: gh auth (GITHUB_TOKEN in Actions), jq.
+# Download an available push Build artifact for exactly the requested SHA and branch.
+# Usage: bash scripts/ci-download-build-artifact.sh <git-sha> [dest-dir] [branch]
 set -euo pipefail
 
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SHA="${1:-}"
 DEST="${2:-dist}"
-if [[ -z "$SHA" ]]; then
-  echo "Usage: $0 <git-sha> [dest-dir]" >&2
+BRANCH="${3:-main}"
+if [[ ! "$SHA" =~ ^[0-9a-f]{40}$ ]]; then
+  echo "Usage: $0 <full-git-sha> [dest-dir] [branch]" >&2
   exit 1
 fi
 
@@ -18,19 +19,18 @@ fi
 
 RUN_ID="$(gh run list \
   --workflow=build.yml \
+  --branch="$BRANCH" \
+  --event=push \
   --commit="$SHA" \
   --status=success \
-  --limit=1 \
-  --json databaseId \
-  --jq '.[0].databaseId // empty')"
+  --limit=20 \
+  --json databaseId,headSha,headBranch,event,conclusion |
+  python3 "$ROOT/scripts/release_checks.py" select-run "$SHA" "$BRANCH")"
 
-if [[ -z "$RUN_ID" ]]; then
-  echo "No successful Build workflow run found for commit ${SHA}." >&2
-  echo "Push/merge so build.yml completes successfully on that commit, then retry publish." >&2
-  exit 1
-fi
+gh api "repos/{owner}/{repo}/actions/runs/$RUN_ID/artifacts" |
+  python3 "$ROOT/scripts/release_checks.py" artifact >&2
 
-echo "Using Build run id ${RUN_ID} for commit ${SHA}" >&2
+echo "Using Build run id ${RUN_ID} for commit ${SHA} on ${BRANCH}" >&2
 mkdir -p "$DEST"
 # Download into DEST (artifact files land in DEST/)
 gh run download "$RUN_ID" --name yak-packages --dir "$DEST"

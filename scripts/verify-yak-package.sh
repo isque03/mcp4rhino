@@ -1,35 +1,5 @@
 #!/usr/bin/env bash
-# Verify a packed MCP4Rhino .yak archive (icon, manifest, required assemblies).
-# Usage: bash scripts/verify-yak-package.sh path/to/MCP4Rhino-<version>.yak
+# Check archive entries and embedded version; default expected version is the source manifest.
 set -euo pipefail
-
-PKG="${1:-}"
-if [[ -z "$PKG" || ! -f "$PKG" ]]; then
-  echo "Usage: $0 path/to/package.yak" >&2
-  exit 1
-fi
-
-listing="$(unzip -l "$PKG")"
-for need in icon.png manifest.yml net8.0/MCP4Rhino.Logic.dll net8.0/MCP4Rhino.rhp net8.0/MCP4Rhino.Tools.dll net8.0/MCP4Rhino.Contracts.dll net8.0/MCP4Rhino.rui net8.0/MCP4Rhino.Grasshopper.dll skills/grasshopper-parametric-design/SKILL.md; do
-  echo "$listing" | grep -q "$need" || {
-    echo "Archive missing $need: $PKG" >&2
-    exit 1
-  }
-done
-
-if echo "$listing" | grep -Eq 'net8.0/(Grasshopper|GH_IO|RhinoCommon)\.dll'; then
-  echo "Archive must not bundle Rhino/Grasshopper SDK assemblies: $PKG" >&2
-  exit 1
-fi
-
-manifest="$(unzip -p "$PKG" manifest.yml)"
-echo "$manifest" | grep -q '^icon: icon.png' || {
-  echo "manifest.yml missing icon: icon.png in $PKG" >&2
-  exit 1
-}
-echo "$manifest" | grep -q '^name: MCP4Rhino' || {
-  echo "manifest.yml unexpected name in $PKG" >&2
-  exit 1
-}
-
-echo "OK package: $PKG"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+python3 "$ROOT/scripts/release_checks.py" package "$@"

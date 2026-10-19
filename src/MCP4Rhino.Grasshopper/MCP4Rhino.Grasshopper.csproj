@@ -3,7 +3,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>0.5.3</Version>
+    <Version>0.6.0-alpha</Version>
+    <AssemblyVersion>0.6.0.0</AssemblyVersion>
+    <FileVersion>0.6.0.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
     <!-- NuGet's net7 asset injects WindowsDesktop even on macOS. Download the pinned SDK

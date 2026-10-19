@@ -103,11 +103,16 @@ try {
     if ($manifestText -notmatch '(?m)^name:\s*MCP4Rhino\s*$') {
         throw "manifest.yml in $dest unexpected name (expected MCP4Rhino)"
     }
+    $escapedVersion = [regex]::Escape($Version)
+    if ($manifestText -notmatch "(?m)^version:\s*$escapedVersion\s*$") {
+        throw "manifest.yml in $dest version does not match $Version"
+    }
 }
 finally { $zip.Dispose() }
 $skillZip = Join-Path $dist "MCP4Rhino-$Version-skills.zip"
 Compress-Archive -Path (Join-Path $Root "skills\*") -DestinationPath $skillZip -Force
+Copy-Item (Join-Path $Root "scripts\grasshopper-smoke.py") (Join-Path $dist "grasshopper-smoke.py") -Force
 Write-Host "OK package: $dest"
 
 Write-Host "Packed MCP4Rhino $Version → $dest"
-Write-Host "Publish checklist: yak login; yak push $dest"
+Write-Host "Release publication uses the exact CI Build artifact via the Publish workflow; see docs/PUBLISHING.md."

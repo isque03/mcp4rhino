@@ -90,6 +90,7 @@ echo "Wrote $DEST"
 
 bash "$ROOT/scripts/verify-yak-package.sh" "$DEST"
 python3 "$ROOT/scripts/package-agent-skills.py"
+cp "$ROOT/scripts/grasshopper-smoke.py" "$DIST/grasshopper-smoke.py"
 
 echo "Packed MCP4Rhino $VERSION → $DEST"
-echo "Publish checklist: yak login && yak push $DEST"
+echo "Release publication uses the exact CI Build artifact via the Publish workflow; see docs/PUBLISHING.md."

@@ -1,6 +1,6 @@
 # Grasshopper and parametric design
 
-**Experimental checkpoint on `feat/grasshopper1`, parked pending licensed Rhino testing.** Do not merge or release this implementation until the native Windows and macOS checks below pass. Build and unit-test results do not establish Grasshopper runtime behavior.
+**Experimental 0.6.0-alpha on `release/0.6.0-alpha`.** This opt-in alpha is distributed for licensed native testing after CI passes. Stable promotion and merging the feature into `main` remain blocked until native Windows and macOS acceptance checks pass. Build and unit-test results do not establish Grasshopper runtime behavior.
 
 MCP4Rhino exposes native, editable Grasshopper 1 definitions in Rhino 8 on Windows and macOS. The runtime initializes lazily when discovery or document tools are used. `gh_help` works without loading Grasshopper, and ordinary Rhino tools do not depend on it.
 
@@ -66,6 +66,22 @@ python3 scripts/grasshopper-smoke.py --example loft
 
 The smoke runner discovers real component IDs, builds a definition, checks solve diagnostics/counts, retries patches, rejects invalid edits, invalidates old outputs, varies a parameter (or repairs a tree mapping), and round-trips .gh/.ghx. `--bake` creates two additive snapshots and checks exact retry deduplication. It leaves its final definition open and prints temporary saved paths for inspection.
 
-During implementation on October 16, 2026, the macOS solution build, unit coverage gate, skill validation, packaging and live `gh_help` passed. The local Rhino 8.35 installation reported an expired evaluation (`can_save:false`) and view-only mode; Grasshopper could not load. Native graph/solve/bake/round-trip checks and fresh-agent modeling trials remain unverified, as do Windows runtime checks. Run the commands above in a licensed Rhino session before release.
+During implementation on October 16, 2026, the macOS solution build, unit coverage gate, skill validation, packaging and live `gh_help` passed. The local Rhino 8.35 installation reported an expired evaluation (`can_save:false`) and view-only mode; Grasshopper could not load. Native graph/solve/bake/round-trip checks and fresh-agent modeling trials remain unverified, as do Windows runtime checks. The alpha makes these checks available to licensed testers; run them before stable promotion.
 
 Also verify manually on both platforms: one native GH undo/redo step per patch, no side effects on other open definitions, slider edits causing revision conflicts, reference deletion/replacement, switching Rhino documents, queued/running cancellation, and facade dimensions/viewport. For skill trials, give a fresh agent only the installed skill—or only MCP help—and ask it to build an array, repair a loft tree mismatch and change a facade parameter while preserving relationships. Judge geometry, tree structure and tool behavior, not wording.
+
+## Alpha tester checklist
+
+Use a licensed Rhino 8 installation; the initial native target is Rhino 8.35 with bundled Grasshopper 1. Grasshopper 2 is outside this alpha. Use disposable Rhino documents and save any existing work first.
+
+1. Open `PackageManager`, enable **Include pre-releases**, search **MCP4Rhino**, select `0.6.0-alpha`, and install/update. Apply and restart Rhino completely. This updates the existing plugin; it does not run alongside the stable version.
+2. Call `get_support_info` and confirm `server_version` is `0.6.0-alpha`. Call `gh_help` with `topic: "index"` and `gh_status`. Confirm an ordinary tool such as `get_document_info` still works. The endpoint remains `http://127.0.0.1:4010/mcp`.
+3. Use an agent with only MCP help or the downloaded portable skill to create the array, facade, and loft examples. Inspect editable native components, preview, dimensions, tree structure and diagnostics. Change a parameter while preserving derived relationships; repair the loft's deliberate tree mismatch.
+4. Optionally download `grasshopper-smoke.py` from the same GitHub prerelease. With Python 3, run `python grasshopper-smoke.py --example array`, `python grasshopper-smoke.py --example facade --bake`, and `python grasshopper-smoke.py --example loft`. The runner needs no checkout or Python packages. It creates definitions, temporary `.gh`/`.ghx` files, and, with `--bake`, two geometry snapshots. It leaves the final definition open for inspection.
+5. Test manual edit conflicts, one undo/redo step per patch, deleted/replaced Rhino references, switching documents, queued/running cancellation, no overlapping solves, and ordinary tools when Grasshopper cannot load. Record heavy-solve UI blocking rather than treating a job ID as evidence that Rhino stays responsive.
+6. Record **Windows and macOS separately**: OS/version, Rhino build, MCP4Rhino version, install/restart outcome, scenario results, expected versus actual geometry, and any errors. Attach relevant `get_support_info` JSON, job/component diagnostics, log excerpts and a minimal definition to a [GitHub issue](https://github.com/isque03/mcp4rhino/issues). Remove secrets and license keys. An untested platform remains unverified.
+7. Verify Package Manager update selection using a stable installation: prereleases disabled should keep the stable default; enabling them should expose the alpha. If automatic package updates are enabled, record their actual behavior. On the next genuine fix release, verify `alpha` → `alpha.1`; there is no separate restricted alpha-only channel.
+
+### Roll back to stable
+
+Uninstall MCP4Rhino's alpha through Package Manager, explicitly reinstall **0.5.3**, disable prerelease selection, and restart Rhino completely. If a restart is requested between uninstall and reinstall, complete it. Confirm `get_support_info` reports `0.5.3`. **Clearing Include pre-releases alone does not downgrade the installed alpha.**

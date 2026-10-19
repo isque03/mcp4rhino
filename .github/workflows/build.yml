@@ -3,7 +3,7 @@ name: Build
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, release/0.6.0-alpha]
 
 concurrency:
   group: build-${{ github.workflow }}-${{ github.ref }}
@@ -46,6 +46,9 @@ jobs:
 
       - name: Build
         run: dotnet build MCP4Rhino.sln -c Release --no-restore
+
+      - name: Validate release contracts
+        run: python -m unittest discover -s tests/release -p "test_*.py"
 
       - name: Test with coverage (macOS)
         if: runner.os == 'macOS'
@@ -96,5 +99,6 @@ jobs:
           path: |
             dist/MCP4Rhino-*.yak
             dist/MCP4Rhino-*-skills.zip
+            dist/grasshopper-smoke.py
           if-no-files-found: error
           retention-days: 14

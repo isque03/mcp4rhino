@@ -19,3 +19,4 @@ artifacts/
 .cursor/hostile-review/
 # Generated from the portable canonical skill by package-agent-skills.py --cursor
 .cursor/skills/grasshopper-parametric-design/
+__pycache__/
