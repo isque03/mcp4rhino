@@ -12,6 +12,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 ALPHA_BRANCH = 'release/0.6.0-alpha'
+TELEMETRY_ALPHA_BRANCH = 'release/0.6.1-alpha'
 PROJECTS = ('MCP4Rhino', 'MCP4Rhino.Contracts', 'MCP4Rhino.Logic',
             'MCP4Rhino.Tools', 'MCP4Rhino.Grasshopper')
 REQUIRED_FILES = ('icon.png', 'manifest.yml', 'net8.0/MCP4Rhino.rhp',
@@ -30,12 +31,19 @@ def manifest_field(text, field):
 
 def release_metadata(version, tag, workflow_ref):
     stable = re.fullmatch(r'(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)', version)
-    alpha = re.fullmatch(r'0\.6\.0-alpha(?:\.[1-9]\d*)?', version)
+    grasshopper_alpha = re.fullmatch(r'0\.6\.0-alpha(?:\.[1-9]\d*)?', version)
+    telemetry_alpha = re.fullmatch(r'0\.6\.1-alpha(?:\.[1-9]\d*)?', version)
+    alpha = grasshopper_alpha or telemetry_alpha
     if not stable and not alpha:
-        raise ValueError('Only stable SemVer or 0.6.0-alpha[.N] releases are supported')
+        raise ValueError('Only stable SemVer, 0.6.0-alpha[.N], or 0.6.1-alpha[.N] releases are supported')
     if tag != 'v' + version:
         raise ValueError('Tag must equal v + manifest version')
-    branch = ALPHA_BRANCH if alpha else 'main'
+    if grasshopper_alpha:
+        branch = ALPHA_BRANCH
+    elif telemetry_alpha:
+        branch = TELEMETRY_ALPHA_BRANCH
+    else:
+        branch = 'main'
     if workflow_ref != 'refs/heads/' + branch:
         raise ValueError(f'Publish must run from {branch}')
     return {'VERSION': version, 'BUILD_BRANCH': branch,

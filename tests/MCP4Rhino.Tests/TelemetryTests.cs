@@ -375,32 +375,26 @@ public class TelemetryTests : IDisposable
     }
 
     [Fact]
-    public void Initialize_Mentions_Usage_Once_And_Tools_Still_Run()
+    public void Initialize_Does_Not_Mention_Usage_And_Tools_Still_Run()
     {
-        Assert.True(TelemetryUsePrompt.IncludeNotice(enabled: true, endpointConfigured: true, noticeShown: false));
+        Assert.False(TelemetryUsePrompt.IncludeNotice(enabled: true, endpointConfigured: true, noticeShown: false));
         Assert.False(TelemetryUsePrompt.IncludeNotice(enabled: false, endpointConfigured: true, noticeShown: false));
         Assert.False(TelemetryUsePrompt.IncludeNotice(enabled: true, endpointConfigured: false, noticeShown: false));
         Assert.False(TelemetryUsePrompt.IncludeNotice(enabled: true, endpointConfigured: true, noticeShown: true));
-        Assert.DoesNotContain("secret", TelemetryUsePrompt.AgentNotice, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("path", TelemetryUsePrompt.AgentNotice, StringComparison.OrdinalIgnoreCase);
 
-        var shown = false;
         var marked = 0;
-        string Instructions() => TelemetryUsePrompt.Instructions(
-            SupportInfo.ServerInstructions,
-            TelemetryUsePrompt.IncludeNotice(enabled: true, endpointConfigured: true, noticeShown: shown));
+        string Instructions() => TelemetryUsePrompt.Instructions(SupportInfo.ServerInstructions, includeNotice: true);
 
         var first = McpJsonRpc.Dispatch(
             JsonNode.Parse("""{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}"""),
             new ScriptedTools(),
             instructions: Instructions,
-            onInitialized: () =>
-            {
-                shown = true;
-                marked++;
-            });
-        Assert.Contains(TelemetryUsePrompt.AgentNotice, first!["result"]!["instructions"]!.GetValue<string>());
-        Assert.Contains("github.com/isque03/mcp4rhino/issues", first["result"]!["instructions"]!.GetValue<string>());
+            onInitialized: () => marked++);
+        var instructions = first!["result"]!["instructions"]!.GetValue<string>();
+        Assert.Equal(SupportInfo.ServerInstructions, instructions);
+        Assert.DoesNotContain("usage", instructions, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("consent", instructions, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("github.com/isque03/mcp4rhino/issues", instructions);
         Assert.Equal(1, marked);
 
         var second = McpJsonRpc.Dispatch(
@@ -408,8 +402,8 @@ public class TelemetryTests : IDisposable
             new ScriptedTools(),
             instructions: Instructions,
             onInitialized: () => marked++);
-        Assert.DoesNotContain(TelemetryUsePrompt.AgentNotice, second!["result"]!["instructions"]!.GetValue<string>());
-        Assert.Contains(SupportInfo.ServerInstructions, second["result"]!["instructions"]!.GetValue<string>());
+        Assert.Equal(SupportInfo.ServerInstructions, second!["result"]!["instructions"]!.GetValue<string>());
+        Assert.DoesNotContain("usage", second["result"]!["instructions"]!.GetValue<string>(), StringComparison.OrdinalIgnoreCase);
 
         var recorded = new RecordingTelemetry();
         var call = McpJsonRpc.Dispatch(
@@ -418,7 +412,8 @@ public class TelemetryTests : IDisposable
             telemetry: recorded,
             instructions: Instructions);
         Assert.Contains("made", call!.ToJsonString());
-        Assert.DoesNotContain(TelemetryUsePrompt.AgentNotice, call.ToJsonString());
+        Assert.DoesNotContain("usage", call.ToJsonString(), StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("consent", call.ToJsonString(), StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("secret-model", call.ToJsonString());
         Assert.DoesNotContain("secret-prompt", call.ToJsonString());
         Assert.Equal(TelemetryEvents.ToolExecuted, Assert.Single(recorded.Events).Event);

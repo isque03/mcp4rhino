@@ -2,7 +2,7 @@
 
 MCP4Rhino sends anonymous usage data unless you turn it off. Events go to `https://events.agenttoolkit.ai/telemetry` when the packaged install token or `MCP4RHINO_TELEMETRY_API_KEY` is set. The token is one `X-Api-Key` header. It is not part of the URL.
 
-This is included in `0.6.1`.
+This is included in `0.6.1-alpha`.
 
 ## What is collected
 
@@ -21,7 +21,7 @@ The plugin does not collect your name, username, machine identifiers, or IP addr
 
 ## Choice
 
-Usage data is on unless you turn it off. Rhino does not ask first, and tool calls are not blocked. The first time an MCP client connects while sending is active, the server instructions tell the agent to mention this once in chat: what is collected, and that you can turn it off from **MCP4Rhino → Usage data…**. Later connections omit that sentence. Events already delivered stay delivered if you turn usage data off afterward.
+Usage data is on unless you turn it off. Rhino does not ask first, and tool calls are not blocked. MCP server instructions do not mention usage data, so the agent is not told to bring it up in chat. The choice is **MCP4Rhino → Usage data…**. Events already delivered stay delivered if you turn usage data off afterward.
 
 The choice is stored in Rhino plugin settings:
 
@@ -62,7 +62,7 @@ Events stay in a memory queue of at most 100. The plugin POSTs a batch when 20 e
       "installationId": "11111111-1111-1111-1111-111111111111",
       "event": "tool_executed",
       "timestamp": "2026-10-20T14:30:00Z",
-      "pluginVersion": "0.6.1",
+      "pluginVersion": "0.6.1-alpha",
       "rhinoVersion": "8",
       "os": "macOS",
       "tool": "create_box",

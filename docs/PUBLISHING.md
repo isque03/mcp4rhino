@@ -8,6 +8,7 @@ Publish through GitHub Actions: **Build** produces an artifact, then manual **Pu
 |---|---|---|---|
 | Stable | Merged `main` commit; dispatch on `main` | `v0.6.0` | Stable / latest |
 | Grasshopper alpha | `release/0.6.0-alpha`, initially from `feat/grasshopper1` at `37d9691` | `v0.6.0-alpha` | Prerelease / not latest |
+| Telemetry alpha | `release/0.6.1-alpha` | `v0.6.1-alpha` | Prerelease / not latest |
 
 Only `0.6.0-alpha` and numbered successors such as `0.6.0-alpha.1` have the release-branch exception. The first alpha is public, opt-in, and intended to obtain licensed native testing; green CI is its publication gate. Stable promotion requires the native Windows/macOS acceptance results in [GRASSHOPPER.md](GRASSHOPPER.md#alpha-tester-checklist). Keep stable `0.5.3` and `main` unchanged during alpha preparation.
 
