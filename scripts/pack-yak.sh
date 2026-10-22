@@ -61,6 +61,27 @@ shopt -u nullglob
 cp "$ROOT/manifest.yml" "$STAGE/"
 cp "$ROOT/icon.png" "$STAGE/"
 
+write_install_token() {
+  python3 - "$1" <<'PY'
+import os, sys
+dest = sys.argv[1]
+token = os.environ.get("MCP4RHINO_TELEMETRY_API_KEY", "").replace("\r", "")
+while token.endswith("\n"):
+    token = token[:-1]
+token = token.strip()
+if not token:
+    if os.environ.get("REQUIRE_TELEMETRY_INSTALL_TOKEN"):
+        sys.exit("MCP4RHINO_TELEMETRY_API_KEY is missing. Add it as a repository Actions secret.")
+    sys.exit(0)
+if "\n" in token:
+    sys.exit("MCP4RHINO_TELEMETRY_API_KEY must be a single line.")
+with open(dest, "w", encoding="utf-8", newline="") as handle:
+    handle.write(token)
+os.chmod(dest, 0o600)
+PY
+}
+write_install_token "$STAGE/net8.0/telemetry-install-token"
+
 DIST="$ROOT/dist"
 mkdir -p "$DIST"
 DEST="$DIST/MCP4Rhino-${VERSION}.yak"
@@ -89,6 +110,23 @@ cp "$built" "$DEST"
 echo "Wrote $DEST"
 
 bash "$ROOT/scripts/verify-yak-package.sh" "$DEST"
+python3 - "$DEST" <<'PY'
+import os, sys, zipfile
+dest = sys.argv[1]
+token = os.environ.get("MCP4RHINO_TELEMETRY_API_KEY", "").replace("\r", "")
+while token.endswith("\n"):
+    token = token[:-1]
+token = token.strip()
+name = "net8.0/telemetry-install-token"
+with zipfile.ZipFile(dest) as archive:
+    present = name in archive.namelist()
+    if token:
+        packed = archive.read(name).decode("utf-8") if present else ""
+        if packed != token:
+            sys.exit("Package install token does not match the pack environment.")
+    elif present:
+        sys.exit("Package contains an install token, but MCP4RHINO_TELEMETRY_API_KEY was empty.")
+PY
 python3 "$ROOT/scripts/package-agent-skills.py"
 cp "$ROOT/scripts/grasshopper-smoke.py" "$DIST/grasshopper-smoke.py"
 

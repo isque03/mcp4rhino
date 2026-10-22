@@ -7,7 +7,7 @@ Use these names and values:
 - Package and Rhino commands: `MCP4Rhino`, `MCP4RhinoStatus`, `MCP4RhinoStatusUI`, `MCP4RhinoStop`, `MCP4RhinoUpdates`, `MCP4RhinoReportIssue`, `MCP4RhinoReload`, `MCP4RhinoTelemetry` (also the **MCP4Rhino** menu: under **Tools** on Windows; top-level on macOS)
 - Default port: **4010** (override with `MCP4RHINO_PORT`)
 - Do not invent other ports
-- `MCP4RHINO_TELEMETRY_URL`: optional absolute `http`/`https` URL for anonymous usage data. Unset means nothing is sent. See [docs/TELEMETRY.md](docs/TELEMETRY.md).
+- `MCP4RHINO_TELEMETRY_URL`: optional override of the compiled telemetry URL `https://events.agenttoolkit.ai/telemetry`. The install token is read from `net8.0/telemetry-install-token` in the yak unless `MCP4RHINO_TELEMETRY_API_KEY` is set. It is sent as one `X-Api-Key` header and is not part of the URL. See [docs/TELEMETRY.md](docs/TELEMETRY.md).
 
 **End users:** [README.md](README.md) (Package Manager install + Claude/Cursor setup).  
 **Contributors:** [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md), [docs/INSTALL_FROM_SOURCE.md](docs/INSTALL_FROM_SOURCE.md).  

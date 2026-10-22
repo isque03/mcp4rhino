@@ -40,7 +40,8 @@ Then in Rhino: `MCP4RhinoReload` (or MCP tool `mcp4rhino_reload`). After host `.
 | `MCP4RHINO_PORT` | Listen port (default **4010**) |
 | `MCP4RHINO_AUTOSTART` | Set to `0` / `false` / `no` to disable Idle auto-start |
 | `MCP4RHINO_TOOLS_PATH` | Override directory containing `MCP4Rhino.Tools.dll` |
-| `MCP4RHINO_TELEMETRY_URL` | Optional absolute `http`/`https` base URL for anonymous usage data. Unset means nothing is sent. See [TELEMETRY.md](TELEMETRY.md). |
+| `MCP4RHINO_TELEMETRY_URL` | Optional absolute `http`/`https` override of `https://events.agenttoolkit.ai/telemetry`. An invalid value disables sending. See [TELEMETRY.md](TELEMETRY.md). |
+| `MCP4RHINO_TELEMETRY_API_KEY` | Optional override of the install token packed in `net8.0/telemetry-install-token`. Sent as one `X-Api-Key` header. CI copies the repository Actions secret of the same name into that file on push builds. |
 
 Default MCP endpoint: `http://127.0.0.1:4010/mcp`.
 

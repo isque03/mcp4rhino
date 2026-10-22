@@ -54,6 +54,21 @@ Get-ChildItem "$toolsOut\*.dll" | Where-Object { $_.Name -notin $skip } |
 Copy-Item (Join-Path $Root "manifest.yml") $stage
 Copy-Item $icon $stage
 
+$tokenPath = Join-Path $stage "net8.0\telemetry-install-token"
+$token = $env:MCP4RHINO_TELEMETRY_API_KEY
+if ($null -eq $token) { $token = "" }
+$token = $token.Replace("`r", "").Trim()
+if ([string]::IsNullOrWhiteSpace($token)) {
+    if ($env:REQUIRE_TELEMETRY_INSTALL_TOKEN) {
+        throw "MCP4RHINO_TELEMETRY_API_KEY is missing. Add it as a repository Actions secret."
+    }
+} elseif ($token.Contains("`n")) {
+    throw "MCP4RHINO_TELEMETRY_API_KEY must be a single line."
+} else {
+    $utf8 = New-Object System.Text.UTF8Encoding $false
+    [System.IO.File]::WriteAllText($tokenPath, $token, $utf8)
+}
+
 $dist = Join-Path $Root "dist"
 New-Item -ItemType Directory -Force -Path $dist | Out-Null
 $dest = Join-Path $dist "MCP4Rhino-$Version.yak"
@@ -106,6 +121,18 @@ try {
     $escapedVersion = [regex]::Escape($Version)
     if ($manifestText -notmatch "(?m)^version:\s*$escapedVersion\s*$") {
         throw "manifest.yml in $dest version does not match $Version"
+    }
+    $tokenName = "net8.0/telemetry-install-token"
+    $tokenPresent = $tokenName -in $names
+    if (-not [string]::IsNullOrWhiteSpace($token)) {
+        if (-not $tokenPresent) { throw "Package install token does not match the pack environment." }
+        $tokenEntry = $zip.Entries | Where-Object { ($_.FullName -replace '\\', '/') -eq $tokenName } | Select-Object -First 1
+        $tokenReader = New-Object System.IO.StreamReader($tokenEntry.Open())
+        $packedToken = $tokenReader.ReadToEnd()
+        $tokenReader.Close()
+        if ($packedToken -ne $token) { throw "Package install token does not match the pack environment." }
+    } elseif ($tokenPresent) {
+        throw "Package contains an install token, but MCP4RHINO_TELEMETRY_API_KEY was empty."
     }
 }
 finally { $zip.Dispose() }

@@ -12,16 +12,35 @@ public sealed class TelemetryHttpTransport : ITelemetryTransport
     private readonly HttpClient _http;
     private readonly Uri _endpoint;
 
-    public TelemetryHttpTransport(string endpoint, string pluginVersion, HttpMessageHandler? handler = null)
+    public TelemetryHttpTransport(
+        string endpoint,
+        string pluginVersion,
+        HttpMessageHandler? handler = null,
+        string? apiKey = null)
     {
-        if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var uri))
-            throw new ArgumentException("Telemetry endpoint must be an absolute URI.", nameof(endpoint));
+        var canonical = TelemetryEndpoint.Resolve(endpoint)
+            ?? throw new ArgumentException("Telemetry endpoint must be an absolute http or https URI.", nameof(endpoint));
+        if (!string.IsNullOrWhiteSpace(apiKey))
+        {
+            apiKey = apiKey.Trim();
+            if (apiKey.IndexOfAny(['\r', '\n']) >= 0)
+                throw new ArgumentException("Telemetry API key must be a single header value.", nameof(apiKey));
+            if (canonical.Contains(apiKey, StringComparison.Ordinal))
+                throw new ArgumentException("Telemetry endpoint must not contain the API key.", nameof(endpoint));
+        }
+        else
+        {
+            apiKey = null;
+        }
 
-        _endpoint = uri;
+        _endpoint = new Uri(canonical);
         _http = handler is null ? new HttpClient() : new HttpClient(handler, disposeHandler: true);
         _http.Timeout = DefaultTimeout;
         _http.DefaultRequestHeaders.UserAgent.Clear();
         _http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("MCP4Rhino", pluginVersion));
+        if (apiKey is not null
+            && !_http.DefaultRequestHeaders.TryAddWithoutValidation(TelemetryEndpoint.ApiKeyHeader, apiKey))
+            throw new InvalidOperationException("Telemetry API key header was not accepted.");
     }
 
     public TimeSpan Timeout => _http.Timeout;

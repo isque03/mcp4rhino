@@ -89,8 +89,8 @@ public static class TelemetryHost
 
         if (!store.Enabled)
             return "Usage data: off";
-        if (TelemetryEndpoint.Resolve() is null)
-            return "Usage data: on, not sending (MCP4RHINO_TELEMETRY_URL unset)";
+        if (InactiveReason() is string reason)
+            return $"Usage data: on, not sending ({reason})";
         return "Usage data: on";
     }
 
@@ -99,22 +99,27 @@ public static class TelemetryHost
         var store = TelemetrySettingsStore.Load();
         return TelemetryUsePrompt.IncludeNotice(
             store.Enabled,
-            TelemetryEndpoint.Resolve() is not null,
+            InactiveReason() is null,
             TelemetrySettingsStore.NoticeShown());
     }
 
     private static void Apply(TelemetryConsent store)
     {
         var endpoint = store.Enabled ? TelemetryEndpoint.Resolve() : null;
+        var apiKey = store.Enabled ? ResolvedApiKey() : null;
         ITelemetryTransport? transport = null;
-        if (endpoint is not null && store.InstallationId is not null)
+        if (endpoint is not null && apiKey is not null && store.InstallationId is not null)
         {
-            transport = new TelemetryHttpTransport(endpoint, McpJsonRpc.ServerVersion);
+            transport = new TelemetryHttpTransport(endpoint, McpJsonRpc.ServerVersion, apiKey: apiKey);
             PluginLog.Info("telemetry sending enabled");
+        }
+        else if (store.Enabled && endpoint is null)
+        {
+            PluginLog.Info("telemetry enabled but MCP4RHINO_TELEMETRY_URL is unset");
         }
         else if (store.Enabled)
         {
-            PluginLog.Info("telemetry enabled but MCP4RHINO_TELEMETRY_URL is unset");
+            PluginLog.Info("telemetry enabled but install token is unset");
         }
 
         Telemetry.Configure(new TelemetryOptions
@@ -128,6 +133,32 @@ public static class TelemetryHost
             Log = PluginLog.Info,
             UseTimer = true,
         });
+    }
+
+    private static string? InactiveReason()
+    {
+        if (TelemetryEndpoint.Resolve() is null)
+            return "MCP4RHINO_TELEMETRY_URL unset";
+        if (ResolvedApiKey() is null)
+            return "install token unset";
+        return null;
+    }
+
+    private static string? ResolvedApiKey() =>
+        TelemetryEndpoint.ApiKey(packaged: PackagedInstallToken());
+
+    private static string? PackagedInstallToken()
+    {
+        try
+        {
+            var directory = Path.GetDirectoryName(typeof(TelemetryHost).Assembly.Location);
+            return TelemetryEndpoint.ReadInstallToken(directory);
+        }
+        catch (Exception ex)
+        {
+            PluginLog.Info($"telemetry install token unreadable ({ex.GetType().Name})");
+            return null;
+        }
     }
 
     private static string RhinoMajor()

@@ -490,13 +490,12 @@ public class TelemetryTests : IDisposable
     }
 
     [Theory]
-    [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
     [InlineData("not a url")]
     [InlineData("/telemetry")]
     [InlineData("ftp://example.com/telemetry")]
-    public void Endpoint_Rejects_Missing_Or_Non_Http(string? raw) =>
+    public void Endpoint_Rejects_Empty_Or_Non_Http(string raw) =>
         Assert.Null(TelemetryEndpoint.Resolve(raw));
 
     [Theory]
@@ -509,8 +508,15 @@ public class TelemetryTests : IDisposable
     [InlineData("http://127.0.0.1:8080/telemetry?token=abc", "http://127.0.0.1:8080/telemetry?token=abc")]
     [InlineData("http://127.0.0.1:8080?token=abc", "http://127.0.0.1:8080/telemetry?token=abc")]
     [InlineData("https://example.com/v1?x=1&y=2", "https://example.com/v1/telemetry?x=1&y=2")]
-    public void Endpoint_Appends_Telemetry_Path_Once(string raw, string expected) =>
-        Assert.Equal(expected, TelemetryEndpoint.Resolve(raw));
+    [InlineData("https://example.com/telemetry?k=test-api-key", "https://example.com/telemetry")]
+    [InlineData("https://example.com/telemetry?k=test-api-key&x=1", "https://example.com/telemetry?x=1")]
+    [InlineData("https://example.com/v1?x=1&k=test-api-key&y=2", "https://example.com/v1/telemetry?x=1&y=2")]
+    public void Endpoint_Appends_Telemetry_Path_Once(string raw, string expected)
+    {
+        var resolved = TelemetryEndpoint.Resolve(raw);
+        Assert.Equal(expected, resolved);
+        Assert.DoesNotContain("test-api-key", resolved, StringComparison.Ordinal);
+    }
 
     [Fact]
     public void Endpoint_Reads_Environment_When_Argument_Omitted()
@@ -525,6 +531,87 @@ public class TelemetryTests : IDisposable
         finally
         {
             Environment.SetEnvironmentVariable(TelemetryEndpoint.EnvVar, previous);
+        }
+    }
+
+    [Fact]
+    public void Endpoint_Uses_Production_Url_When_Override_Is_Unset()
+    {
+        var previous = Environment.GetEnvironmentVariable(TelemetryEndpoint.EnvVar);
+        try
+        {
+            Environment.SetEnvironmentVariable(TelemetryEndpoint.EnvVar, null);
+            Assert.Equal(
+                "https://events.agenttoolkit.ai/telemetry",
+                TelemetryEndpoint.DefaultUrl);
+            Assert.Equal(TelemetryEndpoint.DefaultUrl, TelemetryEndpoint.Resolve());
+            Assert.DoesNotContain("k=", TelemetryEndpoint.DefaultUrl, StringComparison.Ordinal);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(TelemetryEndpoint.EnvVar, previous);
+        }
+    }
+
+    [Fact]
+    public void Endpoint_Invalid_Override_Does_Not_Use_Default()
+    {
+        var previous = Environment.GetEnvironmentVariable(TelemetryEndpoint.EnvVar);
+        try
+        {
+            Environment.SetEnvironmentVariable(TelemetryEndpoint.EnvVar, "not a url");
+            Assert.Null(TelemetryEndpoint.Resolve());
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(TelemetryEndpoint.EnvVar, previous);
+        }
+    }
+
+    [Fact]
+    public void ApiKey_Comes_From_Environment_Not_From_Url()
+    {
+        var previous = Environment.GetEnvironmentVariable(TelemetryEndpoint.ApiKeyEnvVar);
+        try
+        {
+            Environment.SetEnvironmentVariable(TelemetryEndpoint.ApiKeyEnvVar, "  test-api-key  ");
+            Assert.Equal("MCP4RHINO_TELEMETRY_API_KEY", TelemetryEndpoint.ApiKeyEnvVar);
+            Assert.Equal("X-Api-Key", TelemetryEndpoint.ApiKeyHeader);
+            Assert.Equal("test-api-key", TelemetryEndpoint.ApiKey());
+            var resolved = TelemetryEndpoint.Resolve("https://example.com/telemetry?k=query-secret-do-not-send");
+            Assert.Equal("https://example.com/telemetry", resolved);
+            Assert.DoesNotContain("test-api-key", resolved, StringComparison.Ordinal);
+            Assert.DoesNotContain("query-secret-do-not-send", resolved, StringComparison.Ordinal);
+            Assert.Null(TelemetryEndpoint.ApiKey(" \r\n "));
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(TelemetryEndpoint.ApiKeyEnvVar, previous);
+        }
+    }
+
+    [Fact]
+    public void ApiKey_Uses_Packaged_Token_Unless_Environment_Is_Set()
+    {
+        var previous = Environment.GetEnvironmentVariable(TelemetryEndpoint.ApiKeyEnvVar);
+        var directory = Path.Combine(Path.GetTempPath(), "mcp4rhino-token-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        try
+        {
+            File.WriteAllText(Path.Combine(directory, TelemetryEndpoint.InstallTokenFileName), "  packaged-token\n");
+            Assert.Equal("telemetry-install-token", TelemetryEndpoint.InstallTokenFileName);
+            var packaged = TelemetryEndpoint.ReadInstallToken(directory);
+            Environment.SetEnvironmentVariable(TelemetryEndpoint.ApiKeyEnvVar, null);
+            Assert.Equal("packaged-token", TelemetryEndpoint.ApiKey(packaged: packaged));
+            Assert.Null(TelemetryEndpoint.ApiKey(packaged: "pack\ntoken"));
+            Assert.Null(TelemetryEndpoint.ReadInstallToken(Path.Combine(directory, "missing")));
+            Environment.SetEnvironmentVariable(TelemetryEndpoint.ApiKeyEnvVar, "env-token");
+            Assert.Equal("env-token", TelemetryEndpoint.ApiKey(packaged: packaged));
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(TelemetryEndpoint.ApiKeyEnvVar, previous);
+            Directory.Delete(directory, recursive: true);
         }
     }
 
@@ -549,8 +636,14 @@ public class TelemetryTests : IDisposable
             },
         };
 
+        const string apiKey = "test-api-key";
+        const string leaked = "query-secret-do-not-send";
         var ok = new StubHandler { Status = HttpStatusCode.NoContent };
-        using (var transport = new TelemetryHttpTransport("http://127.0.0.1:8080/telemetry", McpJsonRpc.ServerVersion, ok))
+        using (var transport = new TelemetryHttpTransport(
+            "http://127.0.0.1:8080/telemetry?k=" + leaked,
+            McpJsonRpc.ServerVersion,
+            ok,
+            apiKey))
         {
             Assert.Equal(TimeSpan.FromSeconds(3), transport.Timeout);
             Assert.True(await transport.SendAsync(events, CancellationToken.None));
@@ -558,14 +651,22 @@ public class TelemetryTests : IDisposable
 
         Assert.Equal(HttpMethod.Post, ok.Method);
         Assert.Equal("http://127.0.0.1:8080/telemetry", ok.Uri?.ToString());
+        Assert.DoesNotContain(apiKey, ok.Uri?.ToString(), StringComparison.Ordinal);
+        Assert.DoesNotContain(leaked, ok.Uri?.ToString(), StringComparison.Ordinal);
+        Assert.DoesNotContain("k=", ok.Uri?.Query, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal([apiKey], ok.ApiKeyValues);
+        Assert.Empty(ok.ContentApiKeyValues);
         Assert.Contains($"MCP4Rhino/{McpJsonRpc.ServerVersion}", ok.UserAgent, StringComparison.Ordinal);
         Assert.Contains("application/json", ok.ContentType, StringComparison.Ordinal);
         Assert.Contains("\"events\"", ok.Body);
         Assert.DoesNotContain("tool", ok.Body);
+        Assert.DoesNotContain(apiKey, ok.Body, StringComparison.Ordinal);
+        Assert.DoesNotContain(leaked, ok.Body, StringComparison.Ordinal);
 
         var denied = new StubHandler { Status = HttpStatusCode.InternalServerError };
         using var failing = new TelemetryHttpTransport("http://127.0.0.1:8080/telemetry", McpJsonRpc.ServerVersion, denied);
         Assert.False(await failing.SendAsync(events, CancellationToken.None));
+        Assert.Empty(denied.ApiKeyValues);
 
         using var canceled = new TelemetryHttpTransport("http://127.0.0.1:8080/telemetry", McpJsonRpc.ServerVersion, new StubHandler());
         using var cts = new CancellationTokenSource();
@@ -573,6 +674,11 @@ public class TelemetryTests : IDisposable
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => canceled.SendAsync(events, cts.Token));
 
         Assert.Throws<ArgumentException>(() => new TelemetryHttpTransport("not-a-uri", "0.6.0-alpha"));
+        var leakedInPath = Assert.Throws<ArgumentException>(() => new TelemetryHttpTransport(
+            "http://127.0.0.1:8080/" + apiKey + "/telemetry",
+            McpJsonRpc.ServerVersion,
+            apiKey: apiKey));
+        Assert.DoesNotContain(apiKey, leakedInPath.Message, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -736,6 +842,10 @@ public class TelemetryTests : IDisposable
 
         public string? Body { get; private set; }
 
+        public IReadOnlyList<string> ApiKeyValues { get; private set; } = [];
+
+        public IReadOnlyList<string> ContentApiKeyValues { get; private set; } = [];
+
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -743,6 +853,12 @@ public class TelemetryTests : IDisposable
             Uri = request.RequestUri;
             UserAgent = request.Headers.UserAgent.ToString();
             ContentType = request.Content?.Headers.ContentType?.ToString();
+            ApiKeyValues = request.Headers.TryGetValues(TelemetryEndpoint.ApiKeyHeader, out var values)
+                ? values.ToArray()
+                : [];
+            ContentApiKeyValues = request.Content?.Headers.TryGetValues(TelemetryEndpoint.ApiKeyHeader, out var contentValues) == true
+                ? contentValues.ToArray()
+                : [];
             Body = request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken);
             return new HttpResponseMessage(Status);
         }

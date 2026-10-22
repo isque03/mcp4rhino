@@ -93,6 +93,10 @@ class PackageTests(unittest.TestCase):
     def test_complete_package(self):
         self.verify()
 
+    def test_allows_packaged_install_token(self):
+        self.files['net8.0/telemetry-install-token'] = b'install-token'
+        self.verify()
+
     def test_reject_version_mismatch(self):
         self.files['manifest.yml'] = self.files['manifest.yml'].replace(b'0.6.0-alpha', b'0.5.3')
         with self.assertRaisesRegex(ValueError, 'version'):

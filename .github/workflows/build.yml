@@ -3,7 +3,7 @@ name: Build
 on:
   pull_request:
   push:
-    branches: [main, release/0.6.0-alpha]
+    branches: [main, release/0.6.0-alpha, release/0.6.1-alpha]
 
 concurrency:
   group: build-${{ github.workflow }}-${{ github.ref }}
@@ -90,6 +90,8 @@ jobs:
       - name: Pack universal yak package
         env:
           YAK: ${{ steps.yak.outputs.path }}
+          MCP4RHINO_TELEMETRY_API_KEY: ${{ secrets.MCP4RHINO_TELEMETRY_API_KEY }}
+          REQUIRE_TELEMETRY_INSTALL_TOKEN: ${{ github.event_name == 'push' && '1' || '' }}
         run: bash scripts/pack-yak.sh
 
       - name: Upload yak package

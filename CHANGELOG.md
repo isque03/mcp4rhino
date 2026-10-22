@@ -11,7 +11,7 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ### Added
 
-- Opt-out anonymous usage telemetry. It is on unless you turn it off from **Usage data…**. The first MCP connection tells the agent to mention that once in chat, and tool calls are not blocked. Nothing is sent unless `MCP4RHINO_TELEMETRY_URL` is set. Events cover plugin start, MCP session start, and tool name, duration, and success. No production URL is compiled in. See [docs/TELEMETRY.md](docs/TELEMETRY.md).
+- Opt-out anonymous usage telemetry. It is on unless you turn it off from **Usage data…**. The first MCP connection tells the agent to mention that once in chat, and tool calls are not blocked. The default endpoint is `https://events.agenttoolkit.ai/telemetry` (`MCP4RHINO_TELEMETRY_URL` overrides it). Requests send the packaged install token, `net8.0/telemetry-install-token`, as one `X-Api-Key` header. `MCP4RHINO_TELEMETRY_API_KEY` overrides that file. Nothing is sent while both are unset. The token is not part of the URL. Events cover plugin start, MCP session start, and tool name, duration, and success. See [docs/TELEMETRY.md](docs/TELEMETRY.md).
 
 ## [0.6.0-alpha] — 2026-10-19
 

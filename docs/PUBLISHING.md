@@ -1,6 +1,6 @@
 # CI and publishing (maintainers)
 
-Publish through GitHub Actions: **Build** produces an artifact, then manual **Publish** distributes that exact artifact to McNeel Yak and GitHub Releases. Do not rebuild or run `yak push` from a workstation. Build has no publishing secrets.
+Publish through GitHub Actions: **Build** produces an artifact, then manual **Publish** distributes that exact artifact to McNeel Yak and GitHub Releases. Do not rebuild or run `yak push` from a workstation. Build has no package-publishing secrets. Its pack job reads the repository Actions secret `MCP4RHINO_TELEMETRY_API_KEY` and writes that install token into the yak. Push builds fail when the secret is missing. Pull-request builds omit the file when the secret is unavailable.
 
 ## Release sources
 
@@ -15,7 +15,7 @@ Apply alpha fixes to the release branch and cherry-pick relevant implementation 
 
 ## Build and versions
 
-Build runs for pull requests and pushes to `main` or `release/0.6.0-alpha`:
+Build runs for pull requests and pushes to `main`, `release/0.6.0-alpha`, or `release/0.6.1-alpha`:
 
 1. Build/test on Windows and macOS; enforce at least 80% Logic/Contracts line coverage.
 2. Validate release contracts, source-version consistency, canonical skill/help and example recipes.
@@ -55,7 +55,7 @@ gh workflow run publish.yml --ref release/0.6.0-alpha -f tag="v$VERSION"
 
 Use an empty download destination each time. The tag must identify the exact green SHA, be annotated, and remain immutable. Publish checks the dispatch branch, tag/manifest/project/MCP versions, source ancestry, exact successful push Build, available artifact, and embedded package manifest version. Expired/missing artifacts require rerunning Build on the same SHA before publishing.
 
-Publish searches all Yak versions including prereleases and rejects exact duplicates. Registry query, token, or authentication failures stop publication. The existing environment is **production** with **YAK_TOKEN** as an environment-only secret; no new secret or environment is needed. If required reviewers are configured, a human must approve the environment in GitHub. Never log, paste or commit tokens.
+Publish searches all Yak versions including prereleases and rejects exact duplicates. Registry query, token, or authentication failures stop publication. The existing environment is **production** with **YAK_TOKEN** as an environment-only secret. The telemetry install token is a separate repository Actions secret, `MCP4RHINO_TELEMETRY_API_KEY`, consumed by Build rather than by Publish. If required reviewers are configured, a human must approve the environment in GitHub. Never log, paste or commit tokens.
 
 Publish uses `prerelease: true` and `make_latest: false` for alpha versions. GitHub latest stable remains `v0.5.3`. For stable releases, first merge to `main`, get a successful push Build there, tag that SHA, and dispatch Publish with `--ref main`. The alpha branch cannot publish a stable package.
 
