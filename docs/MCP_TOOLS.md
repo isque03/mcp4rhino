@@ -38,7 +38,6 @@ Default endpoint: `http://127.0.0.1:4010/mcp`.
 - **Layers:** `list_layers`, `create_layer`, `set_layer_props`
 - **Blocks:** `create_block_definition`, `insert_block`, `list_blocks`
 - **Other:** `transform_objects`, `set_document_units`, `get_geometry`, `select_objects`, `clear_selection`
-- **Not available:** `execute_csharp` (registered but returns unavailable — no in-process Roslyn; use `run_rhino_command` or dedicated tools)
 
 ## Surfaces
 

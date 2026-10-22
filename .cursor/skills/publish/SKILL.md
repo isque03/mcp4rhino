@@ -13,7 +13,7 @@ Use **Build** → exact CI artifact → manual **Publish**. Read [docs/PUBLISHIN
 ## Release policy
 
 - Stable versions publish only from a merged `main` commit. Tag after merge and green push CI; dispatch Publish with `--ref main`.
-- Explicit exception: `0.6.0-alpha` and numbered successors (`0.6.0-alpha.1`, etc.) publish from `release/0.6.0-alpha`. `0.6.1-alpha` and numbered successors publish from `release/0.6.1-alpha`. Dispatch with that exact branch ref. Do not merge either alpha into `main` to publish it.
+- Explicit exception: `0.6.0-alpha` and numbered successors (`0.6.0-alpha.1`, etc.) publish from `release/0.6.0-alpha`. `0.6.1-alpha` and numbered successors publish from `release/0.6.1-alpha`. `0.6.2-alpha` and numbered successors publish from `release/0.6.2-alpha`. Dispatch with that exact branch ref. Do not merge these alphas into `main` to publish them.
 - Green Windows/macOS CI, the 80% Logic/Contracts coverage gate, release-contract tests, and package checks gate alpha publication. Licensed native tests happen afterward; native Windows/macOS acceptance gates stable promotion.
 - Tag is `v` + manifest version and must be annotated, point to the exact successful push Build SHA, and be reachable from the allowed source branch. Never move/reuse a published tag.
 - Manifest, five application project versions, and MCP-reported version must agree. Assembly/file versions are numeric; informational versions preserve the prerelease suffix.

@@ -126,8 +126,6 @@ internal static class GeometryFoundationTools
         Tool("run_rhino_command", "Run a Rhino command script string via RhinoApp.RunScript (escape hatch).",
             ("script*", "string", "Command script, e.g. \"_-Line 0,0,0 10,0,0 _Enter\""),
             ("echo", "boolean", "Echo to command line (default false)")),
-        Tool("execute_csharp", "Not available (no Roslyn in-process); use run_rhino_command or the dedicated tools.",
-            ("code", "string", "Ignored")),
     ];
 
     public static string? TryCall(string name, JsonObject args) => name switch
@@ -157,7 +155,6 @@ internal static class GeometryFoundationTools
         "convert_length" => ConvertLength(args),
         "measure_size" => MeasureSize(args),
         "run_rhino_command" => RunRhinoCommand(args),
-        "execute_csharp" => ExecuteCsharp(),
         _ => null,
     };
 
@@ -782,8 +779,4 @@ internal static class GeometryFoundationTools
         doc.Views.Redraw();
         return JsonSerializer.Serialize(new { ok, script, object_count_before = before, object_count_after = doc.Objects.Count });
     });
-
-    private static string ExecuteCsharp() => throw new InvalidOperationException(
-        "execute_csharp is not available: in-process C# scripting (Roslyn) is not bundled with MCP4Rhino to avoid " +
-        "conflicts with Rhino's own assemblies. Use run_rhino_command (RhinoApp.RunScript) or the dedicated geometry tools.");
 }

@@ -7,6 +7,12 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.6.2-alpha] — 2026-10-22
+
+### Removed
+
+- `execute_csharp`. It was registered but always failed, and assistants treated that failure as a reason to script Grasshopper through `run_rhino_command` and Python. Parametric work uses the `gh_*` tools (`gh_help`, `gh_status`, `gh_search_components`, `gh_apply_patch`, `gh_solve`, `gh_bake`).
+
 ## [0.6.1-alpha] — 2026-10-22
 
 ### Added

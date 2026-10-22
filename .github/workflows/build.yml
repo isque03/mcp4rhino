@@ -3,7 +3,7 @@ name: Build
 on:
   pull_request:
   push:
-    branches: [main, release/0.6.0-alpha, release/0.6.1-alpha]
+    branches: [main, release/0.6.0-alpha, release/0.6.1-alpha, release/0.6.2-alpha]
 
 concurrency:
   group: build-${{ github.workflow }}-${{ github.ref }}
