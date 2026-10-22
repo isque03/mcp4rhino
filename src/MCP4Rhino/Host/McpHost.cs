@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using MCP4Rhino.Logic;
+using MCP4Rhino.Logic.Telemetry;
 
 namespace MCP4Rhino.Host;
 
@@ -184,7 +185,14 @@ public static class McpHost
     }
 
     private static JsonNode? Dispatch(JsonNode? req) =>
-        McpJsonRpc.Dispatch(req, ToolProvider.Instance, HotReload, LiveSupport);
+        McpJsonRpc.Dispatch(
+            req,
+            ToolProvider.Instance,
+            HotReload,
+            LiveSupport,
+            Telemetry.Gateway,
+            TelemetryHost.InitializeInstructions,
+            TelemetryHost.MarkNoticeDelivered);
 
     private static SupportContext LiveSupport() => new(
         Endpoint: IsRunning ? Endpoint : SupportInfo.ConfiguredEndpoint(),

@@ -181,6 +181,10 @@ Full tool list: [docs/MCP_TOOLS.md](docs/MCP_TOOLS.md).
 - Rhino must be running for local modeling. Everything stays on your machine; cloud collaboration is not part of MCP4Rhino today.
 - Review AI-generated changes. Automated design and code checks are preliminary and do not replace professional review.
 
+## Usage data
+
+MCP4Rhino sends anonymous usage data unless you turn it off. The first MCP connection tells the agent to mention that once in chat. Tool calls are not blocked. If `MCP4RHINO_TELEMETRY_URL` is unset or invalid, the choice can be on and still nothing is sent. Events include a random installation id, the plugin version, the Rhino major version, the operating system, and which MCP tools ran (name, duration, and success). They do not include models, document names, prompts, tool arguments, or results. Turn this off from **MCP4Rhino → Usage data…**. Details: [docs/TELEMETRY.md](docs/TELEMETRY.md).
+
 ## Documentation
 
 **User docs (Mintlify):** [mcp4rhino.mintlify.app](https://mcp4rhino.mintlify.app/) — quickstart, how-tos, and tool reference.
@@ -191,6 +195,7 @@ Full tool list: [docs/MCP_TOOLS.md](docs/MCP_TOOLS.md).
 | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Diagnostics |
 | [docs/INSTALL_FROM_SOURCE.md](docs/INSTALL_FROM_SOURCE.md) | Source install |
 | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Contributors |
+| [docs/TELEMETRY.md](docs/TELEMETRY.md) | Anonymous usage data |
 | [docs/ARCHITECTURE_AGENT.md](docs/ARCHITECTURE_AGENT.md) | Architecture agent roadmap |
 | [CHANGELOG.md](CHANGELOG.md) | Release history |
 | [CLAUDE.md](CLAUDE.md) | Coding-agent playbook for this repo |

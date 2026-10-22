@@ -7,6 +7,12 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.6.1] — 2026-10-22
+
+### Added
+
+- Opt-out anonymous usage telemetry. It is on unless you turn it off from **Usage data…**. The first MCP connection tells the agent to mention that once in chat, and tool calls are not blocked. Nothing is sent unless `MCP4RHINO_TELEMETRY_URL` is set. Events cover plugin start, MCP session start, and tool name, duration, and success. No production URL is compiled in. See [docs/TELEMETRY.md](docs/TELEMETRY.md).
+
 ## [0.6.0-alpha] — 2026-10-19
 
 ### Added

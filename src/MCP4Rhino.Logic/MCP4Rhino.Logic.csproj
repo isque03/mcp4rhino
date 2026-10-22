@@ -6,9 +6,9 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>MCP4Rhino.Logic</RootNamespace>
     <AssemblyName>MCP4Rhino.Logic</AssemblyName>
-    <Version>0.6.0-alpha</Version>
-    <AssemblyVersion>0.6.0.0</AssemblyVersion>
-    <FileVersion>0.6.0.0</FileVersion>
+    <Version>0.6.1</Version>
+    <AssemblyVersion>0.6.1.0</AssemblyVersion>
+    <FileVersion>0.6.1.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Grasshopper/Tools.json" LogicalName="GrasshopperTools.json" />

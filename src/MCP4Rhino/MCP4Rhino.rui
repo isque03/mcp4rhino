@@ -40,6 +40,12 @@
           </text>
           <macro_id>af7bc9be-059d-4790-a89f-1c739c4b92e4</macro_id>
         </menu_item>
+        <menu_item guid="7c2a1e44-9b0d-4f6a-8c31-2e5d8a0b6f14">
+          <text>
+            <locale_1033>Usage data…</locale_1033>
+          </text>
+          <macro_id>1b9e4c72-6d08-4a55-9f3e-8c7a2d1e0b46</macro_id>
+        </menu_item>
       </menu>
     </menu>
   </extend_rhino_menus>
@@ -136,6 +142,24 @@
         <locale_1033>Report issue…</locale_1033>
       </menu_text>
       <script>! _MCP4RhinoReportIssue</script>
+    </macro_item>
+    <macro_item guid="1b9e4c72-6d08-4a55-9f3e-8c7a2d1e0b46">
+      <text>
+        <locale_1033>Usage data…</locale_1033>
+      </text>
+      <tooltip>
+        <locale_1033>Choose whether MCP4Rhino sends anonymous usage data</locale_1033>
+      </tooltip>
+      <help_text>
+        <locale_1033>Opens the MCP4Rhino usage data dialog.</locale_1033>
+      </help_text>
+      <button_text>
+        <locale_1033>Usage data…</locale_1033>
+      </button_text>
+      <menu_text>
+        <locale_1033>Usage data…</locale_1033>
+      </menu_text>
+      <script>! _MCP4RhinoTelemetry</script>
     </macro_item>
   </macros>
   <bitmaps />

@@ -35,10 +35,12 @@ Then in Rhino: `MCP4RhinoReload` (or MCP tool `mcp4rhino_reload`). After host `.
 | `MCP4RhinoUpdates` | Open Rhino Package Manager |
 | `MCP4RhinoReportIssue` | Open GitHub Issues in the browser |
 | `MCP4RhinoReload` | Hot-reload `MCP4Rhino.Tools.dll` (+ Logic) |
+| `MCP4RhinoTelemetry` | Open the usage-data choice (menu **Usage data…**) |
 | MCP4Rhino menu | From `MCP4Rhino.rui` next to the `.rhp`: under **Tools** on Windows; top-level **MCP4Rhino** on macOS |
 | `MCP4RHINO_PORT` | Listen port (default **4010**) |
 | `MCP4RHINO_AUTOSTART` | Set to `0` / `false` / `no` to disable Idle auto-start |
 | `MCP4RHINO_TOOLS_PATH` | Override directory containing `MCP4Rhino.Tools.dll` |
+| `MCP4RHINO_TELEMETRY_URL` | Optional absolute `http`/`https` base URL for anonymous usage data. Unset means nothing is sent. See [TELEMETRY.md](TELEMETRY.md). |
 
 Default MCP endpoint: `http://127.0.0.1:4010/mcp`.
 

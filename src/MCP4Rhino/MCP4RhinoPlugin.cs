@@ -26,21 +26,17 @@ public class MCP4RhinoPlugin : PlugIn
 
     protected override LoadReturnCode OnLoad(ref string errorMessage)
     {
-        var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? McpJsonRpc.ServerVersion;
+        var version = McpJsonRpc.ServerVersion;
         PluginLog.Info($"OnLoad LoadTime=AtStartup version={version} log={PluginLog.LogPath} autostart={McpHostBootstrap.AutostartEnabled}");
         RhinoApp.WriteLine($"MCP4Rhino {version} loaded.");
 
         TryLoadRui();
 
+        HookIdleOnce();
         if (McpHostBootstrap.AutostartEnabled)
-        {
             RhinoApp.WriteLine("MCP4Rhino: will start the AI connection when Rhino is idle…");
-            HookIdleOnce();
-        }
         else
-        {
             RhinoApp.WriteLine("MCP4Rhino: auto-start off (MCP4RHINO_AUTOSTART). Run MCP4Rhino to start.");
-        }
 
         return LoadReturnCode.Success;
     }
@@ -122,6 +118,15 @@ public class MCP4RhinoPlugin : PlugIn
         RhinoApp.Idle -= OnFirstIdle;
         _idleHooked = false;
 
+        try
+        {
+            TelemetryHost.OnStartupIdle();
+        }
+        catch (Exception ex)
+        {
+            PluginLog.Info($"telemetry startup skipped: {ex.Message}");
+        }
+
         if (!McpHostBootstrap.AutostartEnabled || McpHost.IsRunning)
             return;
 
@@ -139,6 +144,7 @@ public class MCP4RhinoPlugin : PlugIn
                 _idleHooked = false;
             }
             PluginLog.Info("OnShutdown");
+            TelemetryHost.Shutdown();
             GrasshopperHost.Shutdown();
             McpHost.Stop();
         }

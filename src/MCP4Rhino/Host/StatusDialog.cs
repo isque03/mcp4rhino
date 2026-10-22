@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using Eto.Drawing;
 using Eto.Forms;
 using MCP4Rhino.Logic;
@@ -21,6 +20,7 @@ public sealed class StatusDialog : Dialog
     private readonly Label _version = LeftLabel();
     private readonly Label _endpoint = LeftLabel();
     private readonly Label _autostart = LeftLabel();
+    private readonly Label _telemetry = LeftLabel();
     private readonly Label _log = LeftLabel();
     private readonly Button _start = new() { Text = "Start" };
     private readonly Button _stop = new() { Text = "Stop" };
@@ -31,7 +31,7 @@ public sealed class StatusDialog : Dialog
     public StatusDialog()
     {
         Title = "MCP4Rhino Status";
-        ClientSize = new Size(520, 280);
+        ClientSize = new Size(520, 360);
         Resizable = false;
         Padding = 12;
 
@@ -74,6 +74,13 @@ public sealed class StatusDialog : Dialog
         var issue = new Button { Text = "Report issue…" };
         issue.Click += (_, _) => CloseThen(() => OpenUrl(SupportInfo.NewIssueUrl));
 
+        var usage = new Button { Text = "Usage data…" };
+        usage.Click += (_, _) =>
+        {
+            TelemetryHost.ShowPreferences(this);
+            RefreshFields();
+        };
+
         var close = new Button { Text = "Close" };
         close.Click += (_, _) => Close();
         DefaultButton = close;
@@ -89,6 +96,7 @@ public sealed class StatusDialog : Dialog
                 _version,
                 _endpoint,
                 _autostart,
+                _telemetry,
                 _log,
                 new StackLayout
                 {
@@ -104,6 +112,7 @@ public sealed class StatusDialog : Dialog
                     HorizontalContentAlignment = HorizontalAlignment.Left,
                     Items = { updates, logBtn, issue, close },
                 },
+                usage,
             },
         };
 
@@ -128,12 +137,12 @@ public sealed class StatusDialog : Dialog
         _state.Text = running ? "State: Running" : "State: Stopped";
         _state.TextColor = running ? Colors.DarkGreen : Colors.DarkRed;
 
-        var ver = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? McpJsonRpc.ServerVersion;
-        _version.Text = $"Version: {ver}";
+        _version.Text = $"Version: {McpJsonRpc.ServerVersion}";
         _endpoint.Text = running
             ? $"Endpoint: {McpHost.Endpoint}"
             : $"Endpoint (when started): {SupportInfo.ConfiguredEndpoint()}";
         _autostart.Text = $"Autostart: {(McpHostBootstrap.AutostartEnabled ? "on" : "off")} (MCP4RHINO_AUTOSTART)";
+        _telemetry.Text = TelemetryHost.StatusLine();
         _log.Text = $"Log: {PluginLog.LogPath}";
 
         _start.Enabled = !running;

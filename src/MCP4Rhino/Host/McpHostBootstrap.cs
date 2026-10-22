@@ -83,6 +83,7 @@ public static class McpHostBootstrap
         else
             RhinoApp.WriteLine($"  endpoint (when started): {SupportInfo.ConfiguredEndpoint()}");
         RhinoApp.WriteLine($"  autostart: {(AutostartEnabled ? "on" : "off")} (env MCP4RHINO_AUTOSTART)");
+        RhinoApp.WriteLine($"  {TelemetryHost.StatusLine()}");
         RhinoApp.WriteLine($"  log: {PluginLog.LogPath}");
         if (!string.IsNullOrEmpty(ToolLoader.LoadedFrom))
             RhinoApp.WriteLine($"  tools: {ToolLoader.LoadedFrom}");

@@ -35,6 +35,7 @@ dotnet test tests/MCP4Rhino.Tests -c Release
 | `McpJsonRpcTests` | `initialize` / `tools/list` / `tools/call` / errors |
 | `McpContentTests` | MCP text/image content builders; PNG signature validation; image embed helpers |
 | `RhinoLicenseStatusTests` | Save-gate allow/deny messages and evaluation classification from license snapshots |
+| `TelemetryTests` | Opt-in gate, installation id, event JSON, tool success/failure, batching, delivery failure, revoke, and payload redaction |
 
 ## Rhino integration (manual)
 

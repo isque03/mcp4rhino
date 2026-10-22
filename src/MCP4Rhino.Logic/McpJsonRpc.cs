@@ -1,5 +1,8 @@
+using System.Diagnostics;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using MCP4Rhino.Logic.Telemetry;
 
 namespace MCP4Rhino.Logic;
 
@@ -20,13 +23,16 @@ public static class McpJsonRpc
 {
     public const string ProtocolVersion = "2024-11-05";
     public const string ServerName = "MCP4Rhino";
-    public const string ServerVersion = "0.6.0-alpha";
+    public const string ServerVersion = "0.6.1";
 
     public static JsonNode? Dispatch(
         JsonNode? req,
         IMcpToolProvider tools,
         Func<JsonObject, object>? hotReload = null,
-        Func<SupportContext>? supportContext = null)
+        Func<SupportContext>? supportContext = null,
+        ITelemetry? telemetry = null,
+        Func<string>? instructions = null,
+        Action? onInitialized = null)
     {
         if (req is null) return null;
 
@@ -47,11 +53,11 @@ public static class McpJsonRpc
                     protocolVersion = ProtocolVersion,
                     capabilities = new { tools = new { } },
                     serverInfo = new { name = ServerName, version = ServerVersion },
-                    instructions = SupportInfo.ServerInstructions,
+                    instructions = ResolveInstructions(instructions),
                 },
                 "ping" => new { },
                 "tools/list" => new { tools = ListAllTools(tools, hotReload is not null) },
-                "tools/call" => CallTool(@params, tools, hotReload, supportContext),
+                "tools/call" => CallTool(@params, tools, hotReload, supportContext, telemetry),
                 null => throw new InvalidOperationException("Missing method"),
                 _ => throw new InvalidOperationException($"Method not found: {method}"),
             };
@@ -64,6 +70,14 @@ public static class McpJsonRpc
                 id,
                 error = new { code = -32000, message = ex.Message },
             });
+        }
+
+        if (string.Equals(method, "initialize", StringComparison.Ordinal))
+        {
+            try { telemetry?.Track(TelemetryEvents.McpConnected); }
+            catch { /* telemetry must not change the initialize result */ }
+            try { onInitialized?.Invoke(); }
+            catch { /* marking the notice shown must not change the initialize result */ }
         }
 
         return JsonSerializer.SerializeToNode(new
@@ -119,14 +133,51 @@ public static class McpJsonRpc
         return hostTools.Concat(tools.ListTools()).ToArray();
     }
 
+    private static string ResolveInstructions(Func<string>? instructions)
+    {
+        if (instructions is null)
+            return SupportInfo.ServerInstructions;
+        try
+        {
+            var text = instructions();
+            return string.IsNullOrEmpty(text) ? SupportInfo.ServerInstructions : text;
+        }
+        catch
+        {
+            return SupportInfo.ServerInstructions;
+        }
+    }
+
     private static object CallTool(
         JsonNode? @params,
         IMcpToolProvider tools,
         Func<JsonObject, object>? hotReload,
-        Func<SupportContext>? supportContext)
+        Func<SupportContext>? supportContext,
+        ITelemetry? telemetry)
     {
         var name = @params?["name"]?.GetValue<string>()
             ?? throw new ArgumentException("tools/call missing name");
+        var started = Stopwatch.GetTimestamp();
+        try
+        {
+            var result = ExecuteTool(@params, name, tools, hotReload, supportContext);
+            ReportTool(telemetry, name, started, ToolSucceeded(result));
+            return result;
+        }
+        catch (Exception)
+        {
+            ReportTool(telemetry, name, started, success: false);
+            throw;
+        }
+    }
+
+    private static object ExecuteTool(
+        JsonNode? @params,
+        string name,
+        IMcpToolProvider tools,
+        Func<JsonObject, object>? hotReload,
+        Func<SupportContext>? supportContext)
+    {
         var args = @params?["arguments"] as JsonObject ?? new JsonObject();
 
         if (name == "get_support_info")
@@ -150,5 +201,28 @@ public static class McpJsonRpc
         }
 
         return tools.CallTool(@params);
+    }
+
+    private static bool ToolSucceeded(object result)
+    {
+        var isError = result.GetType().GetProperty("isError", BindingFlags.Instance | BindingFlags.Public);
+        return isError?.GetValue(result) is not true;
+    }
+
+    private static void ReportTool(ITelemetry? telemetry, string name, long started, bool success)
+    {
+        if (telemetry is null)
+            return;
+        try
+        {
+            var ms = (long)Stopwatch.GetElapsedTime(started).TotalMilliseconds;
+            if (ms < 0)
+                ms = 0;
+            telemetry.TrackTool(name, ms, success);
+        }
+        catch
+        {
+            // Telemetry must not change the tool result.
+        }
     }
 }
