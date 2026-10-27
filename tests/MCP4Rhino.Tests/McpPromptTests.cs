@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using MCP4Rhino.Logic;
 using MCP4Rhino.Logic.Protocol;
 using MCP4Rhino.Logic.Resources;
 using Xunit;
@@ -13,7 +14,7 @@ public class McpPromptTests
         var tools = new RecordingTools(); var gateway = new ForbiddenGateway();
         var services = new McpServerServices(tools) { Resources = gateway };
         var prompts = PromptCatalog.List(new())["prompts"]!.AsArray();
-        Assert.Equal(8, prompts.Count);
+        Assert.Equal(9, prompts.Count);
         foreach (var prompt in prompts)
         {
             var args = new JsonObject();
@@ -71,8 +72,10 @@ public class McpPromptTests
         }
         foreach (var uri in new[]
                  {
-                     "mcp4rhino://server/getting-started", "mcp4rhino://server/writing-style",
-                     "mcp4rhino://grasshopper/guides/index", "mcp4rhino://grasshopper/recipes/0.6.5-alpha/profile",
+                     "mcp4rhino://server/getting-started", "mcp4rhino://server/grasshopper-getting-started",
+                     "mcp4rhino://server/writing-style",
+                     "mcp4rhino://grasshopper/guides/index",
+                     $"mcp4rhino://grasshopper/recipes/{McpJsonRpc.ServerVersion}/profile",
                  })
         {
             var message = McpTestRequests.Message("resources/read", args: new JsonObject { ["uri"] = uri });

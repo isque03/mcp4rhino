@@ -49,7 +49,7 @@ After hot-reload, smoke one facade path:
 
 Full Rhino.Testing harness for ArchElement/ViewCapture is optional and out of the 80% gate.
 
-## Grasshopper 0.6.5-alpha
+## Grasshopper 0.7.0
 
 `McpProtocolTests`, `McpProtocolValidationTests`, and `McpHttpIntegrationTests` cover the 2024/2025/2026 profiles, required headers, negotiation, errors, Origin/Host checks, legacy behavior and concurrent requests over real local HTTP. `McpResourceTests` and `McpPromptTests` cover every route/catalog, privacy, byte/item limits, identity scope helpers, cursor validation, and static reads/prompts that cannot reach tools or native gateways. See [native resource acceptance](MCP_RESOURCES_PROMPTS.md#validation-and-migration) for licensed checks and smoke-runner flags.
 

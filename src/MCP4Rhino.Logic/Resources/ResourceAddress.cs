@@ -17,6 +17,7 @@ public sealed record ResourceAddress(string Uri, string Kind, string Area, JsonO
         new("capabilities", "server", "capabilities"),
         new("writing_style", "server", "writing-style"),
         new("getting_started", "server", "getting-started"),
+        new("grasshopper_getting_started", "server", "grasshopper-getting-started"),
         new("document", "rhino", "documents/{document_id}", true),
         new("layer", "rhino", "documents/{document_id}/layers/{layer_id}"),
         new("object", "rhino", "documents/{document_id}/objects/{object_id}"),

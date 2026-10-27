@@ -23,7 +23,7 @@ public static class McpJsonRpc
 {
     public const string ProtocolVersion = "2024-11-05";
     public const string ServerName = "MCP4Rhino";
-    public const string ServerVersion = "0.6.5-alpha";
+    public const string ServerVersion = "0.7.0";
 
     public static JsonNode? Dispatch(
         JsonNode? req,

@@ -36,15 +36,15 @@ Create walls, floors, roofs, doors, windows, stairs, spaces, and related element
 
 ### Parametric design with Grasshopper
 
-**Experimental in 0.6.5-alpha.** In Rhino `PackageManager`, enable **Include pre-releases**, select MCP4Rhino `0.6.5-alpha`, install/update, apply, and restart Rhino completely. Stable users can stay on `0.5.3`. Native Grasshopper runtime validation is assigned to alpha testers; see the [tester checklist and rollback instructions](docs/GRASSHOPPER.md#alpha-tester-checklist).
+Install or update **MCP4Rhino 0.7.0** from Rhino `PackageManager`, apply, and restart Rhino completely.
 
 Create native, editable Grasshopper definitions, connect components, adjust parameters, inspect data trees, and explicitly bake geometry into Rhino.
 
 > “Create a Grasshopper facade with adjustable panel count, spacing, and depth.”
 
-Agents can learn the workflow through `gh_help` or the bundled [parametric design skill](skills/grasshopper-parametric-design/SKILL.md). See [Grasshopper support](docs/GRASSHOPPER.md) for setup, supported components and examples.
+Agents can learn the workflow through `gh_help`, the `grasshopper_getting_started` prompt, or the bundled [parametric design skill](skills/grasshopper-parametric-design/SKILL.md). See [Grasshopper support](docs/GRASSHOPPER.md) for setup, supported components and examples.
 
-The alpha also adds discoverable read-only document/graph resources and seven reusable workflow prompts. See [resources, prompts and protocol compatibility](docs/MCP_RESOURCES_PROMPTS.md) for the catalog and modern MCP connection details. Reading context does not initialize Grasshopper or modify a model.
+Discoverable read-only document/graph resources and reusable workflow prompts are documented in [resources, prompts and protocol compatibility](docs/MCP_RESOURCES_PROMPTS.md). Reading context does not initialize Grasshopper or modify a model.
 
 ### Drawings and documentation
 

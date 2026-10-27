@@ -16,6 +16,9 @@ public class SupportInfoTests
         Assert.Contains("mcp4rhino://server/capabilities", SupportInfo.ServerInstructions);
         Assert.Contains("getting_started", SupportInfo.ServerInstructions);
         Assert.Contains("mcp4rhino://server/getting-started", SupportInfo.ServerInstructions);
+        Assert.Contains("grasshopper_getting_started", SupportInfo.ServerInstructions);
+        Assert.Contains("mcp4rhino://server/grasshopper-getting-started", SupportInfo.ServerInstructions);
+        Assert.Contains(".mcp4rhino/tutorial-memory.md", SupportInfo.ServerInstructions);
         Assert.Contains("ASD-STE100 style", SupportInfo.ServerInstructions);
         Assert.Contains("mcp4rhino://server/writing-style", SupportInfo.ServerInstructions);
         Assert.DoesNotContain("Learn parametric design and this server", SupportInfo.ServerInstructions);

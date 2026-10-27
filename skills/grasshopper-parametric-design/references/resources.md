@@ -1,17 +1,18 @@
 # Resources and reusable prompts
 
-MCP4Rhino 0.6.5-alpha provides resources and prompts alongside explicit tools. Clients discover them using `resources/list`, `resources/templates/list`, and `prompts/list`. Support depends on the host UI; do not assume automatic loading or a particular slash-command presentation.
+MCP4Rhino 0.7.0 provides resources and prompts alongside explicit tools. Clients discover them using `resources/list`, `resources/templates/list`, and `prompts/list`. Support depends on the host UI; do not assume automatic loading or a particular slash-command presentation.
 
 Start with:
 
 - `mcp4rhino://server/capabilities`: actual versions, capabilities, subsystem state, capability `lanes` map, supported native type manifest and limits.
-- `mcp4rhino://server/getting-started`: opt-in first Rhino session walkthrough (not Grasshopper-first).
+- `mcp4rhino://server/getting-started`: opt-in first Rhino session walkthrough (names Grasshopper as a lane; harness screenshots after create).
+- `mcp4rhino://server/grasshopper-getting-started`: opt-in first Grasshopper session walkthrough (canvas + viewport images in the harness).
 - `mcp4rhino://server/writing-style`: clear-English reply rules (STE-inspired; not full compliance).
 - `mcp4rhino://rhino/documents/active`: active document identity, units, tolerance, saved/modified state and bounded indexes.
 - `mcp4rhino://grasshopper/sessions`: sessions bound to the active Rhino document and the visible unattached definition.
 - `mcp4rhino://grasshopper/guides/index`: packaged guides and versioned recipe resources.
 
-Use `resources/read` with a concrete URI. Templates describe document/layer/object/view, graph/node/component, result/output, guide and recipe inspection. Template variables are identifiers, never filesystem paths. Only the installed version's recipes are served, for example `mcp4rhino://grasshopper/recipes/0.6.5-alpha/profile`.
+Use `resources/read` with a concrete URI. Templates describe document/layer/object/view, graph/node/component, result/output, guide and recipe inspection. Template variables are identifiers, never filesystem paths. Only the installed version's recipes are served, for example `mcp4rhino://grasshopper/recipes/0.7.0/profile`.
 
 Resource reads do not initialize Grasshopper, attach or activate documents, instantiate components, solve, capture, bake, save, or fetch external data. An unavailable or uninitialized subsystem is explicit. Use a discovery tool to initialize it. Component resources reuse contracts cached by `gh_describe_components`; missing cached ports are identified with `ports_status:not_described` and a next-tool hint.
 
@@ -23,6 +24,6 @@ Follow returned `next_uri` links. Content pages default to 50 items, allow at mo
 
 Node summaries bound ports and sources to 200 each and identify truncation with actual port counts and `truncated_sources`. Result summaries identify output-port limits. Use explicit inspection tools when those bounded summaries are insufficient.
 
-Eight prompts are available: `getting_started`, `inspect_model`, `plan_parametric_definition`, `create_and_verify_definition`, `diagnose_graph`, `explore_parameter_variation`, `prepare_output_snapshot`, and `prepare_model_report`. General prompts start from the active document; Grasshopper prompts start from the GH guide index instead. Retrieve the declared arguments with `prompts/list`; `prompts/get` returns messages and performs no native actions. Follow the user's authorization when executing a selected workflow. Saving, baking, exports and replacement remain explicit actions.
+Nine prompts are available, including `getting_started` and `grasshopper_getting_started`. General prompts start from the active document; Grasshopper prompts start from the GH guide index instead. Retrieve the declared arguments with `prompts/list`; `prompts/get` returns messages and performs no native actions. Follow the user's authorization when executing a selected workflow. Saving, baking, exports and replacement remain explicit actions. Tutorials tell the agent to show capture images in the chat harness and to record completion in `.mcp4rhino/tutorial-memory.md` in the user workspace.
 
 The local endpoint supports MCP 2026-07-28 with per-request metadata and `server/discover`, 2025-11-25 with initialization and Streamable HTTP JSON responses, and the existing 2024-11-05 POST compatibility behavior. Resources and prompts complement generic graph tools; they add no object-specific modeling service or compliance claims.

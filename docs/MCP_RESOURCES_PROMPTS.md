@@ -1,6 +1,6 @@
 # Resources, prompts, and protocol compatibility
 
-MCP4Rhino 0.6.5-alpha continues read-only resources and reusable prompts alongside the existing tools, with balanced lane guidance so Grasshopper is not the default path. The endpoint remains `http://127.0.0.1:4010/mcp`. These capabilities require the complete matching package and a Rhino restart; Tools-only hot reload cannot update host or shared contracts.
+MCP4Rhino 0.7.0 continues read-only resources and reusable prompts alongside the existing tools, with balanced lane guidance so Grasshopper is not the default path. The endpoint remains `http://127.0.0.1:4010/mcp`. These capabilities require the complete matching package and a Rhino restart; Tools-only hot reload cannot update host or shared contracts.
 
 ## Protocol profiles
 
@@ -37,6 +37,7 @@ Discover resources with `resources/list` and templates with `resources/templates
 |---|---|---|
 | `mcp4rhino://server/capabilities` | `application/json` | Protocol/server/Rhino versions, implemented capabilities, subsystem state, capability `lanes` map, supported native type manifest, value categories, limits |
 | `mcp4rhino://server/getting-started` | `text/markdown` | Opt-in first Rhino session walkthrough; reading it does not mutate the model |
+| `mcp4rhino://server/grasshopper-getting-started` | `text/markdown` | Opt-in first Grasshopper session walkthrough; reading it does not mutate the model |
 | `mcp4rhino://server/writing-style` | `text/markdown` | Clear-English (STE-inspired) rules for agent replies; not full ASD-STE100 compliance |
 | `mcp4rhino://rhino/documents/active` | `application/json` | Active document identity, units/tolerances, saved/modified state, counts, and bounded object/layer/view indexes |
 | `mcp4rhino://grasshopper/sessions` | `application/json` | Active-document MCP sessions and the current visible unattached definition, separately identified |
@@ -88,6 +89,7 @@ Native reads have one pending UI request and a 500 ms HTTP wait budget; a blocke
 | Prompt | Required arguments |
 |---|---|
 | `getting_started` | None; optional `goal` |
+| `grasshopper_getting_started` | None; optional `goal` |
 | `inspect_model` | None |
 | `plan_parametric_definition` | `goal` |
 | `create_and_verify_definition` | `design_intent` |

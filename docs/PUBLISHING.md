@@ -6,7 +6,7 @@ Publish through GitHub Actions: **Build** produces an artifact, then manual **Pu
 
 | Release | Source / workflow ref | Tag example | GitHub status |
 |---|---|---|---|
-| Stable | Merged `main` commit; dispatch on `main` | `v0.6.0` | Stable / latest |
+| Stable | Merged `main` commit; dispatch on `main` | `v0.7.0` | Stable / latest |
 | Grasshopper alpha | `release/0.6.0-alpha`, initially from `feat/grasshopper1` at `37d9691` | `v0.6.0-alpha` | Prerelease / not latest |
 | Telemetry alpha | `release/0.6.1-alpha` | `v0.6.1-alpha` | Prerelease / not latest |
 | Grasshopper tools alpha | `release/0.6.2-alpha` | `v0.6.2-alpha` | Prerelease / not latest |

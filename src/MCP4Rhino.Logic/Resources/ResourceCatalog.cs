@@ -8,6 +8,7 @@ public static class ResourceCatalog
     {
         Item("server/capabilities", "Server capabilities", "Server versions, subsystem state, lanes and limits", "application/json"),
         Item("server/getting-started", "Getting started", "First Rhino session walkthrough for new users", "text/markdown"),
+        Item("server/grasshopper-getting-started", "Grasshopper getting started", "First Grasshopper session walkthrough", "text/markdown"),
         Item("server/writing-style", "Writing style", "Clear English (STE-inspired) rules for agent replies", "text/markdown"),
         Item("rhino/documents/active", "Active Rhino document", "Live active-document context without paths or geometry", "application/json"),
         Item("grasshopper/sessions", "Grasshopper sessions", "Definitions and sessions scoped to the active Rhino document", "application/json"),

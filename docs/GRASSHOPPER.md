@@ -1,6 +1,6 @@
 # Grasshopper and parametric design
 
-**Experimental 0.6.5-alpha on `release/0.6.5-alpha` (includes 0.6.4 tooling).** This opt-in alpha is distributed for licensed native testing after CI passes. Stable promotion and merging the feature into `main` remain blocked until native Windows and macOS acceptance checks pass. Build and unit-test results do not establish Grasshopper runtime behavior.
+**Stable in 0.7.0 on `main`.** Build and unit-test results do not by themselves prove every native Grasshopper edge case; report platform-specific issues with `get_support_info`.
 
 MCP4Rhino exposes native, editable Grasshopper 1 definitions in Rhino 8 on Windows and macOS. The runtime initializes lazily when discovery or document tools are used. `gh_help` works without loading Grasshopper, and ordinary Rhino tools do not depend on it.
 
@@ -38,7 +38,7 @@ All mutations require a unique request ID; exact retries return the original rec
 
 `gh_show_document` changes editor state only, requires a request ID and expected revision, and leaves graph revision unchanged. Capture is read-only with respect to graph/editor state and writes a PNG destination. It does not require a mutation request ID.
 
-## General graph capabilities in 0.6.5-alpha
+## General graph capabilities in 0.7.0
 
 The native allowlist now includes Polyline, Join Curves, Weave, Merge, Shift List, Insert Items, Reverse List, List Length, Entwine, Boundary Surfaces, and Cap Holes. Discover their installed IDs and ports before use; names are not execution authority. Primitive constants on Generic Data inputs use connected native Number, Integer, Boolean or Text parameters.
 
@@ -92,8 +92,8 @@ Also verify manually on both platforms: one native GH undo/redo step per patch, 
 
 Use a licensed Rhino 8 installation; the initial native target is Rhino 8.35 with bundled Grasshopper 1. Grasshopper 2 is outside this alpha. Use disposable Rhino documents and save any existing work first.
 
-1. Open `PackageManager`, enable **Include pre-releases**, search **MCP4Rhino**, select `0.6.5-alpha`, and install/update. Apply and restart Rhino completely. This updates the existing plugin; it does not run alongside the stable version.
-2. Call `get_support_info` and confirm `server_version` is `0.6.5-alpha`. Call `gh_help` with `topic: "index"` and `gh_status`. Confirm an ordinary tool such as `get_document_info` still works. The endpoint remains `http://127.0.0.1:4010/mcp`.
+1. Open `PackageManager`, search **MCP4Rhino**, select `0.7.0`, and install/update. Apply and restart Rhino completely.
+2. Call `get_support_info` and confirm `server_version` is `0.7.0`. Call `gh_help` with `topic: "index"` and `gh_status`. Confirm an ordinary tool such as `get_document_info` still works. The endpoint remains `http://127.0.0.1:4010/mcp`.
 3. Use an agent with only MCP help or the downloaded portable skill to create the array, facade, and loft examples. Inspect editable native components, preview, dimensions, tree structure and diagnostics. Change a parameter while preserving derived relationships; repair the loft's deliberate tree mismatch.
 4. Optionally download `grasshopper-smoke.py` from the same GitHub prerelease. With Python 3, run `python grasshopper-smoke.py --example array`, `python grasshopper-smoke.py --example facade --bake`, and `python grasshopper-smoke.py --example loft`. The runner needs no checkout or Python packages. It creates definitions, temporary `.gh`/`.ghx` files, and, with `--bake`, two geometry snapshots. It leaves the final definition open for inspection.
 5. Test manual edit conflicts, one undo/redo step per patch, deleted/replaced Rhino references, switching documents, queued/running cancellation, no overlapping solves, and ordinary tools when Grasshopper cannot load. Record heavy-solve UI blocking rather than treating a job ID as evidence that Rhino stays responsive.

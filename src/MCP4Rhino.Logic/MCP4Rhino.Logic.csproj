@@ -6,15 +6,16 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>MCP4Rhino.Logic</RootNamespace>
     <AssemblyName>MCP4Rhino.Logic</AssemblyName>
-    <Version>0.6.5-alpha</Version>
-    <AssemblyVersion>0.6.5.0</AssemblyVersion>
-    <FileVersion>0.6.5.0</FileVersion>
+    <Version>0.7.0</Version>
+    <AssemblyVersion>0.7.0.0</AssemblyVersion>
+    <FileVersion>0.7.0.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Grasshopper/Tools.json" LogicalName="GrasshopperTools.json" />
     <EmbeddedResource Include="Grasshopper/NativeComponents.json" LogicalName="GrasshopperNativeComponents.json" />
     <EmbeddedResource Include="Resources/writing-style.md" LogicalName="ServerGuide.writing-style.md" />
     <EmbeddedResource Include="Resources/getting-started.md" LogicalName="ServerGuide.getting-started.md" />
+    <EmbeddedResource Include="Resources/grasshopper-getting-started.md" LogicalName="ServerGuide.grasshopper-getting-started.md" />
     <EmbeddedResource Include="../../skills/grasshopper-parametric-design/**/*.md">
       <LogicalName>GrasshopperHelp/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
     </EmbeddedResource>

@@ -7,6 +7,18 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-10-27
+
+### Added
+
+- `grasshopper_getting_started` prompt and `mcp4rhino://server/grasshopper-getting-started` walkthrough for a first parametric session.
+- Tutorial guidance to show viewport/canvas captures in the chat harness and to record completion in workspace `.mcp4rhino/tutorial-memory.md`.
+
+### Changed
+
+- `getting_started` now names Grasshopper as a first-class next lane and points at the Grasshopper tutorial.
+- Stable package version `0.7.0` (includes prior 0.6.x alpha tooling, resources, prompts, and agent-guidance balance).
+
 ## [0.6.5-alpha] — 2026-10-27
 
 ### Added

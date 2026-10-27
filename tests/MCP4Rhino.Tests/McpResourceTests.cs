@@ -20,6 +20,7 @@ public class McpResourceTests
     [Theory]
     [InlineData("mcp4rhino://server/capabilities", "capabilities")]
     [InlineData("mcp4rhino://server/getting-started", "getting_started")]
+    [InlineData("mcp4rhino://server/grasshopper-getting-started", "grasshopper_getting_started")]
     [InlineData("mcp4rhino://server/writing-style", "writing_style")]
     [InlineData("mcp4rhino://rhino/documents/active", "document")]
     [InlineData("mcp4rhino://rhino/documents/" + Id, "document")]
@@ -33,7 +34,7 @@ public class McpResourceTests
     [InlineData("mcp4rhino://grasshopper/sessions/" + Id + "/results/" + Id + "/nodes/" + Id + "/outputs/0", "output")]
     [InlineData("mcp4rhino://grasshopper/components/" + Id, "component")]
     [InlineData("mcp4rhino://grasshopper/guides/examples/profile", "guide")]
-    [InlineData("mcp4rhino://grasshopper/recipes/0.6.5-alpha/profile", "recipe")]
+    [InlineData("mcp4rhino://grasshopper/recipes/0.7.0/profile", "recipe")]
     public void CatalogRoutesHaveUnambiguousTypedIdentifiers(string uri, string expected) =>
         Assert.Equal(expected, ResourceAddress.Parse(uri).Kind);
 
@@ -57,7 +58,7 @@ public class McpResourceTests
     [Fact]
     public void ResourcesAndTemplatesAreDiscoverableWithoutNativeAccess()
     {
-        var list = ResourceCatalog.List(new()); Assert.Equal(6, list["resources"]!.AsArray().Count);
+        var list = ResourceCatalog.List(new()); Assert.Equal(7, list["resources"]!.AsArray().Count);
         foreach (var resource in list["resources"]!.AsArray())
             Assert.NotNull(ResourceAddress.Parse(resource!["uri"]!.GetValue<string>()));
         var templates = ResourceCatalog.Templates(new())["resourceTemplates"]!.AsArray();
@@ -84,7 +85,7 @@ public class McpResourceTests
             Assert.NotNull(Read(link.Groups[1].Value, new ForbiddenGateway()));
         Assert.Throws<McpRpcException>(() => Read("mcp4rhino://grasshopper/guides/unknown"));
         Assert.Throws<McpRpcException>(() => Read("mcp4rhino://grasshopper/recipes/0.1.0/profile"));
-        Assert.Throws<McpRpcException>(() => Read("mcp4rhino://grasshopper/recipes/0.6.5-alpha/unknown"));
+        Assert.Throws<McpRpcException>(() => Read("mcp4rhino://grasshopper/recipes/0.7.0/unknown"));
     }
 
     [Fact]
@@ -122,6 +123,9 @@ public class McpResourceTests
         Assert.Equal("get_document_info", data["lanes"]!["document"]!["entry"]![0]!.GetValue<string>());
         Assert.Equal("mcp4rhino://server/getting-started", data["lanes"]!["getting_started"]!["resource"]!.GetValue<string>());
         Assert.Equal("getting_started", data["lanes"]!["getting_started"]!["prompt"]!.GetValue<string>());
+        Assert.Equal("grasshopper_getting_started", data["lanes"]!["grasshopper"]!["prompt"]!.GetValue<string>());
+        Assert.Equal("mcp4rhino://server/grasshopper-getting-started",
+            data["lanes"]!["grasshopper"]!["resource"]!.GetValue<string>());
         var promptNames = PromptCatalog.List(new())["prompts"]!.AsArray()
             .Select(prompt => prompt!["name"]!.GetValue<string>()).ToHashSet(StringComparer.Ordinal);
         foreach (var lane in data["lanes"]!.AsObject())
@@ -134,6 +138,7 @@ public class McpResourceTests
 
     [Theory]
     [InlineData("mcp4rhino://server/getting-started", "Getting started")]
+    [InlineData("mcp4rhino://server/grasshopper-getting-started", "Grasshopper getting started")]
     [InlineData("mcp4rhino://server/writing-style", "Writing style")]
     public void ServerGuidesAreMarkdownWithoutNativeAccess(string uri, string heading)
     {

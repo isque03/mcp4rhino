@@ -10,6 +10,7 @@ public static class ServerGuides
     {
         ["writing_style"] = "ServerGuide.writing-style.md",
         ["getting_started"] = "ServerGuide.getting-started.md",
+        ["grasshopper_getting_started"] = "ServerGuide.grasshopper-getting-started.md",
     };
 
     public static bool TryMarkdown(string kind, out string markdown)

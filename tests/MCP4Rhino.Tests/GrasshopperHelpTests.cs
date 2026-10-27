@@ -22,7 +22,8 @@ public class GrasshopperHelpTests
         Assert.Contains("gh_help", SupportInfo.ServerInstructions);
         Assert.Contains("convert_length", SupportInfo.ServerInstructions);
         Assert.Contains("architecture", SupportInfo.ServerInstructions);
-        Assert.Contains("Do not open Grasshopper for ordinary", SupportInfo.ServerInstructions);
+        Assert.Contains("not for ordinary one-off Rhino edits", SupportInfo.ServerInstructions);
+        Assert.Contains("grasshopper_getting_started", SupportInfo.ServerInstructions);
         Assert.DoesNotContain(AppDomain.CurrentDomain.GetAssemblies(), a => a.GetName().Name == "Grasshopper");
     }
 

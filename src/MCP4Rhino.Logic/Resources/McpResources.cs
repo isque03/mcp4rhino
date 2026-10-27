@@ -66,8 +66,11 @@ public static class McpResources
         ["analysis"] = Lane(["clash_detect", "quantity_takeoff", "export_ifc"]),
         ["code_checks"] = Lane(["set_code_context", "run_code_checks", "get_code_report"],
             note: "Findings only; never claim legal compliance or an RA stamp."),
-        ["grasshopper"] = Lane(["gh_help", "gh_status"], "mcp4rhino://grasshopper/guides/index",
-            "Use only when the user wants an editable parametric definition."),
+        ["grasshopper"] = Lane(
+            ["gh_help", "gh_status", "gh_open_document", "gh_search_components", "gh_apply_patch", "gh_solve"],
+            "mcp4rhino://server/grasshopper-getting-started",
+            note: "Editable parametric definitions only. Prefer grasshopper_getting_started for new users.",
+            prompt: "grasshopper_getting_started"),
     };
 
     private static JsonObject Lane(string[] entry, string? resource = null, string? note = null, string? prompt = null)

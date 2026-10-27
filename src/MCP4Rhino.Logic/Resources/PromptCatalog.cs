@@ -13,7 +13,10 @@ public static class PromptCatalog
     private static readonly WorkflowPrompt[] Prompts =
     [
         new("getting_started", "Walk a new user through a first Rhino session", [Arg("goal")],
-            "Read mcp4rhino://server/getting-started and follow its steps. Confirm before create_box or any other mutation. Use mcp4rhino://server/writing-style for narration. After the practice box, measure, zoom, and capture, then ask what lane to try next. Do not open Grasshopper unless the user chooses parametric work."),
+            "Read mcp4rhino://server/getting-started and follow its steps. Check .mcp4rhino/tutorial-memory.md first; skip a full redo if getting_started is already complete. In the first reply, name direct Rhino modeling and Grasshopper as separate lanes. Confirm before create_box or any other mutation. Use mcp4rhino://server/writing-style for narration. After the practice box, measure, zoom, capture_viewport, show the image in the chat harness, then update tutorial memory. Offer architecture, drawings, or grasshopper_getting_started."),
+        new("grasshopper_getting_started", "Walk a new user through a first Grasshopper session", [Arg("goal")],
+            "Read mcp4rhino://server/grasshopper-getting-started and follow its steps. Check .mcp4rhino/tutorial-memory.md first; skip a full redo if grasshopper_getting_started is already complete. Confirm before open, patch, solve, bake, or save. Use mcp4rhino://server/writing-style. Prefer a small supported graph; discover components and ports before patches. After solve, show gh_capture_canvas and capture_viewport images in the chat harness, then update tutorial memory. Do not use Grasshopper for ordinary one-off Rhino edits.",
+            Grasshopper: true),
         new("inspect_model", "Inspect a Rhino model without modifying it", [Arg("document_id"), Arg("focus")],
             "Read the active-document resource and inspect only the requested document. Report units, relevant contents, observations and uncertainty. Do not modify the model or open Grasshopper."),
         new("plan_parametric_definition", "Plan an editable Grasshopper graph", [Arg("goal", true), Arg("parameters"), Arg("units"), Arg("document_id")],

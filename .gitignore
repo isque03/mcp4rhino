@@ -13,10 +13,14 @@ dist/
 # Test coverage outputs
 tests/**/coverage/
 
+# Local agent tutorial memory (workspace-relative; see server getting-started guides)
+.mcp4rhino/
+
 # Artifacts
 artifacts/
 # Code Reviews
 .cursor/hostile-review/
+.cursor/hostile-review-*/
 # Generated from the portable canonical skill by package-agent-skills.py --cursor
 .cursor/skills/grasshopper-parametric-design/
 __pycache__/
