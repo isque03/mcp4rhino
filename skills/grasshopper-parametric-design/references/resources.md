@@ -5,6 +5,8 @@ MCP4Rhino 0.6.5-alpha provides resources and prompts alongside explicit tools. C
 Start with:
 
 - `mcp4rhino://server/capabilities`: actual versions, capabilities, subsystem state, capability `lanes` map, supported native type manifest and limits.
+- `mcp4rhino://server/getting-started`: opt-in first Rhino session walkthrough (not Grasshopper-first).
+- `mcp4rhino://server/writing-style`: clear-English reply rules (STE-inspired; not full compliance).
 - `mcp4rhino://rhino/documents/active`: active document identity, units, tolerance, saved/modified state and bounded indexes.
 - `mcp4rhino://grasshopper/sessions`: sessions bound to the active Rhino document and the visible unattached definition.
 - `mcp4rhino://grasshopper/guides/index`: packaged guides and versioned recipe resources.
@@ -21,6 +23,6 @@ Follow returned `next_uri` links. Content pages default to 50 items, allow at mo
 
 Node summaries bound ports and sources to 200 each and identify truncation with actual port counts and `truncated_sources`. Result summaries identify output-port limits. Use explicit inspection tools when those bounded summaries are insufficient.
 
-Seven generic prompts are available: `inspect_model`, `plan_parametric_definition`, `create_and_verify_definition`, `diagnose_graph`, `explore_parameter_variation`, `prepare_output_snapshot`, and `prepare_model_report`. General prompts orient from the active document; Grasshopper prompts also open the GH guide index. Retrieve the declared arguments with `prompts/list`; `prompts/get` returns messages and performs no native actions. Follow the user's authorization when executing a selected workflow. Saving, baking, exports and replacement remain explicit actions.
+Eight prompts are available: `getting_started`, `inspect_model`, `plan_parametric_definition`, `create_and_verify_definition`, `diagnose_graph`, `explore_parameter_variation`, `prepare_output_snapshot`, and `prepare_model_report`. General prompts orient from the active document; Grasshopper prompts also open the GH guide index. Retrieve the declared arguments with `prompts/list`; `prompts/get` returns messages and performs no native actions. Follow the user's authorization when executing a selected workflow. Saving, baking, exports and replacement remain explicit actions.
 
 The local endpoint supports MCP 2026-07-28 with per-request metadata and `server/discover`, 2025-11-25 with initialization and Streamable HTTP JSON responses, and the existing 2024-11-05 POST compatibility behavior. Resources and prompts complement generic graph tools; they add no object-specific modeling service or compliance claims.

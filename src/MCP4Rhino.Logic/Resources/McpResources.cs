@@ -17,6 +17,8 @@ public static class McpResources
     {
         var uri = McpRequestContext.Text(args["uri"]) ?? throw ResourceAddress.Invalid();
         var address = ResourceAddress.Parse(uri);
+        if (address.Kind is "writing_style" or "getting_started")
+            return Content(uri, "text/markdown", $"Version: {McpJsonRpc.ServerVersion}\n\n{ServerGuides.Markdown(address.Kind)}");
         if (address.Kind == "guide") return Guide(uri, address.Arguments["topic"]!.GetValue<string>());
         if (address.Kind == "recipe") return Recipe(address);
         var data = gateway?.Read(address) ?? new JsonObject { ["status"] = "unavailable", ["reason"] = "native_gateway_unavailable" };
@@ -52,6 +54,8 @@ public static class McpResources
 
     private static JsonObject Lanes() => new()
     {
+        ["getting_started"] = Lane(["getting_started"], "mcp4rhino://server/getting-started",
+            "Opt-in first session. Use the getting_started prompt or this resource; ask before creating geometry."),
         ["document"] = Lane(["get_document_info", "get_document_units", "convert_length"], "mcp4rhino://rhino/documents/active"),
         ["geometry"] = Lane(["create_box", "boolean_union", "loft_surface", "measure_size"]),
         ["architecture"] = Lane(["create_level", "create_wall", "create_space", "get_building_model"]),

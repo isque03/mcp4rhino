@@ -12,6 +12,8 @@ public static class PromptCatalog
     private static PromptArgument Arg(string name, bool required = false) => new(name, $"User-supplied {name.Replace('_', ' ')}", required);
     private static readonly WorkflowPrompt[] Prompts =
     [
+        new("getting_started", "Walk a new user through a first Rhino session", [Arg("goal")],
+            "Read mcp4rhino://server/getting-started and follow its steps. Confirm before create_box or any other mutation. Use mcp4rhino://server/writing-style for narration. After the practice box, measure, zoom, and capture, then ask what lane to try next. Do not open Grasshopper unless the user chooses parametric work."),
         new("inspect_model", "Inspect a Rhino model without modifying it", [Arg("document_id"), Arg("focus")],
             "Read the active-document resource and inspect only the requested document. Report units, relevant contents, observations and uncertainty. Do not modify the model or open Grasshopper."),
         new("plan_parametric_definition", "Plan an editable Grasshopper graph", [Arg("goal", true), Arg("parameters"), Arg("units"), Arg("document_id")],

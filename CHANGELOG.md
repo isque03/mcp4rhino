@@ -9,11 +9,16 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [0.6.5-alpha] — 2026-10-27
 
+### Added
+
+- Opt-in `getting_started` prompt and `mcp4rhino://server/getting-started` walkthrough (orient → practice box → measure/capture → next lane). Asks before creating geometry.
+- `mcp4rhino://server/writing-style` with pragmatic clear-English rules (ASD-STE100 style, not full compliance or dictionary).
+
 ### Changed
 
-- MCP `instructions` now map document, geometry, architecture, drawings, analysis, code-check, and Grasshopper lanes so agents do not treat Grasshopper as the default path.
-- `mcp4rhino://server/capabilities` includes a compact `lanes` map with exemplar tools and lane guidance.
-- General prompts (`inspect_model`, `prepare_model_report`) start from the active-document resource; Grasshopper prompts keep the GH guide index. Prompt descriptions name Grasshopper when the workflow is parametric.
+- MCP `instructions` now map document, geometry, architecture, drawings, analysis, code-check, and Grasshopper lanes so agents do not treat Grasshopper as the default path. New-user and writing-style pointers are included.
+- `mcp4rhino://server/capabilities` includes a compact `lanes` map (including `getting_started`) with exemplar tools and lane guidance.
+- General prompts (`getting_started`, `inspect_model`, `prepare_model_report`) start from the active-document resource; Grasshopper prompts keep the GH guide index. Prompt descriptions name Grasshopper when the workflow is parametric.
 - `gh_help` description refers to Grasshopper parametric-design help for this package, not “this server” as a whole.
 - Package, assembly, MCP version, and CI prerelease provenance checks support `0.6.5-alpha` on `release/0.6.5-alpha`.
 

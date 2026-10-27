@@ -36,6 +36,8 @@ Discover resources with `resources/list` and templates with `resources/templates
 | URI | MIME type | Contents |
 |---|---|---|
 | `mcp4rhino://server/capabilities` | `application/json` | Protocol/server/Rhino versions, implemented capabilities, subsystem state, capability `lanes` map, supported native type manifest, value categories, limits |
+| `mcp4rhino://server/getting-started` | `text/markdown` | Opt-in first Rhino session walkthrough; reading it does not mutate the model |
+| `mcp4rhino://server/writing-style` | `text/markdown` | Clear-English (STE-inspired) rules for agent replies; not full ASD-STE100 compliance |
 | `mcp4rhino://rhino/documents/active` | `application/json` | Active document identity, units/tolerances, saved/modified state, counts, and bounded object/layer/view indexes |
 | `mcp4rhino://grasshopper/sessions` | `application/json` | Active-document MCP sessions and the current visible unattached definition, separately identified |
 | `mcp4rhino://grasshopper/guides/index` | `text/markdown` | Packaged guidance with resolvable resource links and versioned recipe links |
@@ -85,6 +87,7 @@ Native reads have one pending UI request and a 500 ms HTTP wait budget; a blocke
 
 | Prompt | Required arguments |
 |---|---|
+| `getting_started` | None; optional `goal` |
 | `inspect_model` | None |
 | `plan_parametric_definition` | `goal` |
 | `create_and_verify_definition` | `design_intent` |

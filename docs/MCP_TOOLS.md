@@ -30,7 +30,7 @@ MCP resources and prompts complement tools in 0.6.5-alpha. See [resources, promp
 | `get_support_info` | Version, endpoint, log path, GitHub Issues URLs, filing tips |
 | `mcp4rhino_reload` | Hot-reload Tools and Logic |
 
-`initialize` also returns MCP `instructions` with a capability-lane map (document, geometry, architecture, drawings, analysis, code checks, Grasshopper) plus [GitHub Issues](https://github.com/isque03/mcp4rhino/issues) and `get_support_info` before filing bugs or enhancements.
+`initialize` also returns MCP `instructions` with a capability-lane map (getting started, document, geometry, architecture, drawings, analysis, code checks, Grasshopper), clear-English writing guidance, plus [GitHub Issues](https://github.com/isque03/mcp4rhino/issues) and `get_support_info` before filing bugs or enhancements. New users can follow the `getting_started` prompt or `mcp4rhino://server/getting-started`.
 
 ## Curves and solids
 

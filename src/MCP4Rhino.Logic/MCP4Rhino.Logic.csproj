@@ -13,6 +13,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Grasshopper/Tools.json" LogicalName="GrasshopperTools.json" />
     <EmbeddedResource Include="Grasshopper/NativeComponents.json" LogicalName="GrasshopperNativeComponents.json" />
+    <EmbeddedResource Include="Resources/writing-style.md" LogicalName="ServerGuide.writing-style.md" />
+    <EmbeddedResource Include="Resources/getting-started.md" LogicalName="ServerGuide.getting-started.md" />
     <EmbeddedResource Include="../../skills/grasshopper-parametric-design/**/*.md">
       <LogicalName>GrasshopperHelp/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
     </EmbeddedResource>

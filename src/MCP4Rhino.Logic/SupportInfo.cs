@@ -14,11 +14,13 @@ public static class SupportInfo
 
     public static string ServerInstructions { get; } =
         "MCP4Rhino drives the active Rhino 8 document for AI assistants. Prefer the smallest lane that matches the ask. " +
+        "New users: use the getting_started prompt or read mcp4rhino://server/getting-started; ask before creating geometry. " +
         "Orient with mcp4rhino://rhino/documents/active or get_document_info / get_document_units; lengths use document model units—call convert_length before create_* when the user speaks other units. " +
         "Direct modeling covers geometry, architecture (levels/walls/spaces/…), drawings/docs, views/capture, clash/QTO/export, and code-check findings—discover via tools/list or mcp4rhino://server/capabilities lanes. " +
         "Do not open Grasshopper for ordinary one-off Rhino edits. " +
         "Parametric / Grasshopper only when the user wants an editable definition: start with gh_help(topic: index) or mcp4rhino://grasshopper/guides/index; discover components and ports before patches. " +
         "Optional workflows: prompts/list. Inspect-only: inspect_model. Reading resources or prompts never mutates the model or initializes Grasshopper. " +
+        "When writing to the user in English, use short clear sentences and one term per idea (ASD-STE100 style, not full compliance); see mcp4rhino://server/writing-style. In other languages, keep the same clarity: short sentences and consistent terms. " +
         "File bugs at https://github.com/isque03/mcp4rhino/issues. Call get_support_info first. " +
         "Include MCP4Rhino/Rhino/OS versions, repro, expected vs actual, and relevant log lines. Do not paste secrets or full license keys.";
 

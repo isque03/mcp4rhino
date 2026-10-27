@@ -14,7 +14,13 @@ public class SupportInfoTests
         Assert.Contains("labels=enhancement", SupportInfo.NewEnhancementUrl);
         Assert.Contains("get_support_info", SupportInfo.ServerInstructions);
         Assert.Contains("mcp4rhino://server/capabilities", SupportInfo.ServerInstructions);
+        Assert.Contains("getting_started", SupportInfo.ServerInstructions);
+        Assert.Contains("mcp4rhino://server/getting-started", SupportInfo.ServerInstructions);
+        Assert.Contains("ASD-STE100 style", SupportInfo.ServerInstructions);
+        Assert.Contains("mcp4rhino://server/writing-style", SupportInfo.ServerInstructions);
         Assert.DoesNotContain("Learn parametric design and this server", SupportInfo.ServerInstructions);
+        Assert.DoesNotContain("usage", SupportInfo.ServerInstructions, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("consent", SupportInfo.ServerInstructions, StringComparison.OrdinalIgnoreCase);
 
         var json = System.Text.Json.JsonSerializer.Serialize(SupportInfo.BuildPayload(
             endpoint: "http://127.0.0.1:4010/mcp",

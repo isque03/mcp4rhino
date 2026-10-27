@@ -6,7 +6,8 @@ namespace MCP4Rhino.Logic.Resources;
 /// <summary>Resource-only projection. Existing explicit tool responses remain unchanged.</summary>
 public static partial class ResourcePrivacy
 {
-    [GeneratedRegex(@"(?:file://|[A-Za-z]:[\\/]|(?<![:/A-Za-z0-9])/(?!/)|\\\\)[^\s\""<>]*")]
+    // Drive letters must not match letters inside URIs such as mcp4rhino://…
+    [GeneratedRegex(@"(?:file://|(?<![A-Za-z0-9])[A-Za-z]:[\\/]|(?<![:/A-Za-z0-9])/(?!/)|\\\\)[^\s\""<>]*")]
     private static partial Regex LocalPath();
 
     public static JsonNode? Project(JsonNode? value)

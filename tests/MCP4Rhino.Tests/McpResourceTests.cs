@@ -19,6 +19,8 @@ public class McpResourceTests
 
     [Theory]
     [InlineData("mcp4rhino://server/capabilities", "capabilities")]
+    [InlineData("mcp4rhino://server/getting-started", "getting_started")]
+    [InlineData("mcp4rhino://server/writing-style", "writing_style")]
     [InlineData("mcp4rhino://rhino/documents/active", "document")]
     [InlineData("mcp4rhino://rhino/documents/" + Id, "document")]
     [InlineData("mcp4rhino://rhino/documents/" + Id + "/objects/" + Id, "object")]
@@ -55,7 +57,7 @@ public class McpResourceTests
     [Fact]
     public void ResourcesAndTemplatesAreDiscoverableWithoutNativeAccess()
     {
-        var list = ResourceCatalog.List(new()); Assert.Equal(4, list["resources"]!.AsArray().Count);
+        var list = ResourceCatalog.List(new()); Assert.Equal(6, list["resources"]!.AsArray().Count);
         foreach (var resource in list["resources"]!.AsArray())
             Assert.NotNull(ResourceAddress.Parse(resource!["uri"]!.GetValue<string>()));
         var templates = ResourceCatalog.Templates(new())["resourceTemplates"]!.AsArray();
@@ -98,6 +100,11 @@ public class McpResourceTests
         Assert.DoesNotContain("private text", data.ToJsonString()); Assert.DoesNotContain("secret.txt", data.ToJsonString());
         Assert.Equal("live_read", data["freshness"]!.GetValue<string>());
         Assert.NotNull(data["observed_at_utc"]);
+        Assert.Equal("mcp4rhino://server/getting-started",
+            ResourcePrivacy.Project(JsonValue.Create("mcp4rhino://server/getting-started"))!.GetValue<string>());
+        Assert.Equal("mcp4rhino://rhino/documents/active",
+            ResourcePrivacy.Project(JsonValue.Create("mcp4rhino://rhino/documents/active"))!.GetValue<string>());
+        Assert.Contains("[local path redacted]", ResourcePrivacy.Project(JsonValue.Create("C:\\private\\model.3dm"))!.GetValue<string>());
     }
 
     [Fact]
@@ -108,10 +115,24 @@ public class McpResourceTests
         Assert.Equal(256 * 1024, data["limits"]!["resource_max_bytes"]!.GetValue<int>());
         Assert.Equal(3, data["supported_protocol_versions"]!.AsArray().Count);
         Assert.Equal(ComponentSupport.Catalog().Length, data["supported_components"]!.AsArray().Count);
+        Assert.Contains("getting_started", data["lanes"]!.AsObject().Select(p => p.Key));
         Assert.Contains("architecture", data["lanes"]!.AsObject().Select(p => p.Key));
         Assert.Contains("grasshopper", data["lanes"]!.AsObject().Select(p => p.Key));
         Assert.Contains("Do not open Grasshopper", data["lane_guidance"]!.GetValue<string>());
         Assert.Equal("get_document_info", data["lanes"]!["document"]!["entry"]![0]!.GetValue<string>());
+        Assert.Equal("mcp4rhino://server/getting-started", data["lanes"]!["getting_started"]!["resource"]!.GetValue<string>());
+    }
+
+    [Theory]
+    [InlineData("mcp4rhino://server/getting-started", "Getting started")]
+    [InlineData("mcp4rhino://server/writing-style", "Writing style")]
+    public void ServerGuidesAreMarkdownWithoutNativeAccess(string uri, string heading)
+    {
+        var result = Read(uri, new ForbiddenGateway());
+        var content = result["contents"]![0]!;
+        Assert.Equal("text/markdown", content["mimeType"]!.GetValue<string>());
+        Assert.Contains(heading, content["text"]!.GetValue<string>());
+        Assert.Contains(McpJsonRpc.ServerVersion, content["text"]!.GetValue<string>());
     }
 
     [Fact]

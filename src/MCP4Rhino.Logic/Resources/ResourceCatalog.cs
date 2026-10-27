@@ -6,7 +6,9 @@ public static class ResourceCatalog
 {
     public static JsonObject List(JsonObject args) => ResourcePaging.Catalog("resources", new object[]
     {
-        Item("server/capabilities", "Server capabilities", "Server versions, subsystem state and limits", "application/json"),
+        Item("server/capabilities", "Server capabilities", "Server versions, subsystem state, lanes and limits", "application/json"),
+        Item("server/getting-started", "Getting started", "First Rhino session walkthrough for new users", "text/markdown"),
+        Item("server/writing-style", "Writing style", "Clear English (STE-inspired) rules for agent replies", "text/markdown"),
         Item("rhino/documents/active", "Active Rhino document", "Live active-document context without paths or geometry", "application/json"),
         Item("grasshopper/sessions", "Grasshopper sessions", "Definitions and sessions scoped to the active Rhino document", "application/json"),
         Item("grasshopper/guides/index", "Grasshopper guides", "Packaged guides and versioned recipes", "text/markdown"),
