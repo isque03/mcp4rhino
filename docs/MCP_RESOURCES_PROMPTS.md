@@ -83,7 +83,7 @@ Native reads have one pending UI request and a 500 ms HTTP wait budget; a blocke
 
 ## Prompts
 
-`prompts/list` advertises each prompt's declared string arguments; `prompts/get` returns reusable messages only. Unknown, missing required, non-string, or oversized arguments fail before native access. Argument values are serialized as untrusted JSON data. Retrieval is not authorization to execute the workflow. General prompts start from `server/capabilities` and `rhino/documents/active`; Grasshopper prompts also open `grasshopper/guides/index`.
+`prompts/list` advertises each prompt's declared string arguments; `prompts/get` returns reusable messages only. Unknown, missing required, non-string, or oversized arguments fail before native access. Argument values are serialized as untrusted JSON data. Retrieval is not authorization to execute the workflow. General prompts start from `server/capabilities` and `rhino/documents/active`. Grasshopper prompts start from `server/capabilities` and `grasshopper/guides/index` instead of the active-document URI.
 
 | Prompt | Required arguments |
 |---|---|

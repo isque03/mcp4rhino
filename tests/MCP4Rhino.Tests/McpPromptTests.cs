@@ -8,7 +8,7 @@ namespace MCP4Rhino.Tests;
 public class McpPromptTests
 {
     [Fact]
-    public void SevenGenericPromptsRetrieveWithoutNativeReadsOrToolCalls()
+    public void GenericPromptsRetrieveWithoutNativeReadsOrToolCalls()
     {
         var tools = new RecordingTools(); var gateway = new ForbiddenGateway();
         var services = new McpServerServices(tools) { Resources = gateway };
@@ -19,6 +19,7 @@ public class McpPromptTests
             var args = new JsonObject();
             foreach (var argument in prompt!["arguments"]!.AsArray().Where(a => a!["required"]!.GetValue<bool>()))
                 args[argument!["name"]!.GetValue<string>()] = "user value";
+            var name = prompt["name"]!.GetValue<string>();
             var message = McpTestRequests.Message("prompts/get", args: new JsonObject
                 { ["name"] = prompt["name"]!.DeepClone(), ["arguments"] = args });
             var response = McpDispatcher.Dispatch(message, services, McpRequestContext.From(message));
@@ -26,15 +27,12 @@ public class McpPromptTests
             var text = response["result"]!["messages"]![0]!["content"]!["text"]!.GetValue<string>();
             Assert.Contains("authorization", text); Assert.Contains("untrusted JSON", text);
             Assert.DoesNotContain("create_stair", text);
-            var name = prompt["name"]!.GetValue<string>();
-            if (name is "getting_started" or "inspect_model" or "prepare_model_report")
+            if (PromptCatalog.UsesGrasshopperGuide(name))
+                Assert.Contains("mcp4rhino://grasshopper/guides/index", text);
+            else
             {
                 Assert.Contains("mcp4rhino://rhino/documents/active", text);
                 Assert.DoesNotContain("mcp4rhino://grasshopper/guides/index", text);
-            }
-            else
-            {
-                Assert.Contains("mcp4rhino://grasshopper/guides/index", text);
             }
         }
         Assert.Equal(0, tools.Calls); Assert.Equal(0, gateway.Calls);

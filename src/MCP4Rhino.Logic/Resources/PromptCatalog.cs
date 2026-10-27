@@ -35,6 +35,9 @@ public static class PromptCatalog
             "Gather named inputs, measurements, diagnostics and provenance from the active document and, when a session is supplied, the matching Grasshopper solution. Use explicit capture tools if authorized. Every measurement and image must identify the same document or solution revision/result. State omissions and assumptions; distinguish screenshots from dimensioned drawings. Do not assert structural, regulatory or manufacturing approval."),
     ];
 
+    public static bool UsesGrasshopperGuide(string name) =>
+        Prompts.FirstOrDefault(prompt => prompt.Name == name)?.Grasshopper == true;
+
     public static JsonObject List(JsonObject args) => ResourcePaging.Catalog("prompts", Prompts.Select(prompt => (object)new
     {
         name = prompt.Name, description = prompt.Description,

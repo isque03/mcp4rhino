@@ -12,13 +12,17 @@ public static class ServerGuides
         ["getting_started"] = "ServerGuide.getting-started.md",
     };
 
-    public static string Markdown(string kind)
+    public static bool TryMarkdown(string kind, out string markdown)
     {
-        if (!Names.TryGetValue(kind, out var name))
-            throw new Protocol.McpRpcException(-32002, "Guide not found");
-        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(name)
-            ?? throw new Protocol.McpRpcException(-32002, "Guide not found");
+        markdown = "";
+        if (!Names.TryGetValue(kind, out var name)) return false;
+        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(name);
+        if (stream is null) return false;
         using var reader = new StreamReader(stream, Encoding.UTF8);
-        return reader.ReadToEnd();
+        markdown = reader.ReadToEnd();
+        return true;
     }
+
+    public static string Markdown(string kind) =>
+        TryMarkdown(kind, out var markdown) ? markdown : throw new Protocol.McpRpcException(-32002, "Guide not found");
 }

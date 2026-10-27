@@ -121,6 +121,15 @@ public class McpResourceTests
         Assert.Contains("Do not open Grasshopper", data["lane_guidance"]!.GetValue<string>());
         Assert.Equal("get_document_info", data["lanes"]!["document"]!["entry"]![0]!.GetValue<string>());
         Assert.Equal("mcp4rhino://server/getting-started", data["lanes"]!["getting_started"]!["resource"]!.GetValue<string>());
+        Assert.Equal("getting_started", data["lanes"]!["getting_started"]!["prompt"]!.GetValue<string>());
+        var promptNames = PromptCatalog.List(new())["prompts"]!.AsArray()
+            .Select(prompt => prompt!["name"]!.GetValue<string>()).ToHashSet(StringComparer.Ordinal);
+        foreach (var lane in data["lanes"]!.AsObject())
+        {
+            foreach (var entry in lane.Value!["entry"]!.AsArray())
+                Assert.False(promptNames.Contains(entry!.GetValue<string>()),
+                    $"Lane {lane.Key} entry '{entry}' must be a tool name, not a prompt");
+        }
     }
 
     [Theory]
