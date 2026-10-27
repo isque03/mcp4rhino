@@ -1,6 +1,6 @@
 # Resources, prompts, and protocol compatibility
 
-MCP4Rhino 0.6.4-alpha adds read-only resources and reusable prompts alongside the existing tools. The endpoint remains `http://127.0.0.1:4010/mcp`. These capabilities require the complete matching package and a Rhino restart; Tools-only hot reload cannot update host or shared contracts.
+MCP4Rhino 0.6.5-alpha continues read-only resources and reusable prompts alongside the existing tools, with balanced lane guidance so Grasshopper is not the default path. The endpoint remains `http://127.0.0.1:4010/mcp`. These capabilities require the complete matching package and a Rhino restart; Tools-only hot reload cannot update host or shared contracts.
 
 ## Protocol profiles
 
@@ -35,7 +35,7 @@ Discover resources with `resources/list` and templates with `resources/templates
 
 | URI | MIME type | Contents |
 |---|---|---|
-| `mcp4rhino://server/capabilities` | `application/json` | Protocol/server/Rhino versions, implemented capabilities, subsystem state, supported native type manifest, value categories, limits |
+| `mcp4rhino://server/capabilities` | `application/json` | Protocol/server/Rhino versions, implemented capabilities, subsystem state, capability `lanes` map, supported native type manifest, value categories, limits |
 | `mcp4rhino://rhino/documents/active` | `application/json` | Active document identity, units/tolerances, saved/modified state, counts, and bounded object/layer/view indexes |
 | `mcp4rhino://grasshopper/sessions` | `application/json` | Active-document MCP sessions and the current visible unattached definition, separately identified |
 | `mcp4rhino://grasshopper/guides/index` | `text/markdown` | Packaged guidance with resolvable resource links and versioned recipe links |
@@ -81,7 +81,7 @@ Native reads have one pending UI request and a 500 ms HTTP wait budget; a blocke
 
 ## Prompts
 
-`prompts/list` advertises each prompt's declared string arguments; `prompts/get` returns reusable messages only. Unknown, missing required, non-string, or oversized arguments fail before native access. Argument values are serialized as untrusted JSON data. Retrieval is not authorization to execute the workflow.
+`prompts/list` advertises each prompt's declared string arguments; `prompts/get` returns reusable messages only. Unknown, missing required, non-string, or oversized arguments fail before native access. Argument values are serialized as untrusted JSON data. Retrieval is not authorization to execute the workflow. General prompts start from `server/capabilities` and `rhino/documents/active`; Grasshopper prompts also open `grasshopper/guides/index`.
 
 | Prompt | Required arguments |
 |---|---|
@@ -93,7 +93,7 @@ Native reads have one pending UI request and a 500 ms HTTP wait budget; a blocke
 | `prepare_output_snapshot` | `session_id`, `outputs` |
 | `prepare_model_report` | None; supply document/session and intended audience as appropriate |
 
-Prompts preserve user changes, require supported-component discovery, distinguish preview from snapshots, and require explicit save/bake/export intent. Reports must associate measurements and images with the same solution identity. No staircase service or regulatory/manufacturing approval is added.
+Prompts preserve user changes, require supported-component discovery for Grasshopper workflows, distinguish preview from snapshots, and require explicit save/bake/export intent. Reports must associate measurements and images with the same document or solution identity. No staircase service or regulatory/manufacturing approval is added.
 
 ## Validation and migration
 

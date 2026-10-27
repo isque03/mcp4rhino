@@ -26,6 +26,16 @@ public class McpPromptTests
             var text = response["result"]!["messages"]![0]!["content"]!["text"]!.GetValue<string>();
             Assert.Contains("authorization", text); Assert.Contains("untrusted JSON", text);
             Assert.DoesNotContain("create_stair", text);
+            var name = prompt["name"]!.GetValue<string>();
+            if (name is "inspect_model" or "prepare_model_report")
+            {
+                Assert.Contains("mcp4rhino://rhino/documents/active", text);
+                Assert.DoesNotContain("mcp4rhino://grasshopper/guides/index", text);
+            }
+            else
+            {
+                Assert.Contains("mcp4rhino://grasshopper/guides/index", text);
+            }
         }
         Assert.Equal(0, tools.Calls); Assert.Equal(0, gateway.Calls);
     }
@@ -61,7 +71,7 @@ public class McpPromptTests
             var message = McpTestRequests.Message(method);
             Assert.Null(McpDispatcher.Dispatch(message, services, McpRequestContext.From(message))!["error"]);
         }
-        foreach (var uri in new[] { "mcp4rhino://grasshopper/guides/index", "mcp4rhino://grasshopper/recipes/0.6.4-alpha/profile" })
+        foreach (var uri in new[] { "mcp4rhino://grasshopper/guides/index", "mcp4rhino://grasshopper/recipes/0.6.5-alpha/profile" })
         {
             var message = McpTestRequests.Message("resources/read", args: new JsonObject { ["uri"] = uri });
             Assert.Null(McpDispatcher.Dispatch(message, services, McpRequestContext.From(message))!["error"]);

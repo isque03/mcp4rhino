@@ -1,7 +1,7 @@
 [
   {
     "name": "gh_help",
-    "description": "Learn parametric design and this server. Topics: index, quickstart, design, data-trees, workflow, debugging, examples/array, examples/facade, examples/loft. Works without Grasshopper. Also: resources, inspection, capture, examples/profile, examples/stair.",
+    "description": "Grasshopper parametric-design help for this package. Topics: index, quickstart, design, data-trees, workflow, debugging, examples/array, examples/facade, examples/loft. Works without Grasshopper. Also: resources, inspection, capture, examples/profile, examples/stair.",
     "inputSchema": {
       "type": "object",
       "properties": {

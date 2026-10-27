@@ -11,14 +11,15 @@ Publish through GitHub Actions: **Build** produces an artifact, then manual **Pu
 | Telemetry alpha | `release/0.6.1-alpha` | `v0.6.1-alpha` | Prerelease / not latest |
 | Grasshopper tools alpha | `release/0.6.2-alpha` | `v0.6.2-alpha` | Prerelease / not latest |
 | General Grasshopper tooling alpha | `release/0.6.4-alpha` | `v0.6.4-alpha` | Prerelease / not latest |
+| Agent-guidance balance alpha | `release/0.6.5-alpha` | `v0.6.5-alpha` | Prerelease / not latest |
 
-`0.6.0-alpha`, `0.6.1-alpha`, `0.6.2-alpha`, and `0.6.4-alpha`, plus numbered successors such as `0.6.0-alpha.1`, each publish from their own release branch. These alphas are public, opt-in, and intended to obtain licensed native testing; green CI is the publication gate. Stable promotion requires the native Windows/macOS acceptance results in [GRASSHOPPER.md](GRASSHOPPER.md#alpha-tester-checklist). Keep stable `0.5.3` and `main` unchanged during alpha preparation.
+`0.6.0-alpha`, `0.6.1-alpha`, `0.6.2-alpha`, `0.6.4-alpha`, and `0.6.5-alpha`, plus numbered successors such as `0.6.0-alpha.1`, each publish from their own release branch. These alphas are public, opt-in, and intended to obtain licensed native testing; green CI is the publication gate. Stable promotion requires the native Windows/macOS acceptance results in [GRASSHOPPER.md](GRASSHOPPER.md#alpha-tester-checklist). Keep stable `0.5.3` and `main` unchanged during alpha preparation.
 
 Apply alpha fixes to the release branch and cherry-pick relevant implementation fixes back to `feat/grasshopper1`. Publishing the final stable `0.6.0` and merging the feature into `main` are separate decisions.
 
 ## Build and versions
 
-Build runs for pull requests and pushes to `main`, `release/0.6.0-alpha`, `release/0.6.1-alpha`, `release/0.6.2-alpha`, or `release/0.6.4-alpha`:
+Build runs for pull requests and pushes to `main`, `release/0.6.0-alpha`, `release/0.6.1-alpha`, `release/0.6.2-alpha`, `release/0.6.4-alpha`, or `release/0.6.5-alpha`:
 
 1. Build/test on Windows and macOS; enforce at least 80% Logic/Contracts line coverage.
 2. Validate release contracts, source-version consistency, canonical skill/help and example recipes.
@@ -41,19 +42,19 @@ Use PowerShell equivalents for .NET coverage and local packaging on Windows. A l
 
 ## Publish an alpha
 
-From a clean, pushed `release/0.6.4-alpha` checkout with the chosen version committed:
+From a clean, pushed `release/0.6.5-alpha` checkout with the chosen version committed:
 
 ```bash
 VERSION="$(awk '/^version:/ { print $2; exit }' manifest.yml)"
 SHA="$(git rev-parse HEAD)"
-python3 scripts/release_checks.py metadata "v$VERSION" refs/heads/release/0.6.4-alpha
+python3 scripts/release_checks.py metadata "v$VERSION" refs/heads/release/0.6.5-alpha
 # Wait for a successful push Build for THIS SHA, not a PR merge build.
-gh run list --workflow=build.yml --branch release/0.6.4-alpha --event push --commit="$SHA" --status=success
-bash scripts/ci-download-build-artifact.sh "$SHA" artifacts/release-candidate release/0.6.4-alpha
+gh run list --workflow=build.yml --branch release/0.6.5-alpha --event push --commit="$SHA" --status=success
+bash scripts/ci-download-build-artifact.sh "$SHA" artifacts/release-candidate release/0.6.5-alpha
 bash scripts/verify-yak-package.sh "artifacts/release-candidate/MCP4Rhino-$VERSION.yak" "$VERSION"
 git tag -a "v$VERSION" -m "MCP4Rhino $VERSION"
 git push origin "v$VERSION"
-gh workflow run publish.yml --ref release/0.6.4-alpha -f tag="v$VERSION"
+gh workflow run publish.yml --ref release/0.6.5-alpha -f tag="v$VERSION"
 ```
 
 Use an empty download destination each time. The tag must identify the exact green SHA, be annotated, and remain immutable. Publish checks the dispatch branch, tag/manifest/project/MCP versions, source ancestry, exact successful push Build, available artifact, and embedded package manifest version. Expired/missing artifacts require rerunning Build on the same SHA before publishing.
@@ -65,7 +66,7 @@ Publish uses `prerelease: true` and `make_latest: false` for alpha versions. Git
 ## Verify distribution
 
 ```bash
-gh release view v0.6.4-alpha --json tagName,isPrerelease,assets,url
+gh release view v0.6.5-alpha --json tagName,isPrerelease,assets,url
 # Read-only checks using the Yak executable shipped with Rhino:
 yak search MCP4Rhino --all --prerelease
 yak search MCP4Rhino

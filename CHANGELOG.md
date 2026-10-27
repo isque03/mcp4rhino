@@ -7,6 +7,16 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.6.5-alpha] — 2026-10-27
+
+### Changed
+
+- MCP `instructions` now map document, geometry, architecture, drawings, analysis, code-check, and Grasshopper lanes so agents do not treat Grasshopper as the default path.
+- `mcp4rhino://server/capabilities` includes a compact `lanes` map with exemplar tools and lane guidance.
+- General prompts (`inspect_model`, `prepare_model_report`) start from the active-document resource; Grasshopper prompts keep the GH guide index. Prompt descriptions name Grasshopper when the workflow is parametric.
+- `gh_help` description refers to Grasshopper parametric-design help for this package, not “this server” as a whole.
+- Package, assembly, MCP version, and CI prerelease provenance checks support `0.6.5-alpha` on `release/0.6.5-alpha`.
+
 ## [0.6.4-alpha] — 2026-10-27
 
 ### Added

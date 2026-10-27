@@ -26,7 +26,7 @@ class Mcp:
         if self.protocol == '2026-07-28':
             arguments['_meta'] = {'io.modelcontextprotocol/protocolVersion': self.protocol,
                 'io.modelcontextprotocol/clientCapabilities': {},
-                'io.modelcontextprotocol/clientInfo': {'name': 'MCP4Rhino smoke', 'version': '0.6.4-alpha'}}
+                'io.modelcontextprotocol/clientInfo': {'name': 'MCP4Rhino smoke', 'version': '0.6.5-alpha'}}
             headers['Mcp-Method'] = method
             if method in ('tools/call', 'prompts/get', 'resources/read'):
                 name = arguments.get('name', arguments.get('uri'))
@@ -357,7 +357,7 @@ def run(client, name, bake, skip_save=False, capture=False):
 def protocol_probe(client):
     method = 'server/discover' if client.protocol == '2026-07-28' else 'initialize'
     arguments = {} if client.protocol == '2026-07-28' else {'protocolVersion': client.protocol,
-        'capabilities': {}, 'clientInfo': {'name': 'MCP4Rhino smoke', 'version': '0.6.4-alpha'}}
+        'capabilities': {}, 'clientInfo': {'name': 'MCP4Rhino smoke', 'version': '0.6.5-alpha'}}
     client.rpc(method, arguments)
     before = client.call('gh_status')
     for method in ('resources/list', 'resources/templates/list', 'prompts/list'):

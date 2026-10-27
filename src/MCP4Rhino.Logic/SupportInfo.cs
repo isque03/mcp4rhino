@@ -13,12 +13,14 @@ public static class SupportInfo
     public const string NewEnhancementUrl = "https://github.com/isque03/mcp4rhino/issues/new?labels=enhancement";
 
     public static string ServerInstructions { get; } =
-        "MCP4Rhino drives the active Rhino 8 document for AI assistants. " +
-        "For Grasshopper and parametric design, start with gh_help(topic: index); use discovery before constructing graphs. " +
-        "File bugs and enhancement requests at https://github.com/isque03/mcp4rhino/issues. " +
-        "Call get_support_info before filing so the report includes version, endpoint, and log path. " +
-        "Include MCP4Rhino version, Rhino version, OS, steps to reproduce, expected vs actual behavior, " +
-        "and relevant log lines. Do not paste secrets, tokens, or full license keys.";
+        "MCP4Rhino drives the active Rhino 8 document for AI assistants. Prefer the smallest lane that matches the ask. " +
+        "Orient with mcp4rhino://rhino/documents/active or get_document_info / get_document_units; lengths use document model units—call convert_length before create_* when the user speaks other units. " +
+        "Direct modeling covers geometry, architecture (levels/walls/spaces/…), drawings/docs, views/capture, clash/QTO/export, and code-check findings—discover via tools/list or mcp4rhino://server/capabilities lanes. " +
+        "Do not open Grasshopper for ordinary one-off Rhino edits. " +
+        "Parametric / Grasshopper only when the user wants an editable definition: start with gh_help(topic: index) or mcp4rhino://grasshopper/guides/index; discover components and ports before patches. " +
+        "Optional workflows: prompts/list. Inspect-only: inspect_model. Reading resources or prompts never mutates the model or initializes Grasshopper. " +
+        "File bugs at https://github.com/isque03/mcp4rhino/issues. Call get_support_info first. " +
+        "Include MCP4Rhino/Rhino/OS versions, repro, expected vs actual, and relevant log lines. Do not paste secrets or full license keys.";
 
     public static int ResolvePort()
     {

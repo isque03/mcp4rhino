@@ -31,7 +31,7 @@ public class McpResourceTests
     [InlineData("mcp4rhino://grasshopper/sessions/" + Id + "/results/" + Id + "/nodes/" + Id + "/outputs/0", "output")]
     [InlineData("mcp4rhino://grasshopper/components/" + Id, "component")]
     [InlineData("mcp4rhino://grasshopper/guides/examples/profile", "guide")]
-    [InlineData("mcp4rhino://grasshopper/recipes/0.6.4-alpha/profile", "recipe")]
+    [InlineData("mcp4rhino://grasshopper/recipes/0.6.5-alpha/profile", "recipe")]
     public void CatalogRoutesHaveUnambiguousTypedIdentifiers(string uri, string expected) =>
         Assert.Equal(expected, ResourceAddress.Parse(uri).Kind);
 
@@ -82,7 +82,7 @@ public class McpResourceTests
             Assert.NotNull(Read(link.Groups[1].Value, new ForbiddenGateway()));
         Assert.Throws<McpRpcException>(() => Read("mcp4rhino://grasshopper/guides/unknown"));
         Assert.Throws<McpRpcException>(() => Read("mcp4rhino://grasshopper/recipes/0.1.0/profile"));
-        Assert.Throws<McpRpcException>(() => Read("mcp4rhino://grasshopper/recipes/0.6.4-alpha/unknown"));
+        Assert.Throws<McpRpcException>(() => Read("mcp4rhino://grasshopper/recipes/0.6.5-alpha/unknown"));
     }
 
     [Fact]
@@ -108,6 +108,10 @@ public class McpResourceTests
         Assert.Equal(256 * 1024, data["limits"]!["resource_max_bytes"]!.GetValue<int>());
         Assert.Equal(3, data["supported_protocol_versions"]!.AsArray().Count);
         Assert.Equal(ComponentSupport.Catalog().Length, data["supported_components"]!.AsArray().Count);
+        Assert.Contains("architecture", data["lanes"]!.AsObject().Select(p => p.Key));
+        Assert.Contains("grasshopper", data["lanes"]!.AsObject().Select(p => p.Key));
+        Assert.Contains("Do not open Grasshopper", data["lane_guidance"]!.GetValue<string>());
+        Assert.Equal("get_document_info", data["lanes"]!["document"]!["entry"]![0]!.GetValue<string>());
     }
 
     [Fact]

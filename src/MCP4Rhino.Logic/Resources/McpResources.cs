@@ -27,6 +27,8 @@ public static class McpResources
             data["capabilities"] = McpDispatcher.Capabilities();
             data["supported_components"] = JsonSerializer.SerializeToNode(ComponentSupport.Catalog());
             data["supported_components_scope"] = "Configured native type allowlist, not installed inventory. Use explicit discovery for installed IDs and ports.";
+            data["lanes"] = Lanes();
+            data["lane_guidance"] = "Prefer the smallest lane that matches the ask. Do not open Grasshopper for ordinary one-off Rhino edits.";
             data["limits"] = new JsonObject { ["page_default"] = 50, ["page_max"] = 200, ["resource_max_bytes"] = ResourcePaging.MaxBytes,
                 ["patch_operations"] = 100, ["definition_objects"] = 2000, ["persistent_items"] = 10000 };
             data["value_categories"] = JsonSerializer.SerializeToNode(new[] { "number", "integer", "boolean", "text (redacted)", "point", "vector", "plane", "interval", "geometry summaries" });
@@ -46,6 +48,27 @@ public static class McpResources
         if (obj["next_offset"] is JsonValue value && value.TryGetValue<int>(out var offset))
             obj["next_uri"] = ResourcePaging.Continue(uri, offset, revision);
         foreach (var child in obj.Select(p => p.Value).Where(v => v is JsonObject or JsonArray).ToArray()) AddContinuations(child!, uri, revision);
+    }
+
+    private static JsonObject Lanes() => new()
+    {
+        ["document"] = Lane(["get_document_info", "get_document_units", "convert_length"], "mcp4rhino://rhino/documents/active"),
+        ["geometry"] = Lane(["create_box", "boolean_union", "loft_surface", "measure_size"]),
+        ["architecture"] = Lane(["create_level", "create_wall", "create_space", "get_building_model"]),
+        ["drawings"] = Lane(["create_section", "create_dimension", "create_sheet", "export_pdf"]),
+        ["analysis"] = Lane(["clash_detect", "quantity_takeoff", "export_ifc"]),
+        ["code_checks"] = Lane(["set_code_context", "run_code_checks", "get_code_report"],
+            note: "Findings only; never claim legal compliance or an RA stamp."),
+        ["grasshopper"] = Lane(["gh_help", "gh_status"], "mcp4rhino://grasshopper/guides/index",
+            "Use only when the user wants an editable parametric definition."),
+    };
+
+    private static JsonObject Lane(string[] entry, string? resource = null, string? note = null)
+    {
+        var lane = new JsonObject { ["entry"] = JsonSerializer.SerializeToNode(entry) };
+        if (resource is not null) lane["resource"] = resource;
+        if (note is not null) lane["note"] = note;
+        return lane;
     }
 
     private static JsonObject Guide(string uri, string topic)

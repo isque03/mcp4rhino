@@ -20,6 +20,9 @@ public class GrasshopperHelpTests
         }
         Assert.Throws<GhException>(() => GhHelp.Read("../../private"));
         Assert.Contains("gh_help", SupportInfo.ServerInstructions);
+        Assert.Contains("convert_length", SupportInfo.ServerInstructions);
+        Assert.Contains("architecture", SupportInfo.ServerInstructions);
+        Assert.Contains("Do not open Grasshopper for ordinary", SupportInfo.ServerInstructions);
         Assert.DoesNotContain(AppDomain.CurrentDomain.GetAssemblies(), a => a.GetName().Name == "Grasshopper");
     }
 

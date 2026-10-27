@@ -4,7 +4,7 @@ Complete inventory for agents and developers. End-user overview: [README.md](../
 
 Default endpoint: `http://127.0.0.1:4010/mcp`.
 
-MCP resources and prompts complement tools in 0.6.4-alpha. See [resources, prompts and protocol compatibility](MCP_RESOURCES_PROMPTS.md) for the catalog, URI templates, active-document boundaries, privacy and three supported protocol profiles. Reading resources or retrieving prompts never invokes a modeling tool.
+MCP resources and prompts complement tools in 0.6.5-alpha. See [resources, prompts and protocol compatibility](MCP_RESOURCES_PROMPTS.md) for the catalog, URI templates, active-document boundaries, privacy and three supported protocol profiles. Reading resources or retrieving prompts never invokes a modeling tool.
 
 **Document units:** length coordinates on create/transform tools are in the **current document unit system**. If the user says “32 inches” and the file is in Feet, call `convert_length` first, then create, then verify with `measure_size` or `measure_distance`.
 
@@ -30,7 +30,7 @@ MCP resources and prompts complement tools in 0.6.4-alpha. See [resources, promp
 | `get_support_info` | Version, endpoint, log path, GitHub Issues URLs, filing tips |
 | `mcp4rhino_reload` | Hot-reload Tools and Logic |
 
-`initialize` also returns MCP `instructions` pointing agents at [GitHub Issues](https://github.com/isque03/mcp4rhino/issues) and `get_support_info` before filing bugs or enhancements.
+`initialize` also returns MCP `instructions` with a capability-lane map (document, geometry, architecture, drawings, analysis, code checks, Grasshopper) plus [GitHub Issues](https://github.com/isque03/mcp4rhino/issues) and `get_support_info` before filing bugs or enhancements.
 
 ## Curves and solids
 
