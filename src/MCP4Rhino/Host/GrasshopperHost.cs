@@ -17,6 +17,19 @@ public static class GrasshopperHost
     private static IGrasshopperRuntime? _runtime;
     private static readonly object Gate = new();
 
+    public static JsonObject ResourceStatus()
+    {
+        var status = _runtime is { } runtime
+            ? JsonNode.Parse(runtime.ReadResource(new JsonObject { ["kind"] = "capabilities" }))!.AsObject()
+            : new JsonObject { ["status"] = "uninitialized", ["initialized"] = false };
+        status["installed"] = Rhino.PlugIns.PlugIn.IdFromName("Grasshopper") != Guid.Empty;
+        return status;
+    }
+
+    public static string ReadResource(JsonObject request) => _runtime is { } runtime ? runtime.ReadResource(request) :
+        new JsonObject { ["status"] = "uninitialized", ["next_tool"] = "gh_search_components",
+            ["detail"] = "Use an explicit discovery tool to initialize Grasshopper; resource reads do not load it." }.ToJsonString();
+
     public static object Call(string name, JsonObject args)
     {
         try
@@ -29,20 +42,37 @@ public static class GrasshopperHost
                     license_can_save = RhinoApp.CanSave,
                     help_topic = "quickstart", version = McpJsonRpc.ServerVersion,
                 }) : Runtime().Call(name, args);
+            if (name == "gh_capture_canvas")
+            {
+                var metadata = JsonNode.Parse(json)!.AsObject();
+                return CaptureContent.FromPng(metadata, File.ReadAllBytes(metadata["path"]!.GetValue<string>()));
+            }
             return McpContent.TextOnly(json);
         }
-        catch (Exception ex)
+        catch (Exception ex) { return Error(ex); }
+    }
+
+    public static object CaptureViewport(JsonObject context, Func<object> capture)
+    {
+        try
         {
-            ex = ex is TargetInvocationException { InnerException: not null } wrapped ? wrapped.InnerException! : ex;
-            return new
-            {
-                content = new[] { new { type = "text", text = JsonSerializer.Serialize(new
-                {
-                    code = (ex as GhException)?.Code ?? "grasshopper_error", message = ex.Message,
-                    help_topic = (ex as GhException)?.HelpTopic ?? "debugging",
-                }) } }, isError = true,
-            };
+            GhSchema.Validate(CaptureContent.ContextSchema, context);
+            return Runtime().WithPreview(context, capture);
         }
+        catch (Exception ex) { return Error(ex); }
+    }
+
+    private static object Error(Exception ex)
+    {
+        while (ex is TargetInvocationException { InnerException: not null } wrapped) ex = wrapped.InnerException!;
+        return new
+        {
+            content = new[] { new { type = "text", text = JsonSerializer.Serialize(new
+            {
+                code = (ex as GhException)?.Code ?? "grasshopper_error", message = ex.Message,
+                help_topic = (ex as GhException)?.HelpTopic ?? "debugging",
+            }) } }, isError = true,
+        };
     }
 
     private static IGrasshopperRuntime Runtime()

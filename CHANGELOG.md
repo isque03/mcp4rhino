@@ -7,6 +7,31 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.6.4-alpha] — 2026-10-27
+
+### Added
+
+- Read-only resources and URI templates for active Rhino document context, Grasshopper sessions/graphs/nodes/components/results, embedded guides and versioned recipes. Reads preserve tree paths, redact text/paths, enforce active-document scope and reject stale results.
+- Seven generic workflow prompts with validated arguments and no native actions during retrieval.
+- MCP 2026-07-28 discovery/metadata and Streamable HTTP JSON responses, 2025-11-25 initialization support, and retained 2024-11-05 POST compatibility. Includes Origin/Host validation, request-local protocol context, `/health`, bounded requests and resource responses.
+- Generic native Grasshopper support for Polyline, Join Curves, Weave, Merge, Shift List, Insert Items, Reverse List, List Length, Entwine, Boundary Surfaces, and Cap Holes. Component GUIDs and port contracts remain installation-discovered.
+- `gh_get_solution_summary` for revision-bound controls, persistent-input samples, named output pages, units, and diagnostics. Geometry inspection includes curve closedness/planarity/self-intersection/length, Brep area/solid volume, and explicit unsupported measurements.
+- `gh_capture_canvas` for native graph PNGs with explicit framing and bounded MCP image content; `gh_show_document` for deliberate editor activation. `capture_viewport` accepts optional guarded Grasshopper preview context.
+- Generic ordered-profile and capped-extrusion fixture, plus a native stair-study example exercising the same tools. Stair calculations live only in the example graph; there is no staircase tool or compliance check.
+- Multi-patch recipe smoke checks, capture options, and explicit reporting when save/reopen checks are skipped.
+- Explicit whole-graph `layout` patch operation with revision checks and the batch's existing undo/rollback behavior.
+
+### Changed
+
+- Unsupported persistent-value errors explain how to connect typed native constant parameters to Generic Data inputs.
+- Document activation suppresses the native canvas setter's implicit solve, preserving inspection-only open behavior and current result handles.
+- Package, assembly, MCP version, and CI prerelease provenance checks now support `0.6.4-alpha` on `release/0.6.4-alpha`.
+
+### Testing status
+
+- Native rendering, geometry, manual-edit/undo behavior, baking and persistence require licensed macOS/Windows acceptance. The local Rhino installation cannot load Grasshopper and reports saving unavailable; automated builds and unit tests do not establish native runtime behavior.
+- Persistent adapter, host and contract changes require a full package install and Rhino restart.
+
 ## [0.6.2-alpha] — 2026-10-22
 
 ### Removed

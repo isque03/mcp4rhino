@@ -13,6 +13,7 @@ Operations:
 - `set_value`: node, input port, tree [{path,items}]. Disconnect any sources first.
 - `set_properties`: node, optional name/position/preview/enabled.
 - `set_mapping`: node, input port, optional mapping (none/flatten/graft), simplify, reverse.
+- `layout`: arrange the entire graph by dependency with no node argument. Place it last in a batch to frame a multi-batch graph coherently. It is revision-checked and part of the same undo record as the rest of the patch.
 
 Primitive persistent values are JSON numbers, integer numbers, booleans, strings, or null. Geometric values are tagged:
 

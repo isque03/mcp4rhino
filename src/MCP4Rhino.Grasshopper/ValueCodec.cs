@@ -31,7 +31,9 @@ internal static class ValueCodec
             case Param_Surface p: Set(p, branches, v => Reference<GH_Surface>(v, rhino)); break;
             case Param_Mesh p: Set(p, branches, v => Reference<GH_Mesh>(v, rhino)); break;
             case Param_Geometry p: Set(p, branches, v => GeometryReference(v, rhino)); break;
-            default: throw new GhException("unsupported_value", $"Persistent values for {parameter.TypeName} are unsupported.", "workflow");
+            default: throw new GhException("unsupported_value", $"Persistent values for {parameter.TypeName} are unsupported. " +
+                "Add a native Number, Integer, Boolean or Text parameter, set_value on its in:0 port, then connect its out:0 to this input. " +
+                "Use gh_describe_components to discover compatible types and ports.", "data-trees");
         }
     }
 
@@ -112,25 +114,31 @@ internal static class ValueCodec
         };
     }
 
-    public static object? PersistentSummary(IGH_Param parameter)
+    public static object? PersistentSummary(IGH_Param parameter, bool measurements = true)
     {
         var data = parameter.GetType().GetProperty("PersistentData")?.GetValue(parameter) as IGH_Structure;
         return data is null ? null : new { branch_count = data.PathCount, item_count = data.DataCount,
-            sample = Rows(data).Take(10).ToArray() };
+            sample = Rows(data, measurements: measurements).Take(10).ToArray() };
     }
 
-    public static IEnumerable<object> Rows(IGH_Structure tree)
+    public static IEnumerable<object> Rows(IGH_Structure tree, double tolerance = 0.001, bool measurements = true, int offset = 0)
     {
         foreach (var path in tree.Paths)
         {
             var branch = tree.get_Branch(path);
-            if (branch.Count == 0) yield return new { path = path.Indices, item_index = (int?)null, empty = true };
-            for (var i = 0; i < branch.Count; i++)
-                yield return new { path = path.Indices, item_index = i, value = Summary(branch[i] as IGH_Goo) };
+            if (branch.Count == 0)
+            {
+                if (offset > 0) { offset--; continue; }
+                yield return new { path = path.Indices, item_index = (int?)null, empty = true };
+            }
+            if (offset >= branch.Count) { offset -= branch.Count; continue; }
+            for (var i = offset; i < branch.Count; i++)
+                yield return new { path = path.Indices, item_index = i, value = Summary(branch[i] as IGH_Goo, tolerance, measurements) };
+            offset = 0;
         }
     }
 
-    public static object? Summary(IGH_Goo? value) => value switch
+    public static object? Summary(IGH_Goo? value, double tolerance = 0.001, bool measurements = true) => value switch
     {
         null => null,
         GH_Number n => new { type = "number", value = double.IsFinite(n.Value) ? (double?)n.Value : null, valid = double.IsFinite(n.Value) },
@@ -142,7 +150,9 @@ internal static class ValueCodec
         GH_Interval d => new { type = "interval", value = new[] { d.Value.T0, d.Value.T1 } },
         GH_Plane p => new { type = "plane", origin = new[] { p.Value.OriginX, p.Value.OriginY, p.Value.OriginZ },
             x_axis = new[] { p.Value.XAxis.X, p.Value.XAxis.Y, p.Value.XAxis.Z }, y_axis = new[] { p.Value.YAxis.X, p.Value.YAxis.Y, p.Value.YAxis.Z } },
-        IGH_GeometricGoo g => new { type = value.TypeName, valid = value.IsValid, bounds = Bounds(g.Boundingbox), reference_id = g.ReferenceID },
+        IGH_GeometricGoo g when measurements => GeometrySummary.Read(g, tolerance),
+        IGH_GeometricGoo g => new { type = value.TypeName, valid = value.IsValid, bounds = Bounds(g.Boundingbox),
+            reference_id = g.ReferenceID, measurements_status = "use_gh_read_output_for_computed_measurements" },
         _ => new { type = value.TypeName, valid = value.IsValid },
     };
 

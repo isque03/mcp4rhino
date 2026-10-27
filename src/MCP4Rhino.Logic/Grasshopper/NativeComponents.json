@@ -24,7 +24,14 @@
     "MathComponents.OperatorComponents.Operator_Division",
     "MathComponents.ArrayComponents.Component_ListItemVariable",
     "MathComponents.ArrayComponents.Component_Dispatch",
-    "MathComponents.DomainComponents.Component_ConstructDomain"
+    "MathComponents.DomainComponents.Component_ConstructDomain",
+    "MathComponents.ArrayComponents.Component_Weave",
+    "MathComponents.ArrayComponents.Component_ShiftList",
+    "MathComponents.ArrayComponents.Component_InsertItems",
+    "MathComponents.ArrayComponents.Component_ReverseList",
+    "MathComponents.ArrayComponents.Component_ListLength",
+    "MathComponents.MergeComponents.Component_MergeVariable",
+    "MathComponents.MergeComponents.Component_Entwine"
   ],
   "VectorComponents": [
     "VectorComponents.PointComponents.Component_ConstructPoint",
@@ -36,13 +43,17 @@
   "CurveComponents": [
     "CurveComponents.Component_Line",
     "CurveComponents.Component_Circle",
-    "CurveComponents.Component_Rectangle"
+    "CurveComponents.Component_Rectangle",
+    "CurveComponents.Component_Polyline",
+    "CurveComponents.Component_JoinCurves"
   ],
   "SurfaceComponents": [
     "SurfaceComponents.SurfaceComponents.Component_Extrude",
     "SurfaceComponents.SurfaceComponents.Component_LoftSurface",
     "SurfaceComponents.AnalysisComponents.Component_AreaProperties",
-    "SurfaceComponents.AnalysisComponents.Component_VolumeProperties"
+    "SurfaceComponents.AnalysisComponents.Component_VolumeProperties",
+    "SurfaceComponents.SurfaceComponents.Component_BoundarySurfaces",
+    "SurfaceComponents.SurfaceComponents.Component_CapPlanarHoles"
   ],
   "XformComponents": [
     "LinearXForms.Component_Move",

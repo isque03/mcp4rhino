@@ -1,0 +1,253 @@
+{
+  "components": {
+    "slider": "Grasshopper.Kernel.Special.GH_NumberSlider",
+    "point_param": "Grasshopper.Kernel.Parameters.Param_Point",
+    "boolean": "Grasshopper.Kernel.Parameters.Param_Boolean",
+    "polyline": "CurveComponents.Component_Polyline",
+    "vector": "VectorComponents.VectorComponents.Component_ConstructVector",
+    "extrude": "SurfaceComponents.SurfaceComponents.Component_Extrude",
+    "cap": "SurfaceComponents.SurfaceComponents.Component_CapPlanarHoles"
+  },
+  "operations": [
+    {
+      "op": "add",
+      "alias": "depth",
+      "component_id": "$slider",
+      "name": "depth"
+    },
+    {
+      "op": "set_slider",
+      "node": "depth",
+      "value": 120,
+      "minimum": 1,
+      "maximum": 500,
+      "integer": false
+    },
+    {
+      "op": "add",
+      "alias": "corners",
+      "component_id": "$point_param",
+      "name": "corners"
+    },
+    {
+      "op": "set_value",
+      "node": "corners",
+      "port": "in:0",
+      "tree": [
+        {
+          "path": [
+            0
+          ],
+          "items": [
+            {
+              "type": "point",
+              "value": [
+                0,
+                0,
+                0
+              ]
+            },
+            {
+              "type": "point",
+              "value": [
+                200,
+                0,
+                0
+              ]
+            },
+            {
+              "type": "point",
+              "value": [
+                200,
+                100,
+                0
+              ]
+            },
+            {
+              "type": "point",
+              "value": [
+                0,
+                100,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "path": [
+            3,
+            0
+          ],
+          "items": [
+            {
+              "type": "point",
+              "value": [
+                300,
+                0,
+                0
+              ]
+            },
+            {
+              "type": "point",
+              "value": [
+                500,
+                0,
+                0
+              ]
+            },
+            {
+              "type": "point",
+              "value": [
+                500,
+                100,
+                0
+              ]
+            },
+            {
+              "type": "point",
+              "value": [
+                300,
+                100,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "op": "add",
+      "alias": "closed",
+      "component_id": "$boolean",
+      "name": "closed"
+    },
+    {
+      "op": "set_value",
+      "node": "closed",
+      "port": "in:0",
+      "tree": [
+        {
+          "path": [
+            0
+          ],
+          "items": [
+            true
+          ]
+        }
+      ]
+    },
+    {
+      "op": "add",
+      "alias": "outline",
+      "component_id": "$polyline",
+      "name": "outline"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "corners",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "outline",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "closed",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "outline",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "direction",
+      "component_id": "$vector",
+      "name": "direction"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "depth",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "direction",
+        "port": "in:2"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "extrusions",
+      "component_id": "$extrude",
+      "name": "extrusions"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "outline",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "extrusions",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "direction",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "extrusions",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "solids",
+      "component_id": "$cap",
+      "name": "solids"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "extrusions",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "solids",
+        "port": "in:0"
+      }
+    }
+  ],
+  "output": {
+    "node": "solids",
+    "port": "out:0"
+  },
+  "expected_count": 2,
+  "checks": {
+    "outlines": {
+      "node": "outline",
+      "port": "out:0"
+    },
+    "solids": {
+      "node": "solids",
+      "port": "out:0"
+    }
+  },
+  "port_contracts": {
+    "polyline": {
+      "inputs": [
+        "Vertices",
+        "Closed"
+      ]
+    }
+  }
+}

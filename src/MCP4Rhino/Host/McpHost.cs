@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using MCP4Rhino.Logic;
 using MCP4Rhino.Logic.Telemetry;
+using MCP4Rhino.Logic.Protocol;
 
 namespace MCP4Rhino.Host;
 
@@ -20,6 +21,7 @@ public static class McpHost
     private static HttpListener? _listener;
     private static CancellationTokenSource? _cts;
     private static Task? _loop;
+    private static readonly NativeResourceGateway Resources = new();
 
     public static bool IsRunning => _listener is { IsListening: true };
 
@@ -47,6 +49,9 @@ public static class McpHost
             return false;
         }
 
+        // Preload the read bridge during server startup, never as a side effect of resources/read.
+        try { ToolLoader.EnsureLoaded(); }
+        catch (Exception ex) { PluginLog.Info($"Tools unavailable at startup: {ex.Message}"); }
         _listener = listener;
         _cts = new CancellationTokenSource();
         var token = _cts.Token;
@@ -113,86 +118,47 @@ public static class McpHost
     {
         try
         {
-            var path = ctx.Request.Url?.AbsolutePath.TrimEnd('/') ?? "";
-            if (!path.Equals("/mcp", StringComparison.OrdinalIgnoreCase))
-            {
-                ctx.Response.StatusCode = 404;
-                ctx.Response.Close();
-                return;
-            }
-
-            if (!string.Equals(ctx.Request.HttpMethod, "POST", StringComparison.OrdinalIgnoreCase))
-            {
-                await WriteTextAsync(ctx, 200, "text/plain", "MCP4Rhino OK\n");
-                return;
-            }
-
-            string body;
-            using (var reader = new StreamReader(ctx.Request.InputStream, ctx.Request.ContentEncoding))
-                body = await reader.ReadToEndAsync();
-
-            JsonNode? root;
-            try
-            {
-                root = JsonNode.Parse(body);
-            }
-            catch
-            {
-                await WriteJsonAsync(ctx, McpJsonRpc.ParseError(null, "Parse error"));
-                return;
-            }
-
-            if (root is JsonArray arr)
-            {
-                var results = new JsonArray();
-                foreach (var item in arr)
-                {
-                    var r = Dispatch(item);
-                    if (r is not null)
-                        results.Add(r);
-                }
-                await WriteJsonAsync(ctx, results);
-                return;
-            }
-
-            var response = Dispatch(root);
-            if (response is null)
-            {
-                ctx.Response.StatusCode = 202;
-                ctx.Response.Close();
-                return;
-            }
-
-            await WriteJsonAsync(ctx, response);
+            var headers = ctx.Request.Headers.AllKeys.Where(key => key is not null)
+                .ToDictionary(key => key!, key => ctx.Request.Headers[key!] ?? "", StringComparer.OrdinalIgnoreCase);
+            var request = new McpHttpRequest(ctx.Request.HttpMethod, ctx.Request.Url?.AbsolutePath ?? "", headers, "", Port);
+            McpHttpTransport.ValidateAuthority(request);
+            var body = await ReadBodyAsync(ctx.Request).WaitAsync(TimeSpan.FromSeconds(30));
+            if (body is null) { await WriteTextAsync(ctx, 413, "text/plain", "Request too large"); return; }
+            var response = McpHttpTransport.Process(request with { Body = body }, Services());
+            ctx.Response.Headers["Cache-Control"] = "no-store";
+            if (response.Status == 405) ctx.Response.Headers["Allow"] = "POST";
+            await WriteTextAsync(ctx, response.Status, response.ContentType, response.Body);
         }
-        catch (Exception ex)
+        catch (McpRpcException ex) { await WriteTextAsync(ctx, ex.Code == -32003 ? 403 : 400, "application/json", ex.Response(null).ToJsonString()); }
+        catch (DecoderFallbackException) { await WriteTextAsync(ctx, 400, "application/json", new McpRpcException(-32700, "Invalid UTF-8 JSON").Response(null).ToJsonString()); }
+        catch (TimeoutException) { await WriteTextAsync(ctx, 408, "text/plain", "Request body timeout"); }
+        catch (Exception)
         {
-            PluginLog.Info($"HandleRequest error: {ex.Message}");
-            try
-            {
-                await WriteJsonAsync(ctx, new
-                {
-                    jsonrpc = "2.0",
-                    id = (object?)null,
-                    error = new { code = -32603, message = ex.Message },
-                });
-            }
-            catch
-            {
-                // ignore
-            }
+            try { await WriteTextAsync(ctx, 500, "application/json", new McpRpcException(-32603, "Internal server error").Response(null).ToJsonString()); }
+            catch { /* disconnected client */ }
         }
     }
 
-    private static JsonNode? Dispatch(JsonNode? req) =>
-        McpJsonRpc.Dispatch(
-            req,
-            ToolProvider.Instance,
-            HotReload,
-            LiveSupport,
-            Telemetry.Gateway,
-            TelemetryHost.InitializeInstructions,
-            TelemetryHost.MarkNoticeDelivered);
+    private static async Task<string?> ReadBodyAsync(HttpListenerRequest request)
+    {
+        if (request.ContentLength64 > McpHttpTransport.MaxRequestBytes) return null;
+        using var reader = new StreamReader(request.InputStream, new UTF8Encoding(false, true));
+        var body = new StringBuilder(); var buffer = new char[4096];
+        int read;
+        while ((read = await reader.ReadAsync(buffer.AsMemory())) > 0)
+        {
+            body.Append(buffer, 0, read);
+            if (body.Length > McpHttpTransport.MaxRequestBytes) return null;
+        }
+        return body.ToString();
+    }
+
+    private static McpServerServices Services() => new(ToolProvider.Instance)
+    {
+        HotReload = HotReload, Support = LiveSupport, Telemetry = Telemetry.Gateway,
+        Instructions = TelemetryHost.InitializeInstructions, OnInitialized = TelemetryHost.MarkNoticeDelivered,
+        Resources = Resources,
+    };
 
     private static SupportContext LiveSupport() => new(
         Endpoint: IsRunning ? Endpoint : SupportInfo.ConfiguredEndpoint(),
@@ -219,6 +185,9 @@ public static class McpHost
             ToolLoader.EnsureLoaded();
             var bridge = ToolLoader.Bridge
                 ?? throw new InvalidOperationException("Tools bridge not loaded.");
+            if (name == "capture_viewport" && @params?["arguments"]?["grasshopper"] is { } context)
+                return GrasshopperHost.CaptureViewport(MCP4Rhino.Logic.Grasshopper.GhJson.Object(context),
+                    () => bridge.CallTool(@params));
             return bridge.CallTool(@params);
         }
     }

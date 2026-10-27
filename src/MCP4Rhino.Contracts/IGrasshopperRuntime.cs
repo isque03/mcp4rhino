@@ -6,6 +6,8 @@ namespace MCP4Rhino.Contracts;
 public interface IGrasshopperRuntime : IDisposable
 {
     string Call(string tool, JsonObject arguments);
+    object WithPreview(JsonObject context, Func<object> capture);
+    string ReadResource(JsonObject request);
 }
 
 public interface IGrasshopperDispatcher

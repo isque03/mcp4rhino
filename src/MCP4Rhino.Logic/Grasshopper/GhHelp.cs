@@ -11,7 +11,12 @@ public static class GhHelp
         ["workflow"] = "references/workflow.md", ["debugging"] = "references/debugging.md",
         ["examples/array"] = "references/array.md", ["examples/facade"] = "references/facade.md",
         ["examples/loft"] = "references/loft.md",
+        ["inspection"] = "references/inspection.md", ["capture"] = "references/capture.md",
+        ["resources"] = "references/resources.md",
+        ["examples/profile"] = "references/profile.md", ["examples/stair"] = "references/stair.md",
     };
+
+    public static IReadOnlyDictionary<string, string> TopicsIndex => Topics;
 
     public static object Read(string topic = "index")
     {

@@ -63,7 +63,8 @@ internal static class GraphEditor
             }
         }
         GraphRules.RequireAcyclic(doc.Objects.Select(n => n.InstanceGuid.ToString()), Edges(doc));
-        ArrangeAddedNodes(doc, operations, aliases);
+        if (!operations.OfType<JsonObject>().Any(op => op["op"]?.GetValue<string>() == "layout"))
+            ArrangeAddedNodes(doc, operations, aliases);
         return aliases;
     }
 
@@ -83,6 +84,7 @@ internal static class GraphEditor
     private static void ApplyOne(GH_Document doc, JsonObject op, Dictionary<string, string> aliases, RhinoDoc rhino)
     {
         var kind = GhJson.Text(op, "op");
+        if (kind == "layout") { Layout(doc); return; }
         if (kind == "add") { Add(doc, op, aliases); return; }
         if (kind is "connect" or "disconnect") { Connect(doc, op, aliases, kind == "connect"); return; }
         var node = Node(doc, GhJson.Text(op, "node"), aliases);
@@ -96,6 +98,16 @@ internal static class GraphEditor
             default: throw new GhException("invalid_operation", $"Unknown operation {kind}.");
         }
         if (node is IGH_ActiveObject active) active.ExpireSolution(false);
+    }
+
+    private static void Layout(GH_Document doc)
+    {
+        var positions = GraphRules.Layout(doc.Objects.Select(n => n.InstanceGuid.ToString()), Edges(doc));
+        foreach (var node in doc.Objects)
+        {
+            var position = positions[node.InstanceGuid.ToString()];
+            node.Attributes.Pivot = new PointF(position.X, position.Y);
+        }
     }
 
     public static IGH_DocumentObject Node(GH_Document doc, string id, IReadOnlyDictionary<string, string>? aliases = null)

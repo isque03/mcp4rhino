@@ -82,6 +82,8 @@ internal sealed class DefinitionSession : IDisposable
 
     public bool IsClosed => RhinoDoc.FromRuntimeSerialNumber(RhinoSerial) is null || !GH.DocumentServer.Contains(Document);
 
+    public ResultIdentity Identity => new(Id, Document.RuntimeID.ToString(), Revision, ResultId);
+
     public object Summary() => new
     {
         session_id = Id, document_id = Document.RuntimeID, name = Label ?? Document.DisplayName, owned = Owned,

@@ -14,16 +14,16 @@ internal static class ResultReader
         session.RequireContext();
         var nodes = session.Document.Objects;
         return new { session = session.Summary(), total = nodes.Count, offset = GhJson.Offset(args),
-            nodes = nodes.Skip(GhJson.Offset(args)).Take(GhJson.PageSize(args)).Select(DescribeNode).ToArray() };
+            nodes = nodes.Skip(GhJson.Offset(args)).Take(GhJson.PageSize(args)).Select(node => DescribeNode(node)).ToArray() };
     }
 
-    private static object DescribeNode(IGH_DocumentObject node) => new
+    internal static object DescribeNode(IGH_DocumentObject node, bool resource = false) => new
     {
         node = node.InstanceGuid, component_id = node.ComponentGuid, name = node.Name, nickname = node.NickName,
         supported = ComponentCatalog.Supported(node), position = new[] { node.Attributes.Pivot.X, node.Attributes.Pivot.Y },
         enabled = node is not IGH_ActiveObject active || !active.Locked,
         preview = node is IGH_PreviewObject preview && !preview.Hidden, settings = ComponentCatalog.Settings(node),
-        inputs = ComponentCatalog.Ports(node, true), outputs = ComponentCatalog.Ports(node, false),
+        inputs = ComponentCatalog.Ports(node, true, resource), outputs = ComponentCatalog.Ports(node, false, resource),
         diagnostics = Diagnostics(node),
     };
 
@@ -46,15 +46,43 @@ internal static class ResultReader
 
     public static object Read(DefinitionSession session, JsonObject args)
     {
-        session.RequireContext(); session.RequireResult(GhJson.Text(args, "result_id"));
+        var rhino = session.RequireContext(); session.Identity.Require(args, true);
         var port = GraphEditor.Endpoint(session.Document, args, null, false);
         var offset = GhJson.Offset(args);
         var limit = GhJson.PageSize(args);
-        var page = ValueCodec.Rows(port.VolatileData).Skip(offset).Take(limit + 1).ToArray();
-        return new { session_id = session.Id, result_id = session.ResultId, branch_count = port.VolatileData.PathCount,
+        var page = ValueCodec.Rows(port.VolatileData, rhino.ModelAbsoluteTolerance, offset: offset).Take(limit + 1).ToArray();
+        return new { session_id = session.Id, revision = session.Revision, result_id = session.ResultId,
+            units = Units(rhino), branch_count = port.VolatileData.PathCount,
             item_count = port.VolatileDataCount, rows = page.Take(limit).ToArray(),
             next_offset = page.Length > limit ? offset + limit : (int?)null };
     }
+
+    public static object Summary(DefinitionSession session, JsonObject args)
+    {
+        var rhino = session.RequireContext(); session.Identity.Require(args, true);
+        var outputs = NamedOutput.Parse(args).Select(output =>
+        {
+            var node = GraphEditor.Node(session.Document, output.Node);
+            var port = ComponentCatalog.Port(node, output.Port, false);
+            return new { name = output.Name, node = output.Node, port = output.Port,
+                branch_count = port.VolatileData.PathCount, item_count = port.VolatileDataCount,
+                data = SolutionReport.Page(ValueCodec.Rows(port.VolatileData, rhino.ModelAbsoluteTolerance), args) };
+        }).ToArray();
+        var controls = session.Document.Objects.Select(node => (object)new
+        {
+            node = node.InstanceGuid, name = node.NickName, settings = ComponentCatalog.Settings(node),
+            inputs = ComponentCatalog.Ports(node, true), diagnostics = Diagnostics(node),
+        });
+        return new { session = session.Summary(), identity = session.Identity, units = Units(rhino),
+            graph = SolutionReport.Page(controls, args), outputs };
+    }
+
+    private static object Units(RhinoDoc rhino) => new
+    {
+        model = rhino.ModelUnitSystem.ToString(), absolute_tolerance = rhino.ModelAbsoluteTolerance,
+        length = "model units", area = "model units squared", volume = "model units cubed",
+        numeric_outputs = "Unitless unless defined by the graph; no dimensional meaning is inferred.",
+    };
 
     public static object Bake(DefinitionSession session, JsonObject args)
     {

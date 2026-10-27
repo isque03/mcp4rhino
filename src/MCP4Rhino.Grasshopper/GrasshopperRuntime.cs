@@ -22,6 +22,13 @@ public sealed class GrasshopperRuntime : IGrasshopperRuntime
     private bool _disposed;
     private SolveContext? _activeSolve;
 
+    public string ReadResource(JsonObject request)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        if (_jobs.Busy) return Json(new { status = "busy", next_tool = "gh_get_job" });
+        return (string)_dispatcher.Invoke(() => GrasshopperResourceReader.Read(request, _sessions.Values));
+    }
+
     public GrasshopperRuntime(IGrasshopperDispatcher dispatcher)
     {
         _dispatcher = dispatcher; _jobs = new SolveQueue(dispatcher.Post);
@@ -57,7 +64,7 @@ public sealed class GrasshopperRuntime : IGrasshopperRuntime
     }
 
     private static bool IsMutation(string tool) => tool is "gh_open_document" or "gh_apply_patch" or
-        "gh_save_document" or "gh_close_document" or "gh_bake";
+        "gh_save_document" or "gh_close_document" or "gh_bake" or "gh_show_document";
 
     private object Dispatch(string tool, JsonObject args) => tool switch
     {
@@ -68,11 +75,54 @@ public sealed class GrasshopperRuntime : IGrasshopperRuntime
         "gh_inspect_document" => ResultReader.Inspect(Session(args), args),
         "gh_apply_patch" => Patch(Session(args), args),
         "gh_read_output" => ResultReader.Read(Session(args), args),
+        "gh_get_solution_summary" => ResultReader.Summary(Session(args), args),
+        "gh_capture_canvas" => CanvasCapture.Capture(Session(args), args),
+        "gh_show_document" => Show(Session(args), args),
         "gh_bake" => ResultReader.Bake(Session(args), args),
         "gh_save_document" => Save(Session(args), args),
         "gh_close_document" => Close(Session(args), args),
         _ => throw new GhException("unknown_tool", $"Unknown Grasshopper tool {tool}.", "index"),
     };
+
+    public object WithPreview(JsonObject context, Func<object> capture)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        GhSchema.Validate(CaptureContent.ContextSchema, context);
+        if (_jobs.Busy) throw new GhException("busy", "Wait for the running solve before capturing preview.");
+        return _dispatcher.Invoke(() =>
+        {
+            var session = Session(context);
+            session.RequireContext(); session.Identity.Require(context, true);
+            if (!ReferenceEquals(GH.ActiveCanvas?.Document, session.Document))
+                throw new GhException("preview_not_active", "Use gh_show_document to explicitly activate this definition before viewport capture.", "capture");
+            var identity = session.Identity;
+            var result = capture();
+            session.RequireContext(); session.Identity.Require(context, true);
+            if (!ReferenceEquals(GH.ActiveCanvas?.Document, session.Document))
+                throw new GhException("preview_not_active", "The preview document changed during capture.", "capture");
+            return CaptureContent.Associate(result, identity);
+        });
+    }
+
+    private static object Show(DefinitionSession session, JsonObject args)
+    {
+        session.RequireContext(); GhJson.ExpectRevision(session.Revision, args);
+        var id = Rhino.PlugIns.PlugIn.IdFromName("Grasshopper");
+        var plugin = RhinoApp.GetPlugInObject(id);
+        var show = plugin?.GetType().GetMethod("ShowEditor") ??
+            throw new GhException("editor_unavailable", "Grasshopper cannot show its editor on this installation.", "capture");
+        show.Invoke(plugin, null);
+        var canvas = DocumentPresentation.Activate(session.Document);
+        if (GhJson.Flag(args, "fit"))
+        {
+            var region = CanvasCapture.Contents(session.Document);
+            var frame = new CanvasFrame(canvas.Viewport.Width, canvas.Viewport.Height, "fit", region);
+            canvas.Viewport.Zoom = (float)frame.Zoom(region);
+            canvas.Viewport.MidPoint = new System.Drawing.PointF((float)(region.X + region.Width / 2), (float)(region.Y + region.Height / 2));
+        }
+        GH.InvalidateCanvas();
+        return session.Summary();
+    }
 
     private DefinitionSession Session(JsonObject args) => _sessions.GetValueOrDefault(GhJson.Text(args, "session_id")) ??
         throw new GhException("session_not_found", "Session not found. Open or explicitly attach a definition.");
@@ -130,7 +180,7 @@ public sealed class GrasshopperRuntime : IGrasshopperRuntime
         document.Enabled = false;
         GH.DocumentServer.AddDocument(document);
         // Opening is inspection-only: leave the document disabled until an explicit supported solve.
-        if (GH.ActiveCanvas is { } canvas) { canvas.Document = document; GH.InvalidateCanvas(); }
+        if (GH.ActiveCanvas is not null) { DocumentPresentation.Activate(document); GH.InvalidateCanvas(); }
     }
 
     private object Patch(DefinitionSession session, JsonObject args)

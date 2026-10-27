@@ -51,6 +51,20 @@ class ReleaseMetadataTests(unittest.TestCase):
             release.release_metadata(
                 '0.6.2-alpha', 'v0.6.2-alpha', 'refs/heads/' + release.TELEMETRY_ALPHA_BRANCH)
 
+    def test_graph_alpha_requires_matching_branch(self):
+        for version in ('0.6.4-alpha', '0.6.4-alpha.1'):
+            metadata = release.release_metadata(version, 'v' + version,
+                                                'refs/heads/' + release.GRAPH_ALPHA_BRANCH)
+            self.assertEqual(metadata['BUILD_BRANCH'], release.GRAPH_ALPHA_BRANCH)
+            self.assertEqual(metadata['PRERELEASE'], 'true')
+            self.assertEqual(metadata['MAKE_LATEST'], 'false')
+            for branch in ('main', release.TOOLS_ALPHA_BRANCH):
+                with self.assertRaises(ValueError):
+                    release.release_metadata(version, 'v' + version, 'refs/heads/' + branch)
+        for version in ('0.6.4-alpha.0', '0.6.4-alpha.01'):
+            with self.assertRaises(ValueError):
+                release.release_metadata(version, 'v' + version, 'refs/heads/' + release.GRAPH_ALPHA_BRANCH)
+
     def test_stable_requires_main(self):
         metadata = release.release_metadata('0.6.0', 'v0.6.0', 'refs/heads/main')
         self.assertEqual(metadata['PRERELEASE'], 'false')

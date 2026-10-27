@@ -27,6 +27,8 @@ public class GrasshopperHelpTests
     [InlineData("array")]
     [InlineData("facade")]
     [InlineData("loft")]
+    [InlineData("profile")]
+    [InlineData("stair")]
     public void WorkedRecipesUseSupportedTypesAndReleasedPatchSchemas(string name)
     {
         var help = JsonNode.Parse(GhHelp.Json("examples/" + name))!;
@@ -37,15 +39,23 @@ public class GrasshopperHelpTests
             var assembly = fullName.StartsWith("LinearXForms.") ? "XformComponents" : fullName.Split('.')[0];
             Assert.True(ComponentSupport.Allows(assembly, fullName), fullName);
         }
-        var patch = new JsonObject { ["session_id"] = "fixture-session", ["expected_revision"] = 0,
-            ["request_id"] = "fixture", ["operations"] = recipe["operations"]!.DeepClone() };
-        GhToolCatalog.Validate("gh_apply_patch", patch);
-        Assert.InRange(patch["operations"]!.AsArray().Count, 1, 100);
-        foreach (var value in patch["operations"]!.AsArray().Where(n => n!["op"]!.GetValue<string>() == "set_value"))
+        var operations = recipe["operations"]!.AsArray();
+        foreach (var batch in operations.Chunk(100))
+        {
+            var patch = new JsonObject { ["session_id"] = "fixture-session", ["expected_revision"] = 0,
+                ["request_id"] = "fixture", ["operations"] = new JsonArray(batch.Select(n => n!.DeepClone()).ToArray()) };
+            GhToolCatalog.Validate("gh_apply_patch", patch);
+        }
+        foreach (var value in operations.Where(n => n!["op"]!.GetValue<string>() == "set_value"))
             DataTree.Parse(value!["tree"]);
-        var aliases = patch["operations"]!.AsArray().Where(n => n!["op"]!.GetValue<string>() == "add")
+        var aliases = operations.Where(n => n!["op"]!.GetValue<string>() == "add")
             .Select(n => n!["alias"]!.GetValue<string>()).ToArray();
         Assert.Contains(recipe["output"]!["node"]!.GetValue<string>(), aliases);
         Assert.Equal(aliases.Length, aliases.Distinct().Count());
+        foreach (var op in operations)
+        {
+            foreach (var endpoint in new[] { op, op!["source"], op["target"] }.Where(n => n?["node"] is not null))
+                Assert.Contains(endpoint!["node"]!.GetValue<string>(), aliases);
+        }
     }
 }

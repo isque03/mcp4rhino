@@ -10,4 +10,5 @@ public interface IMcpToolBridge
     object[] ListTools();
 
     object CallTool(JsonNode? @params);
+    string ReadResource(JsonObject request);
 }

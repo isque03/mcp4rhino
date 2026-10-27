@@ -6,6 +6,9 @@ public static class ComponentSupport
 {
     private static readonly Dictionary<string, string[]> Manifest = Read();
 
+    public static object[] Catalog() => Manifest.SelectMany(entry => entry.Value.Select(type =>
+        (object)new { assembly = entry.Key, type })).ToArray();
+
     private static Dictionary<string, string[]> Read()
     {
         using var stream = typeof(ComponentSupport).Assembly.GetManifestResourceStream("GrasshopperNativeComponents.json")!;

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag matching manifest.yml; e.g. v0.6.0-alpha (dispatch on release/0.6.0-alpha)"
+        description: "Tag matching manifest.yml; e.g. v0.6.4-alpha (dispatch on release/0.6.4-alpha)"
         required: true
         type: string
 
@@ -27,7 +27,7 @@ jobs:
         run: |
           set -euo pipefail
           if [[ ! "$INPUT_TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-alpha(\.[1-9][0-9]*)?)?$ ]]; then
-            echo "Expected a stable release tag or v0.6.0-alpha[.N]." >&2
+            echo "Expected a stable release tag or a supported alpha tag." >&2
             exit 1
           fi
 

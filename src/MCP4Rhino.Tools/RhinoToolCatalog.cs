@@ -239,6 +239,7 @@ public static class RhinoToolCatalog
                 width = new { type = "integer", description = "Image width (default 1024)" },
                 height = new { type = "integer", description = "Image height (default 768)" },
                 path = new { type = "string", description = "Optional output PNG path" },
+                grasshopper = MCP4Rhino.Logic.Grasshopper.CaptureContent.ContextSchema,
             },
         }),
     ];
@@ -324,7 +325,7 @@ public static class RhinoToolCatalog
         {
             name = doc.Name,
             path = doc.Path,
-            units = doc.ModelUnitSystem.ToString(),
+            units = RhinoReadModel.UnitName(doc),
             object_count = doc.Objects.Count,
             layer_count = doc.Layers.Count,
             layers,

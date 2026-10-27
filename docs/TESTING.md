@@ -48,3 +48,13 @@ After hot-reload, smoke one facade path:
 5. License save gate: `check_rhino_license` returns `can_save` plus installation/eval fields. When `can_save` is false, `export_3dm` must fail with the same clear license/evaluation message and must not write a file. When `can_save` is true, `export_3dm` should write successfully.
 
 Full Rhino.Testing harness for ArchElement/ViewCapture is optional and out of the 80% gate.
+
+## Grasshopper 0.6.4-alpha
+
+`McpProtocolTests`, `McpProtocolValidationTests`, and `McpHttpIntegrationTests` cover the 2024/2025/2026 profiles, required headers, negotiation, errors, Origin/Host checks, legacy behavior and concurrent requests over real local HTTP. `McpResourceTests` and `McpPromptTests` cover every route/catalog, privacy, byte/item limits, identity scope helpers, cursor validation, and static reads/prompts that cannot reach tools or native gateways. See [native resource acceptance](MCP_RESOURCES_PROMPTS.md#validation-and-migration) for licensed checks and smoke-runner flags.
+
+`GrasshopperInspectionTests` covers result/revision guards, unique named selections, bounded report pagination, canvas framing validation, MCP image limits, and capture association contracts. Recipe tests validate all packaged examples against the released schemas and support manifest, including multi-patch recipes.
+
+`GrasshopperSdkContractTests` inspects the pinned SDK's metadata without loading Grasshopper. It verifies the guarded canvas-render binding and solver-gate fields used to prevent implicit solutions during capture/activation. A different installed SDK still needs native acceptance; incompatible bindings fail explicitly.
+
+Native checks use `scripts/grasshopper-smoke.py --example profile` and `--example stair --capture` on a licensed Rhino installation with the matching package installed and Rhino restarted. They exercise native point ordering, separate closed profiles, capped solids, parameter changes, stale results, rollback, request retries, canvas capture and save/reopen. `--bake` adds snapshots; `--skip-save` explicitly leaves persistence unverified. Record Windows/macOS results separately and manually verify hidden-editor capture, view preservation, manual-edit invalidation, and native undo/redo. CI cannot establish those behaviors.

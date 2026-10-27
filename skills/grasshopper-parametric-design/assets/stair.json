@@ -1,0 +1,1575 @@
+{
+  "components": {
+    "slider": "Grasshopper.Kernel.Special.GH_NumberSlider",
+    "number": "Grasshopper.Kernel.Parameters.Param_Number",
+    "boolean": "Grasshopper.Kernel.Parameters.Param_Boolean",
+    "integer": "Grasshopper.Kernel.Parameters.Param_Integer",
+    "divide": "MathComponents.OperatorComponents.Operator_Division",
+    "subtract": "MathComponents.OperatorComponents.Component_VariableSubtraction",
+    "multiply": "MathComponents.OperatorComponents.Component_VariableMultiplication",
+    "series": "MathComponents.FunctionComponents.Component_Series",
+    "add": "MathComponents.OperatorComponents.Component_VariableAddition",
+    "point": "VectorComponents.PointComponents.Component_ConstructPoint",
+    "weave": "MathComponents.ArrayComponents.Component_Weave",
+    "merge": "MathComponents.MergeComponents.Component_MergeVariable",
+    "polyline": "CurveComponents.Component_Polyline",
+    "vector": "VectorComponents.VectorComponents.Component_ConstructVector",
+    "extrude": "SurfaceComponents.SurfaceComponents.Component_Extrude",
+    "cap": "SurfaceComponents.SurfaceComponents.Component_CapPlanarHoles",
+    "move": "LinearXForms.Component_Move",
+    "domain": "MathComponents.DomainComponents.Component_ConstructDomain",
+    "rectangle": "CurveComponents.Component_Rectangle"
+  },
+  "operations": [
+    {
+      "op": "add",
+      "alias": "height",
+      "component_id": "$slider",
+      "name": "height"
+    },
+    {
+      "op": "set_slider",
+      "node": "height",
+      "value": 2880,
+      "minimum": 100,
+      "maximum": 6000,
+      "integer": false
+    },
+    {
+      "op": "add",
+      "alias": "risers",
+      "component_id": "$slider",
+      "name": "risers"
+    },
+    {
+      "op": "set_slider",
+      "node": "risers",
+      "value": 16,
+      "minimum": 2,
+      "maximum": 50,
+      "integer": true
+    },
+    {
+      "op": "add",
+      "alias": "going",
+      "component_id": "$slider",
+      "name": "going"
+    },
+    {
+      "op": "set_slider",
+      "node": "going",
+      "value": 279.4,
+      "minimum": 20,
+      "maximum": 1000,
+      "integer": false
+    },
+    {
+      "op": "add",
+      "alias": "width",
+      "component_id": "$slider",
+      "name": "width"
+    },
+    {
+      "op": "set_slider",
+      "node": "width",
+      "value": 1016,
+      "minimum": 100,
+      "maximum": 3000,
+      "integer": false
+    },
+    {
+      "op": "add",
+      "alias": "tread_thickness",
+      "component_id": "$slider",
+      "name": "tread_thickness"
+    },
+    {
+      "op": "set_slider",
+      "node": "tread_thickness",
+      "value": 38,
+      "minimum": 1,
+      "maximum": 100,
+      "integer": false
+    },
+    {
+      "op": "add",
+      "alias": "nosing",
+      "component_id": "$slider",
+      "name": "nosing"
+    },
+    {
+      "op": "set_slider",
+      "node": "nosing",
+      "value": 25,
+      "minimum": 0,
+      "maximum": 100,
+      "integer": false
+    },
+    {
+      "op": "add",
+      "alias": "stringer_depth",
+      "component_id": "$slider",
+      "name": "stringer_depth"
+    },
+    {
+      "op": "set_slider",
+      "node": "stringer_depth",
+      "value": 300,
+      "minimum": 100,
+      "maximum": 1000,
+      "integer": false
+    },
+    {
+      "op": "add",
+      "alias": "stringer_thickness",
+      "component_id": "$slider",
+      "name": "stringer_thickness"
+    },
+    {
+      "op": "set_slider",
+      "node": "stringer_thickness",
+      "value": 38,
+      "minimum": 1,
+      "maximum": 100,
+      "integer": false
+    },
+    {
+      "op": "add",
+      "alias": "stringer_count",
+      "component_id": "$slider",
+      "name": "stringer_count"
+    },
+    {
+      "op": "set_slider",
+      "node": "stringer_count",
+      "value": 3,
+      "minimum": 2,
+      "maximum": 10,
+      "integer": true
+    },
+    {
+      "op": "add",
+      "alias": "zero",
+      "component_id": "$number",
+      "name": "zero"
+    },
+    {
+      "op": "set_value",
+      "node": "zero",
+      "port": "in:0",
+      "tree": [
+        {
+          "path": [
+            0
+          ],
+          "items": [
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "op": "add",
+      "alias": "one",
+      "component_id": "$number",
+      "name": "one"
+    },
+    {
+      "op": "set_value",
+      "node": "one",
+      "port": "in:0",
+      "tree": [
+        {
+          "path": [
+            0
+          ],
+          "items": [
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "op": "add",
+      "alias": "closed",
+      "component_id": "$boolean",
+      "name": "closed"
+    },
+    {
+      "op": "set_value",
+      "node": "closed",
+      "port": "in:0",
+      "tree": [
+        {
+          "path": [
+            0
+          ],
+          "items": [
+            true
+          ]
+        }
+      ]
+    },
+    {
+      "op": "add",
+      "alias": "weave_pattern",
+      "component_id": "$integer",
+      "name": "weave_pattern"
+    },
+    {
+      "op": "set_value",
+      "node": "weave_pattern",
+      "port": "in:0",
+      "tree": [
+        {
+          "path": [
+            0
+          ],
+          "items": [
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "op": "add",
+      "alias": "rise",
+      "component_id": "$divide",
+      "name": "rise"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "height",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "rise",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "risers",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "rise",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "tread_count",
+      "component_id": "$subtract",
+      "name": "tread_count"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "risers",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "tread_count",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "one",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "tread_count",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "run",
+      "component_id": "$multiply",
+      "name": "run"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "tread_count",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "run",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "going",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "run",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "indices",
+      "component_id": "$series",
+      "name": "indices"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "zero",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "indices",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "one",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "indices",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "tread_count",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "indices",
+        "port": "in:2"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "x",
+      "component_id": "$multiply",
+      "name": "x"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "indices",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "x",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "going",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "x",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "step_numbers",
+      "component_id": "$add",
+      "name": "step_numbers"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "indices",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "step_numbers",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "one",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "step_numbers",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "z",
+      "component_id": "$multiply",
+      "name": "z"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "step_numbers",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "z",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "rise",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "z",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "under_treads",
+      "component_id": "$subtract",
+      "name": "under_treads"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "z",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "under_treads",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "tread_thickness",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "under_treads",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "x_next",
+      "component_id": "$add",
+      "name": "x_next"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "x",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "x_next",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "going",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "x_next",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "corners_a",
+      "component_id": "$point",
+      "name": "corners_a"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "x",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "corners_a",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "zero",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "corners_a",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "under_treads",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "corners_a",
+        "port": "in:2"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "corners_b",
+      "component_id": "$point",
+      "name": "corners_b"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "x_next",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "corners_b",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "zero",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "corners_b",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "under_treads",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "corners_b",
+        "port": "in:2"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "notches",
+      "component_id": "$weave",
+      "name": "notches"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "weave_pattern",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "notches",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "corners_a",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "notches",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "corners_b",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "notches",
+        "port": "in:2"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "last_tread_height",
+      "component_id": "$multiply",
+      "name": "last_tread_height"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "tread_count",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "last_tread_height",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "rise",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "last_tread_height",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "last_underside",
+      "component_id": "$subtract",
+      "name": "last_underside"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "last_tread_height",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "last_underside",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "tread_thickness",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "last_underside",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "back_top_z",
+      "component_id": "$subtract",
+      "name": "back_top_z"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "last_underside",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "back_top_z",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "stringer_depth",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "back_top_z",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "first_underside",
+      "component_id": "$subtract",
+      "name": "first_underside"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "rise",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "first_underside",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "tread_thickness",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "first_underside",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "back_bottom_z",
+      "component_id": "$subtract",
+      "name": "back_bottom_z"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "first_underside",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "back_bottom_z",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "stringer_depth",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "back_bottom_z",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "back_top",
+      "component_id": "$point",
+      "name": "back_top"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "run",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "back_top",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "zero",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "back_top",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "back_top_z",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "back_top",
+        "port": "in:2"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "back_bottom",
+      "component_id": "$point",
+      "name": "back_bottom"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "zero",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "back_bottom",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "zero",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "back_bottom",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "back_bottom_z",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "back_bottom",
+        "port": "in:2"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "top_and_back",
+      "component_id": "$merge",
+      "name": "top_and_back"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "notches",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "top_and_back",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "back_top",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "top_and_back",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "all_corners",
+      "component_id": "$merge",
+      "name": "all_corners"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "top_and_back",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "all_corners",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "back_bottom",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "all_corners",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "outline",
+      "component_id": "$polyline",
+      "name": "outline"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "all_corners",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "outline",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "closed",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "outline",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "stringer_vector",
+      "component_id": "$vector",
+      "name": "stringer_vector"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "zero",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "stringer_vector",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "stringer_thickness",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "stringer_vector",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "zero",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "stringer_vector",
+        "port": "in:2"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "stringer_extrusion",
+      "component_id": "$extrude",
+      "name": "stringer_extrusion"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "outline",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "stringer_extrusion",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "stringer_vector",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "stringer_extrusion",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "stringer_solid",
+      "component_id": "$cap",
+      "name": "stringer_solid"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "stringer_extrusion",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "stringer_solid",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "spacing_count",
+      "component_id": "$subtract",
+      "name": "spacing_count"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "stringer_count",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "spacing_count",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "one",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "spacing_count",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "available_width",
+      "component_id": "$subtract",
+      "name": "available_width"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "width",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "available_width",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "stringer_thickness",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "available_width",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "stringer_spacing",
+      "component_id": "$divide",
+      "name": "stringer_spacing"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "available_width",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "stringer_spacing",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "spacing_count",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "stringer_spacing",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "stringer_positions",
+      "component_id": "$series",
+      "name": "stringer_positions"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "zero",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "stringer_positions",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "stringer_spacing",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "stringer_positions",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "stringer_count",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "stringer_positions",
+        "port": "in:2"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "stringer_moves",
+      "component_id": "$vector",
+      "name": "stringer_moves"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "zero",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "stringer_moves",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "stringer_positions",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "stringer_moves",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "zero",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "stringer_moves",
+        "port": "in:2"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "stringers",
+      "component_id": "$move",
+      "name": "stringers"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "stringer_solid",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "stringers",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "stringer_moves",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "stringers",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "board_depth",
+      "component_id": "$add",
+      "name": "board_depth"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "going",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "board_depth",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "nosing",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "board_depth",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "board_x_domain",
+      "component_id": "$domain",
+      "name": "board_x_domain"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "zero",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "board_x_domain",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "board_depth",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "board_x_domain",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "board_y_domain",
+      "component_id": "$domain",
+      "name": "board_y_domain"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "zero",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "board_y_domain",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "width",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "board_y_domain",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "board_rectangle",
+      "component_id": "$rectangle",
+      "name": "board_rectangle"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "board_x_domain",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "board_rectangle",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "board_y_domain",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "board_rectangle",
+        "port": "in:2"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "thickness_vector",
+      "component_id": "$vector",
+      "name": "thickness_vector"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "zero",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "thickness_vector",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "zero",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "thickness_vector",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "tread_thickness",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "thickness_vector",
+        "port": "in:2"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "board_extrusion",
+      "component_id": "$extrude",
+      "name": "board_extrusion"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "board_rectangle",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "board_extrusion",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "thickness_vector",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "board_extrusion",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "board_solid",
+      "component_id": "$cap",
+      "name": "board_solid"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "board_extrusion",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "board_solid",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "tread_x",
+      "component_id": "$subtract",
+      "name": "tread_x"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "x",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "tread_x",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "nosing",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "tread_x",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "tread_moves",
+      "component_id": "$vector",
+      "name": "tread_moves"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "tread_x",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "tread_moves",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "zero",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "tread_moves",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "under_treads",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "tread_moves",
+        "port": "in:2"
+      }
+    },
+    {
+      "op": "add",
+      "alias": "treads",
+      "component_id": "$move",
+      "name": "treads"
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "board_solid",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "treads",
+        "port": "in:0"
+      }
+    },
+    {
+      "op": "connect",
+      "source": {
+        "node": "tread_moves",
+        "port": "out:0"
+      },
+      "target": {
+        "node": "treads",
+        "port": "in:1"
+      }
+    },
+    {
+      "op": "set_properties",
+      "node": "corners_a",
+      "preview": false
+    },
+    {
+      "op": "set_properties",
+      "node": "corners_b",
+      "preview": false
+    },
+    {
+      "op": "set_properties",
+      "node": "back_top",
+      "preview": false
+    },
+    {
+      "op": "set_properties",
+      "node": "back_bottom",
+      "preview": false
+    },
+    {
+      "op": "set_properties",
+      "node": "outline",
+      "preview": false
+    },
+    {
+      "op": "set_properties",
+      "node": "stringer_extrusion",
+      "preview": false
+    },
+    {
+      "op": "set_properties",
+      "node": "stringer_solid",
+      "preview": false
+    },
+    {
+      "op": "set_properties",
+      "node": "board_rectangle",
+      "preview": false
+    },
+    {
+      "op": "set_properties",
+      "node": "board_extrusion",
+      "preview": false
+    },
+    {
+      "op": "set_properties",
+      "node": "board_solid",
+      "preview": false
+    },
+    {
+      "op": "layout"
+    }
+  ],
+  "output": {
+    "node": "stringers",
+    "port": "out:0"
+  },
+  "expected_count": 3,
+  "checks": {
+    "rise": {
+      "node": "rise",
+      "port": "out:0"
+    },
+    "tread_count": {
+      "node": "tread_count",
+      "port": "out:0"
+    },
+    "run": {
+      "node": "run",
+      "port": "out:0"
+    },
+    "outline": {
+      "node": "outline",
+      "port": "out:0"
+    },
+    "treads": {
+      "node": "treads",
+      "port": "out:0"
+    },
+    "stringers": {
+      "node": "stringers",
+      "port": "out:0"
+    }
+  },
+  "port_contracts": {
+    "polyline": {
+      "inputs": [
+        "Vertices",
+        "Closed"
+      ]
+    }
+  }
+}

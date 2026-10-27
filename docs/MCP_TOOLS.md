@@ -4,6 +4,8 @@ Complete inventory for agents and developers. End-user overview: [README.md](../
 
 Default endpoint: `http://127.0.0.1:4010/mcp`.
 
+MCP resources and prompts complement tools in 0.6.4-alpha. See [resources, prompts and protocol compatibility](MCP_RESOURCES_PROMPTS.md) for the catalog, URI templates, active-document boundaries, privacy and three supported protocol profiles. Reading resources or retrieving prompts never invokes a modeling tool.
+
 **Document units:** length coordinates on create/transform tools are in the **current document unit system**. If the user says “32 inches” and the file is in Feet, call `convert_length` first, then create, then verify with `measure_size` or `measure_distance`.
 
 ## Core document and view
@@ -69,3 +71,5 @@ Semantic tags use `mcp4:` user-text keys on model objects (see project skills un
 Native parametric design tools and help are documented in [GRASSHOPPER.md](GRASSHOPPER.md).
 Start with `gh_help` or `gh_status`. Component discovery and definition operations initialize Grasshopper lazily.
 The fixed catalog includes discovery, document lifecycle, batched graph editing, queued solves, paginated output and explicit additive baking.
+
+`gh_get_solution_summary` returns guarded graph controls, named output pages, units, and diagnostics. `gh_capture_canvas` renders the actual native graph with explicit framing; `gh_show_document` deliberately activates its editor view. `capture_viewport` accepts optional `grasshopper:{session_id,expected_revision,result_id}` context to associate a Rhino preview image with one current solution. See `gh_help` topics `inspection` and `capture` for contracts and limitations.

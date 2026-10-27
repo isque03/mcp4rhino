@@ -17,6 +17,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Inspect the pinned SDK's metadata without loading its UI/runtime assemblies. -->
+    <PackageDownload Include="Grasshopper" Version="[8.21.25188.17001]" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">

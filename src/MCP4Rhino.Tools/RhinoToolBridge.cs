@@ -10,4 +10,5 @@ public sealed class RhinoToolBridge : IMcpToolBridge
     public object[] ListTools() => RhinoToolCatalog.ListTools();
 
     public object CallTool(JsonNode? @params) => RhinoToolCatalog.CallTool(@params);
+    public string ReadResource(JsonObject request) => RhinoResourceReader.Read(request);
 }

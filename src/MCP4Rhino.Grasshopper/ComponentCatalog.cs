@@ -8,6 +8,7 @@ namespace MCP4Rhino.Grasshopper;
 
 internal static class ComponentCatalog
 {
+    private static readonly Dictionary<Guid, JsonObject> Descriptions = new();
     public static bool Supported(IGH_DocumentObject node) => ComponentSupport.Allows(
         node.GetType().Assembly.GetName().Name ?? "", node.GetType().FullName ?? "", node.Obsolete);
 
@@ -42,7 +43,18 @@ internal static class ComponentCatalog
         // Unsupported components are discoverable without instantiating plugin or script objects.
         if (!Supported(proxy)) return new { descriptor = DescribeProxy(proxy), inputs = Array.Empty<object>(), outputs = Array.Empty<object>() };
         var node = Create(id);
-        return new { descriptor = DescribeProxy(proxy), inputs = Ports(node, true), outputs = Ports(node, false), settings = Settings(node) };
+        var description = new { descriptor = DescribeProxy(proxy), inputs = Ports(node, true), outputs = Ports(node, false), settings = Settings(node) };
+        Descriptions[id] = System.Text.Json.JsonSerializer.SerializeToNode(description)!.AsObject();
+        return description;
+    }
+
+    public static object ReadDescriptor(Guid id)
+    {
+        var proxy = GH.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == id) ??
+            throw new MCP4Rhino.Logic.Protocol.McpRpcException(-32002, "Installed component not found");
+        return new { descriptor = DescribeProxy(proxy), ports_status = Descriptions.ContainsKey(id) ? "cached" : "not_described",
+            contract = Descriptions.GetValueOrDefault(id)?.DeepClone(),
+            next_tool = Descriptions.ContainsKey(id) ? null : "gh_describe_components" };
     }
 
     public static IGH_DocumentObject Create(Guid id)
@@ -62,14 +74,14 @@ internal static class ComponentCatalog
         _ => Array.Empty<IGH_Param>(),
     };
 
-    public static object[] Ports(IGH_DocumentObject node, bool input) => Parameters(node, input)
+    public static object[] Ports(IGH_DocumentObject node, bool input, bool resource = false) => Parameters(node, input).Take(resource ? 200 : int.MaxValue)
         .Select((p, i) => (object)new
         {
             port = (input ? "in:" : "out:") + i, parameter_id = p.InstanceGuid, name = p.Name, nickname = p.NickName,
             description = p.Description, type = p.TypeName, access = p.Access.ToString(), optional = p.Optional,
             mapping = p.DataMapping.ToString(), simplify = p.Simplify, reverse = p.Reverse,
-            sources = p.Sources.Select(Source).ToArray(),
-            persistent = ValueCodec.PersistentSummary(p),
+            sources = p.Sources.Take(resource ? 200 : int.MaxValue).Select(Source).ToArray(),
+            persistent = ValueCodec.PersistentSummary(p, !resource),
         }).ToArray();
 
     private static object Source(IGH_Param parameter)
