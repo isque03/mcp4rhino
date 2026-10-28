@@ -7,6 +7,17 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.7.2-alpha.1] — 2026-10-28
+
+### Fixed
+
+- Built-in Grasshopper modeling components, including components outside the verified manifest, work without user configuration. Known script, timer, cluster and I/O restrictions remain in place.
+- Replaced environment-variable authorization with **Tools → MCP4Rhino → Grasshopper plugins…**. Select trusted third-party plugins and click Apply; permissions persist and take effect immediately, without a restart.
+- Updated MCP help and authorization errors to point to the Rhino preferences dialog. Discovery's `authorized` field determines whether a component can run; `supported` remains the verified compatibility badge.
+- Prevented a possible UI deadlock when native preferences and an MCP request initialize Grasshopper concurrently.
+
+Native UI and modeling acceptance remain pending separate-machine testing of this build. Stable 0.7.2 promotion waits for user confirmation.
+
 ## [0.7.2-alpha] — 2026-10-28
 
 ### Added

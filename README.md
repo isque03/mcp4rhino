@@ -44,7 +44,7 @@ Create native, editable Grasshopper definitions, connect components, adjust para
 
 Agents can learn the workflow through `gh_help`, the `grasshopper_getting_started` prompt, or the bundled [parametric design skill](skills/grasshopper-parametric-design/SKILL.md). See [Grasshopper support](docs/GRASSHOPPER.md) for setup, supported components and examples.
 
-Prerelease 0.7.2-alpha adds [component extensibility](docs/GRASSHOPPER_EXTENSIBILITY.md): slider edits that preserve third-party definitions, installed component categories, and local assembly authorization for dynamic components.
+Prerelease 0.7.2-alpha.1 adds [component extensibility](docs/GRASSHOPPER_EXTENSIBILITY.md): slider edits that preserve third-party definitions, installed component categories, automatic support for built-in modeling components, and a Rhino preferences dialog for third-party plugin permissions.
 
 Discoverable read-only document/graph resources and reusable workflow prompts are documented in [resources, prompts and protocol compatibility](docs/MCP_RESOURCES_PROMPTS.md). Reading context does not initialize Grasshopper or modify a model.
 

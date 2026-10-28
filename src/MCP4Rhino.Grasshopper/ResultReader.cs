@@ -90,6 +90,7 @@ internal static class ResultReader
     {
         var rhino = session.RequireContext();
         GhJson.ExpectRevision(session.Revision, args); session.RequireResult(GhJson.Text(args, "result_id"));
+        ComponentCatalog.RequireAuthorized(session.Document);
         var outputs = GhJson.Array(args["outputs"]);
         if (outputs.Count is < 1 or > 100) throw new GhException("limit_exceeded", "Select 1–100 output ports.");
         var items = outputs.SelectMany(p => BakeItems(session.Document, GhJson.Object(p))).Take(10001).ToArray();

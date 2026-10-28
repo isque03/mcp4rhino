@@ -45,10 +45,13 @@ public class GrasshopperSdkContractTests
             ["get_ObjectProxies", "EmitObjectProxy", "EmitObject"]);
         AssertMembers(Path.Combine(directory, "Grasshopper.dll"), "Grasshopper.Kernel.IGH_ObjectProxy",
             ["get_Type", "get_SDKCompliant", "get_LibraryGuid", "get_Obsolete"]);
+        AssertMembers(Path.Combine(directory, "Grasshopper.dll"), "Grasshopper.Kernel.GH_AssemblyInfo",
+            ["get_Assembly", "get_Location", "get_LoadingMechanism"]);
         AssertMembers(Path.Combine(directory, "Grasshopper.dll"), "Grasshopper.GUI.GH_Slider", ["get_Value", "get_Type"]);
         AssertMembers(Path.Combine(directory, "GH_IO.dll"), "GH_IO.Serialization.GH_Archive",
             ["ReadFromFile", "ExtractObject", "MessageCount"]);
         Assert.DoesNotContain(AppDomain.CurrentDomain.GetAssemblies(), assembly => assembly.GetName().Name == "Grasshopper");
+        Assert.NotEmpty(AssemblyName.GetAssemblyName(Path.Combine(directory, "Grasshopper.dll")).GetPublicKeyToken()!);
     }
 
     private static void AssertMembers(string assemblyPath, string typeName, string[] members)

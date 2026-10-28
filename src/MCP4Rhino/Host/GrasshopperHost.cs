@@ -30,6 +30,9 @@ public static class GrasshopperHost
         new JsonObject { ["status"] = "uninitialized", ["next_tool"] = "gh_search_components",
             ["detail"] = "Use an explicit discovery tool to initialize Grasshopper; resource reads do not load it." }.ToJsonString();
 
+    public static GrasshopperComponentLibrary[] ComponentLibraries() =>
+        JsonSerializer.Deserialize<GrasshopperComponentLibrary[]>(Runtime().ComponentLibraries()) ?? [];
+
     public static object Call(string name, JsonObject args)
     {
         try
@@ -77,28 +80,36 @@ public static class GrasshopperHost
 
     private static IGrasshopperRuntime Runtime()
     {
-        lock (Gate)
+        if (Volatile.Read(ref _runtime) is { } ready) return ready;
+        // Never hold Gate while waiting for the UI: native preferences can initialize GH too.
+        return UiThread.Invoke(() =>
         {
-            if (_runtime is not null) return _runtime;
-            _runtime = UiThread.Invoke(() =>
+            lock (Gate)
             {
-                var id = Rhino.PlugIns.PlugIn.IdFromName("Grasshopper");
-                if (id == Guid.Empty) id = new Guid("b45a29b1-4343-4035-989e-044e8580d9cf");
-                if (!Rhino.PlugIns.PlugIn.LoadPlugIn(id))
-                    throw new GhException("grasshopper_unavailable", "Rhino could not load Grasshopper. Check plugin availability and check_rhino_license (including view-only mode).", "quickstart");
-                var plugin = RhinoApp.GetPlugInObject(id) ??
-                    throw new GhException("grasshopper_unavailable", "Grasshopper's scripting interface is unavailable.", "quickstart");
-                var loadEditor = plugin.GetType().GetMethod("LoadEditor") ??
-                    throw new GhException("grasshopper_unavailable", "Grasshopper does not expose LoadEditor.", "quickstart");
-                loadEditor.Invoke(plugin, null);
-                AssemblyLoadContext.Default.Resolving += ResolveSdk;
-                var directory = Path.GetDirectoryName(typeof(GrasshopperHost).Assembly.Location)!;
-                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.Combine(directory, "MCP4Rhino.Grasshopper.dll"));
-                var type = assembly.GetType("MCP4Rhino.Grasshopper.GrasshopperRuntime", throwOnError: true)!;
-                return (IGrasshopperRuntime)Activator.CreateInstance(type, new Dispatcher())!;
-            });
-            return _runtime;
-        }
+                if (_runtime is not null) return _runtime;
+                var runtime = LoadRuntime();
+                Volatile.Write(ref _runtime, runtime);
+                return runtime;
+            }
+        });
+    }
+
+    private static IGrasshopperRuntime LoadRuntime()
+    {
+        var id = Rhino.PlugIns.PlugIn.IdFromName("Grasshopper");
+        if (id == Guid.Empty) id = new Guid("b45a29b1-4343-4035-989e-044e8580d9cf");
+        if (!Rhino.PlugIns.PlugIn.LoadPlugIn(id))
+            throw new GhException("grasshopper_unavailable", "Rhino could not load Grasshopper. Check plugin availability and check_rhino_license (including view-only mode).", "quickstart");
+        var plugin = RhinoApp.GetPlugInObject(id) ??
+            throw new GhException("grasshopper_unavailable", "Grasshopper's scripting interface is unavailable.", "quickstart");
+        var loadEditor = plugin.GetType().GetMethod("LoadEditor") ??
+            throw new GhException("grasshopper_unavailable", "Grasshopper does not expose LoadEditor.", "quickstart");
+        loadEditor.Invoke(plugin, null);
+        AssemblyLoadContext.Default.Resolving += ResolveSdk;
+        var directory = Path.GetDirectoryName(typeof(GrasshopperHost).Assembly.Location)!;
+        var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.Combine(directory, "MCP4Rhino.Grasshopper.dll"));
+        var type = assembly.GetType("MCP4Rhino.Grasshopper.GrasshopperRuntime", throwOnError: true)!;
+        return (IGrasshopperRuntime)Activator.CreateInstance(type, new Dispatcher(), GrasshopperComponentAuthorization.Instance)!;
     }
 
     private static Assembly? ResolveSdk(AssemblyLoadContext context, AssemblyName name) =>

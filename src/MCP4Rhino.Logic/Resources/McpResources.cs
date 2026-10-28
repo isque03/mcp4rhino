@@ -28,7 +28,7 @@ public static class McpResources
             data["supported_protocol_versions"] = JsonSerializer.SerializeToNode(McpRequestContext.SupportedVersions);
             data["capabilities"] = McpDispatcher.Capabilities();
             data["supported_components"] = JsonSerializer.SerializeToNode(ComponentSupport.Catalog());
-            data["supported_components_scope"] = "Verified native compatibility manifest, not installed inventory. Discovery reports verified, available and restricted installed types; available assemblies require local trust.";
+            data["supported_components_scope"] = "Verified native compatibility manifest, not installed inventory. Use authorized for execution permission: built-in modeling libraries work automatically; third-party plugins are enabled in Rhino's Grasshopper plugins preferences.";
             data["lanes"] = Lanes();
             data["lane_guidance"] = "Prefer the smallest lane that matches the ask. Do not open Grasshopper for ordinary one-off Rhino edits.";
             data["limits"] = new JsonObject { ["page_default"] = 50, ["page_max"] = 200, ["resource_max_bytes"] = ResourcePaging.MaxBytes,

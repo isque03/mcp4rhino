@@ -9,6 +9,7 @@ public class ComponentPolicyTests
 {
     private const string AssemblyIdentity = "Plugin, Version=1.2.3.0, Culture=neutral, PublicKeyToken=null";
     private static ComponentIdentity Available(string type = "Plugin.Geometry.Component") => new("Plugin", AssemblyIdentity, type);
+    private static ComponentPolicy Policy(string? json) => new(ComponentTrust.Load(json).Allows);
 
     [Fact]
     public void ManifestRemainsVerifiedWithoutTrustAndDisplayNamesGrantNothing()
@@ -24,13 +25,13 @@ public class ComponentPolicyTests
     [Fact]
     public void ExactAssemblyGrantEnablesAvailableWithoutMakingItVerified()
     {
-        var policy = new ComponentPolicy(JsonSerializer.Serialize(new[] { AssemblyIdentity }));
+        var policy = Policy(JsonSerializer.Serialize(new[] { AssemblyIdentity }));
         var permission = policy.Classify(Available());
         Assert.Equal("available", permission.SupportLevel);
         Assert.True(permission.Authorized);
         permission.Require();
         Assert.False(policy.Classify(Available() with { AssemblyIdentity = AssemblyIdentity.Replace("1.2.3", "1.2.4") }).Authorized);
-        Assert.False(new ComponentPolicy("[\"Plugin\"]").Classify(Available()).Authorized);
+        Assert.False(Policy("[\"Plugin\"]").Classify(Available()).Authorized);
     }
 
     [Theory]
@@ -45,7 +46,7 @@ public class ComponentPolicyTests
     [InlineData("Plugin.HopsComponent")]
     public void KnownRiskCannotBeOverriddenByAssemblyTrust(string type)
     {
-        var policy = new ComponentPolicy(JsonSerializer.Serialize(new[] { AssemblyIdentity }));
+        var policy = Policy(JsonSerializer.Serialize(new[] { AssemblyIdentity }));
         var permission = policy.Classify(Available(type));
         Assert.Equal("restricted", permission.SupportLevel);
         Assert.False(permission.Authorized);
@@ -70,8 +71,7 @@ public class ComponentPolicyTests
     [InlineData("{}")]
     public void MalformedConfigurationFailsClosed(string configuration)
     {
-        var policy = new ComponentPolicy(configuration);
-        Assert.True(policy.InvalidConfiguration);
+        var policy = Policy(configuration);
         Assert.False(policy.Classify(Available()).Authorized);
     }
 
@@ -80,8 +80,7 @@ public class ComponentPolicyTests
     {
         foreach (var configuration in new string?[] { null, "", " ", "[]" })
         {
-            var policy = new ComponentPolicy(configuration);
-            Assert.False(policy.InvalidConfiguration);
+            var policy = Policy(configuration);
             var permission = policy.Classify(Available());
             Assert.Equal("available", permission.SupportLevel);
             Assert.Equal("component_authorization_required", Assert.Throws<GhException>(permission.Require).Code);
@@ -91,7 +90,7 @@ public class ComponentPolicyTests
     [Fact]
     public void MissingUserObjectMetadataAndObsoleteTypesAreRestricted()
     {
-        var policy = new ComponentPolicy(JsonSerializer.Serialize(new[] { AssemblyIdentity }));
+        var policy = Policy(JsonSerializer.Serialize(new[] { AssemblyIdentity }));
         foreach (var identity in new[] { Available() with { Compiled = false }, Available() with { TypeName = "" },
             Available() with { AssemblyIdentity = "" }, Available() with { Obsolete = true } })
             Assert.Equal("restricted", policy.Classify(identity).SupportLevel);
@@ -102,5 +101,40 @@ public class ComponentPolicyTests
     {
         foreach (var tool in new[] { "gh_describe_components", "gh_solve", "gh_apply_patch" })
             Assert.Throws<GhException>(() => GhToolCatalog.Validate(tool, new JsonObject { ["allow_unverified"] = true }));
+    }
+
+    [Theory]
+    [InlineData("CurveComponents", "CurveComponents.Component_Interpolate")]
+    [InlineData("SurfaceComponents", "SurfaceComponents.Component_PipeVariable")]
+    [InlineData("Grasshopper", "Grasshopper.Kernel.Special.GH_BooleanToggle")]
+    [InlineData("Grasshopper", "Grasshopper.Kernel.Special.GH_CustomPreview")]
+    public void BuiltInModelingTypesAreAvailableWithoutAnyUserConfiguration(string assembly, string type)
+    {
+        var identity = new ComponentIdentity(assembly, assembly + ", Version=8.36.26296.17002", type) { BuiltIn = true };
+        var permission = new ComponentPolicy().Classify(identity);
+        Assert.Equal("available", permission.SupportLevel);
+        Assert.True(permission.Authorized);
+    }
+
+    [Fact]
+    public void BuiltInOriginDoesNotOverrideKnownRestrictions()
+    {
+        var identity = new ComponentIdentity("Grasshopper", "Grasshopper, Version=8.36", "Grasshopper.Kernel.Special.GH_Timer") { BuiltIn = true };
+        Assert.Equal("restricted", new ComponentPolicy(_ => true).Classify(identity).SupportLevel);
+    }
+
+    [Fact]
+    public void GrantAndRevocationTakeEffectOnExistingPolicyWithoutRestart()
+    {
+        var trusted = new HashSet<string>(StringComparer.Ordinal);
+        var policy = new ComponentPolicy(trusted.Contains);
+        Assert.False(policy.Classify(Available()).Authorized);
+        trusted.Add(AssemblyIdentity);
+        Assert.True(policy.Classify(Available()).Authorized);
+        trusted.Clear();
+        var denied = policy.Classify(Available());
+        Assert.False(denied.Authorized);
+        Assert.Contains(ComponentPolicy.PreferencesCommand, denied.Reason);
+        Assert.DoesNotContain("environment", denied.Reason!, StringComparison.OrdinalIgnoreCase);
     }
 }

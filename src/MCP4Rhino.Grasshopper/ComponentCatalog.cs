@@ -1,7 +1,9 @@
 using System.Text.Json.Nodes;
+using System.Reflection;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
 using MCP4Rhino.Logic.Grasshopper;
+using MCP4Rhino.Contracts;
 using GH = Grasshopper.Instances;
 
 namespace MCP4Rhino.Grasshopper;
@@ -9,7 +11,9 @@ namespace MCP4Rhino.Grasshopper;
 internal static class ComponentCatalog
 {
     private static readonly Dictionary<Guid, JsonObject> Descriptions = new();
-    private static readonly ComponentPolicy Policy = new(Environment.GetEnvironmentVariable(ComponentPolicy.EnvironmentVariable));
+    private static ComponentPolicy Policy = new();
+    private static readonly Dictionary<Assembly, bool> BuiltInLibraries = new();
+    public static void Configure(IGrasshopperComponentAuthorization authorization) => Policy = new(authorization.IsTrustedAssembly);
     public static bool Supported(IGH_DocumentObject node) => ComponentSupport.Allows(
         node.GetType().Assembly.GetName().Name ?? "", node.GetType().FullName ?? "", node.Obsolete);
 
@@ -17,7 +21,29 @@ internal static class ComponentCatalog
         type.Assembly.GetName().Name ?? "", type.FullName ?? "", proxy.Obsolete);
 
     private static ComponentIdentity Identity(Type? type, bool obsolete) => new(type?.Assembly.GetName().Name ?? "",
-        type?.Assembly.FullName ?? "", type?.FullName ?? "", obsolete, type is not null);
+        type?.Assembly.FullName ?? "", type?.FullName ?? "", obsolete, type is not null) { BuiltIn = type is not null && BuiltIn(type.Assembly) };
+
+    private static bool BuiltIn(Assembly assembly)
+    {
+        if (BuiltInLibraries.TryGetValue(assembly, out var value)) return value;
+        var gh = typeof(GH_Document).Assembly;
+        var token = Convert.ToHexString(assembly.GetName().GetPublicKeyToken() ?? []);
+        var ghToken = Convert.ToHexString(gh.GetName().GetPublicKeyToken() ?? []);
+        value = !assembly.IsDynamic && BuiltInComponentAssembly.Matches(assembly.GetName().Name ?? "", token,
+            InstalledPath(assembly), InstalledPath(gh), ghToken);
+        BuiltInLibraries[assembly] = value;
+        return value;
+    }
+
+    private static string InstalledPath(Assembly assembly) => !string.IsNullOrEmpty(assembly.Location) ? assembly.Location :
+        GH.ComponentServer.Libraries.FirstOrDefault(library => library.Assembly == assembly)?.Location ?? "";
+
+    public static GrasshopperComponentLibrary[] Libraries() => GH.ComponentServer.ObjectProxies
+        .Where(p => p.Type is not null && !BuiltIn(p.Type.Assembly))
+        .GroupBy(p => p.Type!.Assembly.FullName!).Select(group => new GrasshopperComponentLibrary(group.Key,
+            group.First().Type!.Assembly.GetName().Name ?? "Plugin", group.First().Type!.Assembly.GetName().Version?.ToString() ?? "",
+            group.Count(p => Permission(p).SupportLevel == "available"), group.Count(p => Permission(p).SupportLevel == "restricted")))
+        .OrderBy(library => library.Name).ToArray();
 
     public static ComponentPermission Permission(IGH_DocumentObject node) => Permission(node.GetType(), node.Obsolete);
     private static ComponentPermission Permission(IGH_ObjectProxy proxy) => Permission(proxy.Type, proxy.Obsolete || !proxy.SDKCompliant);
@@ -54,7 +80,7 @@ internal static class ComponentCatalog
         assembly_identity = proxy.Type?.Assembly.FullName, library_id = proxy.LibraryGuid,
         support_level = Permission(proxy).SupportLevel, authorized = Permission(proxy).Authorized,
         permission_required = Permission(proxy).SupportLevel == "available" && !Permission(proxy).Authorized,
-        restriction_reason = Permission(proxy).Reason, authorization_configuration_invalid = Policy.InvalidConfiguration,
+        restriction_reason = Permission(proxy).Reason, built_in = proxy.Type is not null && BuiltIn(proxy.Type.Assembly),
     };
 
     public static object Describe(JsonObject args) => GhJson.Array(args["component_ids"]).Take(50)

@@ -29,14 +29,22 @@ public sealed class GrasshopperRuntime : IGrasshopperRuntime
         return (string)_dispatcher.Invoke(() => GrasshopperResourceReader.Read(request, _sessions.Values));
     }
 
-    public GrasshopperRuntime(IGrasshopperDispatcher dispatcher)
+    public GrasshopperRuntime(IGrasshopperDispatcher dispatcher, IGrasshopperComponentAuthorization authorization)
     {
+        ComponentCatalog.Configure(authorization);
         _dispatcher = dispatcher; _jobs = new SolveQueue(dispatcher.Post);
         RhinoDoc.AddRhinoObject += GeometryChanged; RhinoDoc.DeleteRhinoObject += GeometryChanged;
         RhinoDoc.UndeleteRhinoObject += GeometryChanged;
         RhinoDoc.ReplaceRhinoObject += GeometryReplaced;
         RhinoDoc.ModifyObjectAttributes += AttributesChanged;
         RhinoDoc.DocumentPropertiesChanged += DocumentSettingsChanged;
+    }
+
+    public string ComponentLibraries()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        if (_jobs.Busy) throw new GhException("busy", "Wait for the current Grasshopper solve before changing plugin permissions.");
+        return (string)_dispatcher.Invoke(() => JsonSerializer.Serialize(ComponentCatalog.Libraries()));
     }
 
     public string Call(string tool, JsonObject arguments)

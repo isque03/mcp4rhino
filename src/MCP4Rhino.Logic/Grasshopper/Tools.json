@@ -35,7 +35,7 @@
   },
   {
     "name": "gh_search_components",
-    "description": "Search installed component metadata: verified, available or restricted, with assembly authorization status. Search does not instantiate components. Discovery initializes Grasshopper.",
+    "description": "Search installed components and authorization status. Built-in modeling components work automatically; enable third-party plugins in Rhino's Grasshopper plugins preferences. Search does not instantiate components.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -63,7 +63,7 @@
   },
   {
     "name": "gh_describe_components",
-    "description": "Inspect component types, port IDs, defaults and access modes. Available types require local assembly trust before instantiation; denied types return metadata only. Discovery initializes Grasshopper.",
+    "description": "Inspect component types, port IDs, defaults and access modes. Built-in modeling types are allowed automatically. Third-party types require permission in Rhino's Grasshopper plugins preferences; denied types return metadata only.",
     "inputSchema": {
       "type": "object",
       "properties": {

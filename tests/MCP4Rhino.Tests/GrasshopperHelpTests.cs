@@ -9,6 +9,16 @@ namespace MCP4Rhino.Tests;
 public class GrasshopperHelpTests
 {
     [Fact]
+    public void PermissionHelpPointsToRhinoPreferencesWithoutEnvironmentSetup()
+    {
+        var help = JsonNode.Parse(GhHelp.Json("workflow"))!["markdown"]!.GetValue<string>();
+        Assert.Contains("MCP4RhinoGrasshopper", help);
+        Assert.Contains("authorized:true", help);
+        Assert.Contains("Apply", help);
+        Assert.DoesNotContain("MCP4RHINO_GH_TRUSTED_ASSEMBLIES", help);
+    }
+
+    [Fact]
     public void EveryPackagedTopicLoadsWithoutGrasshopperAssemblies()
     {
         var index = JsonNode.Parse(GhHelp.Json())!;

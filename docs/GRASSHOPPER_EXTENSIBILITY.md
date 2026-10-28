@@ -1,4 +1,4 @@
-# Grasshopper extensibility in 0.7.2-alpha
+# Grasshopper extensibility in 0.7.2-alpha.1
 
 ## Architecture review
 
@@ -20,7 +20,7 @@ An independent read-only subagent reviewed this plan before implementation for S
 
 1. Keep the manifest and legacy `supported` field as the verified compatibility baseline. Add a small pure `ComponentPolicy`, consumed by the existing SDK catalog gateway. No new execution engine or public tool is introduced.
 2. Add `SliderState` as the raw control value object and `SliderPatch` as a focused transaction script. Prevalidate every slider operation before mutation, including repeated targets. Commit in place under solution suppression, with one targeted undo record and slider-only rollback. Leave other object instances, parameters, wires and positions untouched. Existing cycles do not block this control-only edit.
-3. Classify installed types and authorize available assemblies using local startup configuration. Discovery never calls constructors. Type-level port introspection and graph creation require authorization. Existing instance inspection continues to expose actual ports.
+3. Classify installed types, automatically authorize built-in modeling libraries, and use Rhino plugin preferences for third-party library permissions. Discovery never calls constructors. Type-level port introspection and graph creation require authorization. Existing instance inspection continues to expose actual ports.
 4. Keep staged archive transactions for structural/non-slider patches, requiring authorization for all existing objects before serialization. Check node/type, parameter/type/access and ordered source identities after cloning. Fail on archive warnings/errors rather than patching an incomplete graph. Trusted plugin state serialization still needs native round-trip validation.
 5. Check all graph objects at queued solve execution, including locked nodes. For `solve:true` patches, also check before commit and on the staged graph. A denied authorization cannot first commit a slider change. Solve failures after a successful commit retain the existing repair workflow.
 6. Load `.gh`/`.ghx` with the existing GH_IO archive SDK under solution suppression, dispose failed loads and reject archive warnings/errors. This conservatively rejects some files Grasshopper could repair interactively. Open those manually, resolve dependencies, and explicitly attach. Do not delete or replace unresolved objects to make a file pass.
@@ -32,18 +32,20 @@ The application service remains `GrasshopperRuntime`; `DefinitionSession` owns r
 | Category | Discovery | Creation/type port introspection | Existing slider edits | MCP solve |
 |---|---|---|---|---|
 | Verified | Installed proxy metadata | Allowed | Allowed | Allowed if every graph object is authorized |
-| Available | Installed compiled type outside manifest | Requires local assembly trust | Allowed without trusting unrelated nodes | Requires local assembly trust for every available object |
+| Available | Installed compiled type outside manifest | Built-in modeling libraries allowed automatically; third-party plugins require user selection in Rhino preferences | Allowed without trusting unrelated nodes | Every object must be authorized |
 | Restricted | Metadata where available | Denied | Allowed on verified sliders elsewhere in the graph | Denied while restricted objects are present |
 
 `supported` keeps its original meaning: manifest verified. New `support_level`, `authorized`, `permission_required` and `restriction_reason` fields explain the distinction. `assembly_identity` is the exact .NET assembly full name; `library_id` and `component_id` remain distinct from placed instance GUIDs. `gh_describe_components` returns `ports_status: authorization_required` or `restricted` without instantiating denied types. Port descriptions add `data_type` and `parameter_type`; existing access/default/mapping/source fields remain.
 
-To trust a reviewed plugin, copy its exact `assembly_identity` from discovery into a JSON array in **`MCP4RHINO_GH_TRUSTED_ASSEMBLIES`** in the environment used to launch Rhino, then restart Rhino. For example, the value shape is:
+Rhino's built-in modeling libraries work automatically. A component outside the manifest still reports `available`, but can have `authorized:true`: the manifest records tested compatibility, not the complete executable catalog. The adapter identifies built-in modeling libraries by known assembly name, matching public-key token and installation under the loaded Grasshopper runtime directory. This is provenance selection, not signature validation or a sandbox. Known-risk restrictions are checked before this automatic grant.
 
-```json
-["ExamplePlugin, Version=1.2.3.0, Culture=neutral, PublicKeyToken=null"]
-```
+For third-party plugins:
 
-Use the actual discovered identity, not this example. The grant covers **every available component in that assembly**, including constructors, serialization, callbacks, solving and custom data operations. A different assembly version requires a new grant. Invalid JSON grants nothing and discovery reports `authorization_configuration_invalid`. MCP tool arguments cannot change this configuration. There is no `allow_unsafe` argument or automatic grant from a component name.
+1. In Rhino, open **Tools → MCP4Rhino → Grasshopper plugins…**, use the **Grasshopper plugins…** button in the Status dialog, or run `MCP4RhinoGrasshopper`.
+2. Select the installed plugins you trust and click **Apply**. Restricted-only libraries cannot be enabled.
+3. Continue the agent's work. Changes apply immediately and persist for future Rhino sessions; Cancel changes nothing. No environment variables or file edits are needed.
+
+Choices are saved through Rhino's plugin settings, keyed by exact assembly identity and version. Updating a third-party plugin requires a new choice. A revoked grant blocks subsequent MCP creation, type instantiation during introspection, queued solves and baking; existing-instance inspection and cached component metadata remain readable; it does not terminate code already executing or govern manual Grasshopper solutions. The grant covers available components in that library, including constructors, serialization, callbacks, solving and custom data operations. MCP tool arguments cannot grant permission. The alpha.1 implementation no longer reads the alpha's environment-variable configuration.
 
 Known scripting assemblies/types, Python/CSharp types, clusters, timers, external file/stream/network types, Hops/Compute/optimization types, obsolete components and proxies without compiled metadata remain restricted. Known script/cluster base types are also checked for renamed subclasses. This conservative identity-based filter is **not a complete side-effect detector**. A plugin with an innocuous name can execute arbitrary code. Assembly full names are selection keys, not signatures or a sandbox. Install and trust only reviewed dependencies.
 
@@ -70,15 +72,15 @@ python3 grasshopper-compatibility-smoke.py --document-id <document-guid> --slide
 
 Use `--expect-solve-denied` for a definition containing untrusted/restricted nodes; omit it for an already-authorized definition. It attaches, tests a repeated-target slider patch and retry, checks preservation of all reported node/port/wire identities, rejects an invalid later operation, checks solve authorization when requested, then restores the original raw slider value. It never infers preservation of opaque plugin-private state from inspection alone.
 
-Record the following matrix separately for **licensed Windows and macOS Rhino 8**, with the 0.7.2-alpha package installed and Rhino fully restarted:
+Record the following matrix separately for **licensed Windows and macOS Rhino 8**, with the 0.7.2-alpha.1 package installed and Rhino fully restarted:
 
 | Scenario | Required evidence |
 |---|---|
-| Discovery/instantiation | Verified, available native, installed third-party, restricted script/timer/cluster, null-type user object; search causes no construction; denied describe causes no construction; trust exact assembly and repeat |
+| Discovery/instantiation | Verified, available native, installed third-party, restricted script/timer/cluster, null-type user object; search causes no construction; denied describe causes no construction; enable a plugin through the native dialog and repeat; Cancel/no change, revoke/immediate denial and persisted choices after restart |
 | Create/connect | Build an authorized dynamic component graph across multiple patches; inspect real ports/access/defaults; reject incompatible or invalid edits without partial graph changes |
 | Existing definition | Slider → third-party → native fixture; preserve object references, instance/port GUIDs, source ordering, custom settings and untouched positions; repeat without plugin trust |
 | Slider transactions | Expression slider, Even/Odd modes, decimal places, disjoint ranges, repeated targets, invalid second control, injected write failure/rollback and exact request retry |
-| Solve/output | Deny untrusted/restricted graph even with locked objects and `solve:true`; prove rejection leaves sliders unchanged; trust plugin and check native diagnostics, preview, trees and dimensions |
+| Solve/output | Deny untrusted/restricted graph even with locked objects and `solve:true`; prove rejection leaves sliders unchanged; enable plugin in preferences and check native diagnostics, preview, trees and dimensions |
 | Bake | Existing smoke `--bake` checks two additive geometry snapshots and receipt deduplication from current authorized outputs |
 | Persistence | `.gh` and `.ghx` save/reopen, custom plugin state and ordered connections; missing dependency must fail explicitly without a partial editable document |
 | Undo/redo | One native GH step per patch; slider undo/redo retains unrelated object references/settings and expressions; no automatic solve, current outputs invalidated; explicit solve gives expected result |
@@ -91,3 +93,5 @@ Run the existing array/facade/loft/profile/stair smoke recipes for native regres
 The Release solution build, source-version check, 0.7.2 Yak packaging/contents validation, 371 .NET tests, 33 release/smoke orchestration tests and 19 demo tests passed. Logic/Contracts line coverage was 95.47%; the new policy and slider-state classes each had 100% line coverage. These numbers exclude native adapter execution.
 
 Read-only calls to the running Rhino server returned `server_version: 0.7.1`, `can_save: false`, installation type Evaluation and zero evaluation days remaining. `gh_status` reported `initialized: false`. The 0.7.2 package was built locally but was not installed or used for native acceptance. No 0.7.2 Windows or macOS native acceptance result is claimed.
+
+For alpha.1 native acceptance, repeat the reported Interpolate / Pipe Variable / Periodic input / white Custom Preview graph without configuring any environment variables. Check actual port/value support separately from permission: special controls and custom goo do not gain new codecs just because a component is authorized. Also exercise the plugin-preferences command concurrently with first MCP discovery and verify Rhino stays responsive.

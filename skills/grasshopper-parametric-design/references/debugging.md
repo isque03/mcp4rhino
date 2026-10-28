@@ -9,7 +9,7 @@ Start with the first component with an error, inspect its upstream outputs and i
 | stale_result | Solve the current revision and use its new result ID. Never bake an old result. |
 | invalid_port / node_not_found | Describe the component or inspect the graph; use returned identities. |
 | connected_input | Disconnect sources before assigning persistent values, or change the upstream parameter instead. |
-| component_authorization_required | Inspect the exact assembly identity and explain local trust requirements. Existing sliders can still be edited with a slider-only patch and solve:false. Preserve third-party nodes and connections. |
+| component_authorization_required | Ask the user to enable the plugin in Rhino under Tools → MCP4Rhino → Grasshopper plugins… (MCP4RhinoGrasshopper), then click Apply. No environment setup or restart is needed. Existing sliders remain editable with a slider-only patch and solve:false; preserve third-party nodes and connections. |
 | restricted_component | Preserve and inspect the definition; do not replace or delete its restricted objects to force execution. Slider-only edits elsewhere remain available with solve:false. |
 | missing_reference | Check the Rhino object and bound document. Restore or explicitly replace the reference. |
 | busy | Poll the job. Avoid accumulating UI requests behind a long-running solve. |

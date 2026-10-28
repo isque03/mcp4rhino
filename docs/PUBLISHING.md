@@ -67,7 +67,7 @@ Publish uses `prerelease: true` and `make_latest: false` for alpha versions. Git
 ## Verify distribution
 
 ```bash
-gh release view v0.7.2-alpha --json tagName,isPrerelease,assets,url
+gh release view v0.7.2-alpha.1 --json tagName,isPrerelease,assets,url
 # Read-only checks using the Yak executable shipped with Rhino:
 yak search MCP4Rhino --all --prerelease
 yak search MCP4Rhino
