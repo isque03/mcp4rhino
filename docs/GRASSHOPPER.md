@@ -92,8 +92,8 @@ Also verify manually on both platforms: one native GH undo/redo step per patch, 
 
 Use a licensed Rhino 8 installation; the initial native target is Rhino 8.35 with bundled Grasshopper 1. Grasshopper 2 is outside this alpha. Use disposable Rhino documents and save any existing work first.
 
-1. Open `PackageManager`, search **MCP4Rhino**, select `0.7.0`, and install/update. Apply and restart Rhino completely.
-2. Call `get_support_info` and confirm `server_version` is `0.7.0`. Call `gh_help` with `topic: "index"` and `gh_status`. Confirm an ordinary tool such as `get_document_info` still works. The endpoint remains `http://127.0.0.1:4010/mcp`.
+1. Open `PackageManager`, search **MCP4Rhino**, select `0.7.1`, and install/update. Apply and restart Rhino completely.
+2. Call `get_support_info` and confirm `server_version` is `0.7.1`. Call `gh_help` with `topic: "index"` and `gh_status`. Confirm an ordinary tool such as `get_document_info` still works. The endpoint remains `http://127.0.0.1:4010/mcp`.
 3. Use an agent with only MCP help or the downloaded portable skill to create the array, facade, and loft examples. Inspect editable native components, preview, dimensions, tree structure and diagnostics. Change a parameter while preserving derived relationships; repair the loft's deliberate tree mismatch.
 4. Optionally download `grasshopper-smoke.py` from the same GitHub prerelease. With Python 3, run `python grasshopper-smoke.py --example array`, `python grasshopper-smoke.py --example facade --bake`, and `python grasshopper-smoke.py --example loft`. The runner needs no checkout or Python packages. It creates definitions, temporary `.gh`/`.ghx` files, and, with `--bake`, two geometry snapshots. It leaves the final definition open for inspection.
 5. Test manual edit conflicts, one undo/redo step per patch, deleted/replaced Rhino references, switching documents, queued/running cancellation, no overlapping solves, and ordinary tools when Grasshopper cannot load. Record heavy-solve UI blocking rather than treating a job ID as evidence that Rhino stays responsive.

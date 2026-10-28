@@ -340,7 +340,9 @@ public class TelemetryTests : IDisposable
         Assert.All(events, e =>
         {
             Assert.Equal(TelemetryEvents.ToolExecuted, e.EventName);
-            AssertKeys(Json(e), ToolEventKeys);
+            var diagnostics = e == events[1] ? new[] { "errorCode" }
+                : e == events[2] ? new[] { "errorCode", "errorType" } : [];
+            AssertKeys(Json(e), [.. ToolEventKeys, .. diagnostics]);
         });
     }
 
@@ -472,10 +474,17 @@ public class TelemetryTests : IDisposable
         Telemetry.Configure(Options(consent: true, transport));
         Telemetry.Track(TelemetryEvents.PluginStarted);
         Telemetry.TrackTool("create_box", 4, true);
-        Assert.Equal(2, service.QueuedCount);
+        Telemetry.TrackTool("create_box", 2, false, new(MCP4Rhino.Contracts.ToolErrorCode.Timeout,
+            MCP4Rhino.Contracts.ToolErrorType.TimeoutException, MCP4Rhino.Contracts.ToolErrorStage.Execution));
+        Assert.Equal(3, service.QueuedCount);
         service.NotifyFlushInterval();
         await Wait(service);
-        Assert.Equal(2, transport.Batches.Single().Count);
+        Assert.Equal(3, transport.Batches.Single().Count);
+        var failed = transport.Batches.Single()[2];
+        Assert.False(failed.Success);
+        Assert.Equal("TIMEOUT", failed.ErrorCode);
+        Assert.Equal("TimeoutException", failed.ErrorType);
+        Assert.Equal("EXECUTION", failed.ErrorStage);
 
         Telemetry.Revoke();
         Assert.Equal(0, service.QueuedCount);

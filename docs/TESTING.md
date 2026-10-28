@@ -36,6 +36,15 @@ dotnet test tests/MCP4Rhino.Tests -c Release
 | `McpContentTests` | MCP text/image content builders; PNG signature validation; image embed helpers |
 | `RhinoLicenseStatusTests` | Save-gate allow/deny messages and evaluation classification from license snapshots |
 | `TelemetryTests` | Opt-out gate, installation id, event JSON, tool success/failure, batching, `X-Api-Key` header, URL secret stripping, delivery failure, revoke, and payload redaction |
+| `TelemetryDiagnosticsTests` / `RhinoCommandNameTests` | Controlled failure mapping, optional-field applicability, generic-command outcomes with unchanged MCP responses, safe leading-command lookup, and diagnostics privacy |
+
+## Telemetry 0.7.1 native acceptance
+
+Use a licensed Rhino installation with the complete candidate package installed and Rhino restarted; Tools-only hot reload cannot update the shared Contracts types. Confirm `get_support_info` reports `0.7.1`.
+
+In a disposable document, exercise a harmless successful generic command, a failed command, a prefixed command, an unresolved alias, and a macro with more than one command. Verify the leading canonical English command name through RhinoCommon, and test a localized command when that language is available. Compare MCP responses with their previous shape, including the existing `script` field, while confirming scripts and paths never enter telemetry.
+
+Use the excluded synthetic installation ID from the backend handoff for delivery checks. Require empty HTTP 204 and persisted `error_code`, `error_type`, `error_stage`, and `rhino_command_name` values in BigQuery. Inspect `rhino-events errors`, `commands`, and `recent` for that installation. Record native results separately from Windows/macOS CI; unit tests cannot prove native command lookup or execution.
 
 ## Rhino integration (manual)
 

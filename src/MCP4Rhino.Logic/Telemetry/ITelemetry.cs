@@ -1,3 +1,5 @@
+using MCP4Rhino.Contracts;
+
 namespace MCP4Rhino.Logic.Telemetry;
 
 /// <summary>Fire-and-forget usage events. Implementations must not throw.</summary>
@@ -6,6 +8,9 @@ public interface ITelemetry
     void Track(string eventName);
 
     void TrackTool(string toolName, long durationMs, bool success);
+
+    void TrackTool(string toolName, long durationMs, bool success, ToolDiagnostics? diagnostics) =>
+        TrackTool(toolName, durationMs, success);
 }
 
 /// <summary>

@@ -267,6 +267,8 @@ public static class RhinoToolCatalog
         // capture_viewport returns a full MCP result (text + optional image), not a plain string.
         if (name == "capture_viewport")
             return CaptureViewport(args);
+        if (name == "run_rhino_command")
+            return RhinoCommandTool.Call(args);
 
         var text = name switch
         {

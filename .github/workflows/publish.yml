@@ -122,7 +122,7 @@ jobs:
 
             Use disposable documents. Follow the [Grasshopper tester checklist](https://github.com/isque03/mcp4rhino/blob/${{ inputs.tag }}/docs/GRASSHOPPER.md#alpha-tester-checklist). Download `grasshopper-smoke.py` from the assets for automated native checks; it needs only Python 3 and the running MCP server.
 
-            To leave the alpha: uninstall it, explicitly reinstall stable **0.5.3**, disable prerelease selection, and restart Rhino. Clearing the checkbox alone does not downgrade the installed plugin.
+            ${{ env.PRERELEASE == 'true' && 'To leave the alpha: uninstall it, explicitly reinstall stable **0.5.3**, disable prerelease selection, and restart Rhino. Clearing the checkbox alone does not downgrade the installed plugin.' || '' }}
 
             Also published to McNeel's Package Manager (search **MCP4Rhino** after index refresh).
 

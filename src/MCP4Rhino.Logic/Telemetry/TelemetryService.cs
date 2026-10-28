@@ -1,3 +1,5 @@
+using MCP4Rhino.Contracts;
+
 namespace MCP4Rhino.Logic.Telemetry;
 
 /// <summary>
@@ -120,6 +122,9 @@ public sealed class TelemetryService : ITelemetry, IDisposable
     }
 
     public void TrackTool(string toolName, long durationMs, bool success)
+        => TrackTool(toolName, durationMs, success, null);
+
+    public void TrackTool(string toolName, long durationMs, bool success, ToolDiagnostics? diagnostics)
     {
         try
         {
@@ -127,7 +132,8 @@ public sealed class TelemetryService : ITelemetry, IDisposable
                 return;
             if (durationMs < 0)
                 durationMs = 0;
-            Enqueue(snap.Create(TelemetryEvents.ToolExecuted, toolName.Trim(), durationMs, success));
+            var wire = ToolDiagnosticsWire.Create(toolName.Trim(), success, diagnostics);
+            Enqueue(snap.Create(TelemetryEvents.ToolExecuted, toolName.Trim(), durationMs, success, wire));
         }
         catch (Exception ex)
         {
@@ -318,7 +324,8 @@ public sealed class TelemetryService : ITelemetry, IDisposable
         string os,
         Func<DateTimeOffset> clock)
     {
-        public TelemetryEvent Create(string eventName, string? tool, long? durationMs, bool? success) => new()
+        public TelemetryEvent Create(string eventName, string? tool, long? durationMs, bool? success,
+            ToolDiagnosticsWire diagnostics = default) => new()
         {
             InstallationId = installationId,
             EventName = eventName,
@@ -329,6 +336,10 @@ public sealed class TelemetryService : ITelemetry, IDisposable
             Tool = tool,
             DurationMs = durationMs,
             Success = success,
+            ErrorCode = diagnostics.ErrorCode,
+            ErrorType = diagnostics.ErrorType,
+            ErrorStage = diagnostics.ErrorStage,
+            RhinoCommandName = diagnostics.RhinoCommandName,
         };
     }
 }
