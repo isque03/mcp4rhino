@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag matching manifest.yml; e.g. v0.6.5-alpha (dispatch on release/0.6.5-alpha)"
+        description: "Tag matching manifest.yml; e.g. v0.7.2-alpha (dispatch on release/0.7.2-alpha)"
         required: true
         type: string
 
@@ -64,6 +64,10 @@ jobs:
           test -s "dist/MCP4Rhino-${VERSION}-skills.zip"
           test -s dist/grasshopper-smoke.py
           cmp scripts/grasshopper-smoke.py dist/grasshopper-smoke.py
+          if [[ "$VERSION" == 0.7.2* ]]; then
+            test -s dist/grasshopper-compatibility-smoke.py
+            cmp scripts/grasshopper-compatibility-smoke.py dist/grasshopper-compatibility-smoke.py
+          fi
 
       - name: Download Yak CLI
         id: yak
@@ -107,6 +111,7 @@ jobs:
             dist/MCP4Rhino-${{ env.VERSION }}.yak
             dist/MCP4Rhino-${{ env.VERSION }}-skills.zip
             dist/grasshopper-smoke.py
+            dist/grasshopper-compatibility-smoke.py
           prerelease: ${{ env.PRERELEASE == 'true' }}
           make_latest: ${{ env.MAKE_LATEST }}
           fail_on_unmatched_files: true
@@ -116,13 +121,13 @@ jobs:
 
             Universal package (`MCP4Rhino-${{ env.VERSION }}.yak`) for Rhino 8 on macOS and Windows.
 
-            ${{ env.PRERELEASE == 'true' && '**Experimental alpha for licensed native testing.** Grasshopper runtime behavior is not yet verified on Windows or macOS; stable promotion is blocked pending those results.' || 'Stable release.' }}
+            ${{ env.PRERELEASE == 'true' && '**Prerelease for native testing.** Stable promotion waits for explicit tester confirmation.' || 'Stable release.' }}
 
             In Rhino PackageManager, search **MCP4Rhino**, select this version and install/update. For alpha versions, enable **Include pre-releases**. Apply and restart Rhino completely. Confirm the version with `get_support_info`, then run `gh_help` and `gh_status`.
 
-            Use disposable documents. Follow the [Grasshopper tester checklist](https://github.com/isque03/mcp4rhino/blob/${{ inputs.tag }}/docs/GRASSHOPPER.md#alpha-tester-checklist). Download `grasshopper-smoke.py` from the assets for automated native checks; it needs only Python 3 and the running MCP server.
+            Use disposable documents. Follow the [Grasshopper tester checklist](https://github.com/isque03/mcp4rhino/blob/${{ inputs.tag }}/docs/GRASSHOPPER.md#alpha-tester-checklist). Download both `grasshopper-smoke.py` and `grasshopper-compatibility-smoke.py` into the same folder for native checks; they need only Python 3 and the running MCP server. See the [compatibility acceptance matrix](https://github.com/isque03/mcp4rhino/blob/${{ inputs.tag }}/docs/GRASSHOPPER_EXTENSIBILITY.md).
 
-            ${{ env.PRERELEASE == 'true' && 'To leave the alpha: uninstall it, explicitly reinstall stable **0.5.3**, disable prerelease selection, and restart Rhino. Clearing the checkbox alone does not downgrade the installed plugin.' || '' }}
+            ${{ env.PRERELEASE == 'true' && 'To leave the alpha: explicitly reinstall the current stable package and restart Rhino. Clearing Include pre-releases alone does not downgrade the installed plugin.' || '' }}
 
             Also published to McNeel's Package Manager (search **MCP4Rhino** after index refresh).
 

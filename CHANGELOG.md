@@ -7,6 +7,22 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.7.2-alpha] — 2026-10-28
+
+### Added
+
+- Opt-in prerelease for separate-machine testing. Stable 0.7.2 publication waits for explicit user confirmation.
+- Installed component categories: verified, available and restricted, with exact assembly identities and explicit authorization metadata. The verified manifest and legacy support flag remain compatible.
+- Local `MCP4RHINO_GH_TRUSTED_ASSEMBLIES` configuration for reviewed available assemblies; known scripting, cluster, timer and external-I/O types remain restricted. Discovery alone grants no execution permission.
+- In-place slider-only patches for existing mixed definitions, retaining unrelated object instances, ports and wires, targeted undo/redo, raw slider state and full accuracy modes.
+- Component policy/slider planning tests, compatibility smoke runner, architecture review and Windows/macOS native acceptance matrix.
+
+### Changed
+
+- Structural edits require authorization before serialization and validate cloned graph identities. Archive loading rejects warnings/errors rather than accepting potentially incomplete definitions.
+- Patch/undo/load operations suppress implicit solutions; undo/redo requires a subsequent explicit solve. Authorized solves retain native preview behavior.
+- Native 0.7.2 discovery, plugin graphs, solve/bake, persistence and undo/redo remain unverified until licensed platform acceptance runs succeed. Build and pure tests do not establish these behaviors.
+
 ## [0.7.1] — 2026-10-28
 
 ### Added

@@ -21,6 +21,8 @@ internal static class ResultReader
     {
         node = node.InstanceGuid, component_id = node.ComponentGuid, name = node.Name, nickname = node.NickName,
         supported = ComponentCatalog.Supported(node), position = new[] { node.Attributes.Pivot.X, node.Attributes.Pivot.Y },
+        support_level = ComponentCatalog.Permission(node).SupportLevel, authorized = ComponentCatalog.Permission(node).Authorized,
+        restriction_reason = ComponentCatalog.Permission(node).Reason, assembly_identity = node.GetType().Assembly.FullName,
         enabled = node is not IGH_ActiveObject active || !active.Locked,
         preview = node is IGH_PreviewObject preview && !preview.Hidden, settings = ComponentCatalog.Settings(node),
         inputs = ComponentCatalog.Ports(node, true, resource), outputs = ComponentCatalog.Ports(node, false, resource),

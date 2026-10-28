@@ -169,10 +169,7 @@ public sealed class GrasshopperRuntime : IGrasshopperRuntime
     {
         if (GH.DocumentServer.Cast<GH_Document>().Any(d => string.Equals(d.FilePath, path, StringComparison.OrdinalIgnoreCase)))
             throw new GhException("already_open", "Definition is already open. Explicitly attach its document_id.");
-        var io = new GH_DocumentIO();
-        if (!io.Open(path) || io.Document is null) throw new GhException("open_failed", "Definition could not be loaded. Check dependencies.", "debugging");
-        io.Document.Enabled = false;
-        return io.Document;
+        return DefinitionArchive.Open(path);
     }
 
     private static void Register(GH_Document document, JsonObject args)
@@ -202,7 +199,7 @@ public sealed class GrasshopperRuntime : IGrasshopperRuntime
         var rhino = session.RequireContext();
         GhJson.ExpectRevision(session.Revision, new JsonObject { ["expected_revision"] = revision });
         var document = session.Document;
-        ComponentCatalog.RequireSupported(document);
+        ComponentCatalog.RequireAuthorized(document);
         GraphRules.RequireAcyclic(document.Objects.Select(n => n.InstanceGuid.ToString()), GraphEditor.Edges(document));
         if (document.SolutionDepth != 0 || !GH_Document.EnableSolutions)
             throw new GhException("solver_disabled_or_busy", "Enable Grasshopper's solver and wait for any existing solution.");

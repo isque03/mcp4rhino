@@ -139,6 +139,7 @@ finally { $zip.Dispose() }
 $skillZip = Join-Path $dist "MCP4Rhino-$Version-skills.zip"
 Compress-Archive -Path (Join-Path $Root "skills\*") -DestinationPath $skillZip -Force
 Copy-Item (Join-Path $Root "scripts\grasshopper-smoke.py") (Join-Path $dist "grasshopper-smoke.py") -Force
+Copy-Item (Join-Path $Root "scripts\grasshopper-compatibility-smoke.py") (Join-Path $dist "grasshopper-compatibility-smoke.py") -Force
 Write-Host "OK package: $dest"
 
 Write-Host "Packed MCP4Rhino $Version → $dest"

@@ -34,6 +34,8 @@ For read-only context and reusable workflows, see [resources and prompts](MCP_RE
 | `gh_capture_canvas`, `gh_show_document` | Render a native canvas PNG or explicitly activate/frame a definition |
 | `gh_save_document`, `gh_close_document` | Save .gh/.ghx, close owned definitions, detach attached definitions |
 
+The 0.7.2-alpha source adds [component categories, local authorization and existing-definition compatibility](GRASSHOPPER_EXTENSIBILITY.md). For acceptance testing, install the matching 0.7.2-alpha package and restart Rhino; an older running server does not exercise these changes.
+
 All mutations require a unique request ID; exact retries return the original receipt. Session mutations require an expected revision. Inspect again after user edits or a conflict. Patch aliases identify nodes only inside that patch; retain the returned node GUIDs for later calls.
 
 `gh_show_document` changes editor state only, requires a request ID and expected revision, and leaves graph revision unchanged. Capture is read-only with respect to graph/editor state and writes a PNG destination. It does not require a mutation request ID.
@@ -46,9 +48,9 @@ The native allowlist now includes Polyline, Join Curves, Weave, Merge, Shift Lis
 
 The `profile` example exercises two separate closed outlines and capped extrusions. The `stair` example composes the same generic tools into a parameterized study and is only a regression fixture. All stair formulas live in native graph components; no staircase-specific tool, validation service, or compliance rule was added. The fixture intentionally omits riser boards and engineered bearing cuts.
 
-Patches contain 1–100 operations and create one Grasshopper undo record. Set `solve:true` to queue one solve after commit; the default is false. A solve failure leaves the graph available for repair. Unsupported objects are discoverable/inspectable but prevent v1 patching or solving of that definition. New/opened documents remain disabled until explicitly solved.
+Patches contain 1–100 operations and create one Grasshopper undo record. Set `solve:true` to queue one solve after commit; the default is false. A solve failure leaves the graph available for repair. In 0.7.2-alpha, slider-only patches with `solve:false` edit existing controls in place even when third-party or restricted objects are present, preserving those objects and their wires. Other mutations and solves require every graph object to be authorized. New/opened documents remain disabled until explicitly solved.
 
-The supported manifest is [NativeComponents.json](../src/MCP4Rhino.Logic/Grasshopper/NativeComponents.json). It identifies exact native assembly/type pairs, not display names. Scripting, third-party execution, clusters, timers, external side effects, optimization, bulk sweeps, Compute and Grasshopper 2 are deferred. Installed native components outside the manifest also report unsupported.
+The verified manifest is [NativeComponents.json](../src/MCP4Rhino.Logic/Grasshopper/NativeComponents.json). Discovery adds `support_level`: **verified**, **available**, or **restricted**. Legacy `supported:true` still means manifest verified. Available compiled components can be created, described and solved after their exact assembly identity is authorized locally through `MCP4RHINO_GH_TRUSTED_ASSEMBLIES` before restarting Rhino. Known script, cluster, timer, external-I/O and other risky types remain restricted. Unknown plugin side effects cannot be detected reliably; discovery is not execution permission. See the [0.7.2-alpha architecture review, configuration and acceptance matrix](GRASSHOPPER_EXTENSIBILITY.md).
 
 ## Execution and output lifetime
 
@@ -92,14 +94,14 @@ Also verify manually on both platforms: one native GH undo/redo step per patch, 
 
 Use a licensed Rhino 8 installation; the initial native target is Rhino 8.35 with bundled Grasshopper 1. Grasshopper 2 is outside this alpha. Use disposable Rhino documents and save any existing work first.
 
-1. Open `PackageManager`, search **MCP4Rhino**, select `0.7.1`, and install/update. Apply and restart Rhino completely.
-2. Call `get_support_info` and confirm `server_version` is `0.7.1`. Call `gh_help` with `topic: "index"` and `gh_status`. Confirm an ordinary tool such as `get_document_info` still works. The endpoint remains `http://127.0.0.1:4010/mcp`.
+1. Open `PackageManager`, search **MCP4Rhino**, enable **Include pre-releases**, select `0.7.2-alpha`, and install/update. Apply and restart Rhino completely.
+2. Call `get_support_info` and confirm `server_version` is `0.7.2-alpha`. Call `gh_help` with `topic: "index"` and `gh_status`. Confirm an ordinary tool such as `get_document_info` still works. The endpoint remains `http://127.0.0.1:4010/mcp`.
 3. Use an agent with only MCP help or the downloaded portable skill to create the array, facade, and loft examples. Inspect editable native components, preview, dimensions, tree structure and diagnostics. Change a parameter while preserving derived relationships; repair the loft's deliberate tree mismatch.
-4. Optionally download `grasshopper-smoke.py` from the same GitHub prerelease. With Python 3, run `python grasshopper-smoke.py --example array`, `python grasshopper-smoke.py --example facade --bake`, and `python grasshopper-smoke.py --example loft`. The runner needs no checkout or Python packages. It creates definitions, temporary `.gh`/`.ghx` files, and, with `--bake`, two geometry snapshots. It leaves the final definition open for inspection.
+4. Optionally download `grasshopper-smoke.py` from the same GitHub prerelease. For mixed-definition checks, also download `grasshopper-compatibility-smoke.py` into the same folder and follow the [acceptance matrix](GRASSHOPPER_EXTENSIBILITY.md). With Python 3, run `python grasshopper-smoke.py --example array`, `python grasshopper-smoke.py --example facade --bake`, and `python grasshopper-smoke.py --example loft`. The runner needs no checkout or Python packages. It creates definitions, temporary `.gh`/`.ghx` files, and, with `--bake`, two geometry snapshots. It leaves the final definition open for inspection.
 5. Test manual edit conflicts, one undo/redo step per patch, deleted/replaced Rhino references, switching documents, queued/running cancellation, no overlapping solves, and ordinary tools when Grasshopper cannot load. Record heavy-solve UI blocking rather than treating a job ID as evidence that Rhino stays responsive.
 6. Record **Windows and macOS separately**: OS/version, Rhino build, MCP4Rhino version, install/restart outcome, scenario results, expected versus actual geometry, and any errors. Attach relevant `get_support_info` JSON, job/component diagnostics, log excerpts and a minimal definition to a [GitHub issue](https://github.com/isque03/mcp4rhino/issues). Remove secrets and license keys. An untested platform remains unverified.
 7. Verify Package Manager update selection using a stable installation: prereleases disabled should keep the stable default; enabling them should expose the alpha. If automatic package updates are enabled, record their actual behavior. On the next genuine fix release, verify `alpha` → `alpha.1`; there is no separate restricted alpha-only channel.
 
 ### Roll back to stable
 
-Uninstall MCP4Rhino's alpha through Package Manager, explicitly reinstall **0.5.3**, disable prerelease selection, and restart Rhino completely. If a restart is requested between uninstall and reinstall, complete it. Confirm `get_support_info` reports `0.5.3`. **Clearing Include pre-releases alone does not downgrade the installed alpha.**
+Uninstall MCP4Rhino's alpha through Package Manager, explicitly reinstall **0.7.1**, disable prerelease selection, and restart Rhino completely. If a restart is requested between uninstall and reinstall, complete it. Confirm `get_support_info` reports `0.7.1`. **Clearing Include pre-releases alone does not downgrade the installed alpha.**

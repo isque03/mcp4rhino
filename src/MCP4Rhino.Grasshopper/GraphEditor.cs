@@ -1,8 +1,6 @@
 using System.Drawing;
 using System.Text.Json.Nodes;
-using Grasshopper.GUI.Base;
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Special;
 using MCP4Rhino.Logic.Grasshopper;
 using Rhino;
 
@@ -14,11 +12,19 @@ internal static class GraphEditor
     {
         var rhino = session.RequireContext();
         GhJson.ExpectRevision(session.Revision, args);
-        ComponentCatalog.RequireSupported(session.Document);
         var operations = GhJson.Array(args["operations"]);
         if (operations.Count is < 1 or > 100) throw new GhException("limit_exceeded", "Use 1–100 operations per patch.");
+        if (GhJson.Flag(args, "solve")) ComponentCatalog.RequireAuthorized(session.Document);
+        if (SliderState.IsControlPatch(operations)) return SliderPatch.Apply(session, operations);
+        ComponentCatalog.RequireAuthorized(session.Document);
+        using var suppression = new SolutionSuppression();
         var before = DefinitionArchive.Capture(session.Document);
-        using (var staging = DefinitionArchive.Clone(before)) Apply(staging, operations, rhino);
+        using (var staging = DefinitionArchive.Clone(before))
+        {
+            DefinitionArchive.RequireSameGraph(session.Document, staging);
+            Apply(staging, operations, rhino);
+            if (GhJson.Flag(args, "solve")) ComponentCatalog.RequireAuthorized(staging);
+        }
         return Commit(session, operations, rhino, before);
     }
 
@@ -146,16 +152,8 @@ internal static class GraphEditor
 
     private static void Slider(IGH_DocumentObject node, JsonObject op)
     {
-        if (node is not GH_NumberSlider slider) throw new GhException("invalid_value", "set_slider requires a Number Slider.");
-        var value = (decimal)GhJson.Number(op["value"]);
-        var min = op["minimum"] is null ? slider.Slider.Minimum : (decimal)GhJson.Number(op["minimum"]);
-        var max = op["maximum"] is null ? slider.Slider.Maximum : (decimal)GhJson.Number(op["maximum"]);
-        var integer = GhJson.Flag(op, "integer", slider.Slider.Type == GH_SliderAccuracy.Integer);
-        if (min > max || value < min || value > max || integer && value != decimal.Truncate(value))
-            throw new GhException("invalid_value", "Slider value must fit its bounds and accuracy.", "design");
-        slider.Slider.Minimum = min; slider.Slider.Maximum = max;
-        slider.Slider.Type = integer ? GH_SliderAccuracy.Integer : GH_SliderAccuracy.Float;
-        slider.SetSliderValue(value);
+        var slider = SliderPatch.RequireSlider(node);
+        SliderPatch.Write(slider, SliderPatch.Read(slider).Change(op));
     }
 
     private static void Properties(IGH_DocumentObject node, JsonObject op)
