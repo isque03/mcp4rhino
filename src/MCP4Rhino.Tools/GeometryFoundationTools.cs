@@ -154,7 +154,6 @@ internal static class GeometryFoundationTools
         "get_document_units" => GetDocumentUnits(),
         "convert_length" => ConvertLength(args),
         "measure_size" => MeasureSize(args),
-        "run_rhino_command" => RunRhinoCommand(args),
         _ => null,
     };
 
@@ -768,15 +767,4 @@ internal static class GeometryFoundationTools
         });
     });
 
-    // ---- Escape hatches ----------------------------------------------------------------
-
-    private static string RunRhinoCommand(JsonObject args) => UiThread.Invoke(() =>
-    {
-        var doc = RequireDoc();
-        var script = Str(args, "script") ?? throw new ArgumentException("script required");
-        var before = doc.Objects.Count;
-        var ok = RhinoApp.RunScript(script, Bool(args, "echo"));
-        doc.Views.Redraw();
-        return JsonSerializer.Serialize(new { ok, script, object_count_before = before, object_count_after = doc.Objects.Count });
-    });
 }

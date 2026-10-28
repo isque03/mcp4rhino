@@ -18,7 +18,7 @@ public static class TelemetryConsentDialog
         using var dlg = new Dialog
         {
             Title = Title,
-            ClientSize = new Size(440, 220),
+            ClientSize = new Size(440, 260),
             Resizable = false,
             Padding = 16,
         };
@@ -54,8 +54,8 @@ public static class TelemetryConsentDialog
             Items =
             {
                 question,
-                Paragraph("We collect your plugin version, operating system, and which MCP tools you use. This helps us understand usage and improve the plugin."),
-                Paragraph("We never collect your models, prompts, files, or personal information."),
+                Paragraph("We collect plugin and Rhino versions, operating system, tool usage, failure categories, and recognized Rhino command names to help find problems."),
+                Paragraph("We never collect models, prompts, scripts, arguments, file paths, error messages, or stack traces."),
                 Paragraph("You can change this at any time."),
                 new StackLayout
                 {

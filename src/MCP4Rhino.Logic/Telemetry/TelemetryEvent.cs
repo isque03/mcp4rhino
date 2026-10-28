@@ -46,6 +46,18 @@ public sealed class TelemetryEvent
     [JsonPropertyName("success")]
     public bool? Success { get; init; }
 
+    [JsonPropertyName("errorCode")]
+    public string? ErrorCode { get; init; }
+
+    [JsonPropertyName("errorType")]
+    public string? ErrorType { get; init; }
+
+    [JsonPropertyName("errorStage")]
+    public string? ErrorStage { get; init; }
+
+    [JsonPropertyName("rhinoCommandName")]
+    public string? RhinoCommandName { get; init; }
+
     public static string FormatTimestamp(DateTimeOffset utc) =>
         utc.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture);
 

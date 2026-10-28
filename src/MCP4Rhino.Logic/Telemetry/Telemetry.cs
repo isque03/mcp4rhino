@@ -1,3 +1,5 @@
+using MCP4Rhino.Contracts;
+
 namespace MCP4Rhino.Logic.Telemetry;
 
 /// <summary>Process-wide telemetry entry points used by the Rhino host.</summary>
@@ -20,8 +22,11 @@ public static class Telemetry
     }
 
     public static void TrackTool(string toolName, long durationMs, bool success)
+        => TrackTool(toolName, durationMs, success, null);
+
+    public static void TrackTool(string toolName, long durationMs, bool success, ToolDiagnostics? diagnostics)
     {
-        try { Service.TrackTool(toolName, durationMs, success); }
+        try { Service.TrackTool(toolName, durationMs, success, diagnostics); }
         catch { /* telemetry must not affect callers */ }
     }
 

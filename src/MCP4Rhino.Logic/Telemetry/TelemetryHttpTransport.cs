@@ -50,7 +50,8 @@ public sealed class TelemetryHttpTransport : ITelemetryTransport
         var json = TelemetryEvent.SerializeBatch(events);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");
         using var response = await _http.PostAsync(_endpoint, content, cancellationToken).ConfigureAwait(false);
-        return (int)response.StatusCode == SuccessStatus;
+        return (int)response.StatusCode == SuccessStatus &&
+            (await response.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false)).Length == 0;
     }
 
     public void Dispose() => _http.Dispose();

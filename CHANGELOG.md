@@ -7,6 +7,17 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.7.1] — 2026-10-28
+
+### Added
+
+- Anonymous tool-failure diagnostics: controlled error codes, exception categories, and known failure stages in the existing usage-data events.
+- Canonical English names for recognized leading commands in `run_rhino_command`. Scripts, arguments, paths, error messages, and stack traces are never included in telemetry.
+
+### Fixed
+
+- `run_rhino_command` telemetry now records a failure when Rhino's `RunScript` returns `false`, while preserving the existing MCP response. This is the first release with corrected generic-command success measurement; earlier success rates may be inflated and historical diagnostics cannot be reconstructed.
+
 ## [0.7.0] — 2026-10-27
 
 ### Added

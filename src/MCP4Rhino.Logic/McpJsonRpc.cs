@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using MCP4Rhino.Logic.Telemetry;
+using MCP4Rhino.Contracts;
 
 namespace MCP4Rhino.Logic;
 
@@ -23,7 +23,7 @@ public static class McpJsonRpc
 {
     public const string ProtocolVersion = "2024-11-05";
     public const string ServerName = "MCP4Rhino";
-    public const string ServerVersion = "0.7.0";
+    public const string ServerVersion = "0.7.1";
 
     public static JsonNode? Dispatch(
         JsonNode? req,
@@ -161,12 +161,21 @@ public static class McpJsonRpc
         try
         {
             var result = ExecuteTool(@params, name, tools, hotReload, supportContext);
-            ReportTool(telemetry, name, started, ToolSucceeded(result));
+            var diagnostics = (result as ToolCallResult)?.Diagnostics;
+            if (result is ToolCallResult execution) result = execution.Result;
+            ReportTool(telemetry, name, started, ToolTelemetry.FromResult(name, result, diagnostics));
             return result;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            ReportTool(telemetry, name, started, success: false);
+            // The provider also loads assemblies and dispatches names, so its phase is unknown here.
+            ToolErrorStage? stage = name switch
+            {
+                "mcp4rhino_reload" => hotReload is null ? ToolErrorStage.Dispatch : ToolErrorStage.Execution,
+                "get_support_info" => ToolErrorStage.Execution,
+                _ => null,
+            };
+            ReportTool(telemetry, name, started, ToolTelemetry.FromException(ex, stage));
             throw;
         }
     }
@@ -203,13 +212,7 @@ public static class McpJsonRpc
         return tools.CallTool(@params);
     }
 
-    private static bool ToolSucceeded(object result)
-    {
-        var isError = result.GetType().GetProperty("isError", BindingFlags.Instance | BindingFlags.Public);
-        return isError?.GetValue(result) is not true;
-    }
-
-    private static void ReportTool(ITelemetry? telemetry, string name, long started, bool success)
+    private static void ReportTool(ITelemetry? telemetry, string name, long started, ToolOutcome outcome)
     {
         if (telemetry is null)
             return;
@@ -218,7 +221,7 @@ public static class McpJsonRpc
             var ms = (long)Stopwatch.GetElapsedTime(started).TotalMilliseconds;
             if (ms < 0)
                 ms = 0;
-            telemetry.TrackTool(name, ms, success);
+            telemetry.TrackTool(name, ms, outcome.Success, outcome.Diagnostics);
         }
         catch
         {
