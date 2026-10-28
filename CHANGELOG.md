@@ -7,6 +7,17 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.7.3] — 2026-10-28
+
+### Added
+
+- Stable release of Grasshopper component extensibility: installed component discovery, automatic built-in modeling support, native third-party plugin preferences, and slider edits that preserve existing mixed definitions.
+
+### Changed
+
+- Promoted the tested `0.7.2-alpha.1` implementation to `0.7.3` after user confirmation, with no application behavior changes. The tested OS and Rhino build were not supplied; other native scenarios remain unverified.
+- Synchronized package, MCP and informational versions to `0.7.3`, with assembly/file versions `0.7.3.0`. Both Grasshopper smoke scripts remain release assets and are checked against their tagged sources.
+
 ## [0.7.2-alpha.1] — 2026-10-28
 
 ### Fixed

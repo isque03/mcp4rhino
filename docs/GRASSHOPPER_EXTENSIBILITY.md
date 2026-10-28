@@ -1,4 +1,4 @@
-# Grasshopper extensibility in 0.7.2-alpha.1
+# Grasshopper extensibility in 0.7.3
 
 ## Architecture review
 
@@ -14,7 +14,7 @@ The [online SDK reference](https://developer.rhino3d.com/api/grasshopper/html/Me
 
 ## Reviewed incremental plan
 
-This prerelease is for separate-machine testing; stable 0.7.2 publication waits for explicit user confirmation.
+The user confirmed the separate-machine alpha workflow, including live preview, works and authorized stable 0.7.3 on October 28, 2026. The tested OS and Rhino build were not supplied; platform-specific scenarios below remain unverified unless separately recorded. Stable 0.7.3 promotes that implementation without application behavior changes.
 
 An independent read-only subagent reviewed this plan before implementation for SDK compatibility, authorization, compatibility and complexity. Its corrections are reflected here: use raw slider values, preserve the full accuracy enum, disable automatic solving after undo, retain preview behavior, check archive warnings and verify cloned identities.
 
@@ -64,7 +64,7 @@ Opening a file already deserializes its installed plugins; explicit open/attach 
 
 Pure tests cover category/grant behavior, exact version identity matching, malformed configuration, known restrictions, schema rejection of authorization overrides, slider range/accuracy rules, repeated-target batch planning, invalid-batch nonmutation and request retries. Existing tests cover graph/tree validation, queue/cancellation and revision/result/receipt behavior. SDK metadata checks and the adapter build establish API compatibility only. They do not run plugin constructors, canvas operations, archive extraction, geometry, undo or the solver.
 
-Download both smoke scripts from the prerelease into the same folder. Use `grasshopper-compatibility-smoke.py` against a **disposable already-open definition**, supplying its document and slider GUIDs, for example:
+Download both smoke scripts from the release into the same folder. Use `grasshopper-compatibility-smoke.py` against a **disposable already-open definition**, supplying its document and slider GUIDs, for example:
 
 ```bash
 python3 grasshopper-compatibility-smoke.py --document-id <document-guid> --slider-id <slider-instance-guid> --value <new-raw-value> --expect-solve-denied
@@ -72,7 +72,7 @@ python3 grasshopper-compatibility-smoke.py --document-id <document-guid> --slide
 
 Use `--expect-solve-denied` for a definition containing untrusted/restricted nodes; omit it for an already-authorized definition. It attaches, tests a repeated-target slider patch and retry, checks preservation of all reported node/port/wire identities, rejects an invalid later operation, checks solve authorization when requested, then restores the original raw slider value. It never infers preservation of opaque plugin-private state from inspection alone.
 
-Record the following matrix separately for **licensed Windows and macOS Rhino 8**, with the 0.7.2-alpha.1 package installed and Rhino fully restarted:
+Record the following matrix separately for **licensed Windows and macOS Rhino 8**, with the 0.7.3 package installed and Rhino fully restarted:
 
 | Scenario | Required evidence |
 |---|---|
@@ -86,7 +86,7 @@ Record the following matrix separately for **licensed Windows and macOS Rhino 8*
 | Undo/redo | One native GH step per patch; slider undo/redo retains unrelated object references/settings and expressions; no automatic solve, current outputs invalidated; explicit solve gives expected result |
 | Lifecycle/platforms | Manual edits/revision conflict, active Rhino document switch, hidden editor, preview, other open definitions unaffected, queued/running cancel, full restart and plugin load differences |
 
-Run the existing array/facade/loft/profile/stair smoke recipes for native regressions. An expired evaluation or unavailable Grasshopper blocks these checks; record the actual version/license result instead of treating a successful build or mocked smoke test as acceptance. Native 0.7.2 behavior remains **unverified until these runs succeed**.
+Run the existing array/facade/loft/profile/stair smoke recipes for native regressions. An expired evaluation or unavailable Grasshopper blocks these checks; record the actual version/license result instead of treating a successful build or mocked smoke test as acceptance. The user confirmation covers the tested workflow; it does not establish every scenario on both platforms.
 
 ### Local verification record — 2026-10-28
 
@@ -94,4 +94,4 @@ The Release solution build, source-version check, 0.7.2 Yak packaging/contents v
 
 Read-only calls to the running Rhino server returned `server_version: 0.7.1`, `can_save: false`, installation type Evaluation and zero evaluation days remaining. `gh_status` reported `initialized: false`. The 0.7.2 package was built locally but was not installed or used for native acceptance. No 0.7.2 Windows or macOS native acceptance result is claimed.
 
-For alpha.1 native acceptance, repeat the reported Interpolate / Pipe Variable / Periodic input / white Custom Preview graph without configuring any environment variables. Check actual port/value support separately from permission: special controls and custom goo do not gain new codecs just because a component is authorized. Also exercise the plugin-preferences command concurrently with first MCP discovery and verify Rhino stays responsive.
+For further native acceptance, repeat the reported Interpolate / Pipe Variable / Periodic input / white Custom Preview graph without configuring any environment variables. Check actual port/value support separately from permission: special controls and custom goo do not gain new codecs just because a component is authorized. Also exercise the plugin-preferences command concurrently with first MCP discovery and verify Rhino stays responsive.

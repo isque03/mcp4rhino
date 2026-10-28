@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Native 0.7.2-alpha.1 checks on an explicitly supplied disposable, already-open definition."""
+"""Native 0.7.3 checks on an explicitly supplied disposable, already-open definition."""
 import argparse
 import importlib.util
 import json
@@ -98,7 +98,7 @@ def main():
     args = parser.parse_args()
     client = smoke.Mcp(args.endpoint)
     support = client.call('get_support_info')
-    assert support['server_version'] == '0.7.2-alpha.1', support
+    assert support['server_version'] == '0.7.3', support
     session = client.call('gh_open_document', {'mode': 'attach', 'document_id': args.document_id, 'request_id': str(uuid.uuid4())})
     result = exercise(client, session, args.slider_id, args.value, args.expect_solve_denied)
     print(json.dumps({'version': support['server_version'], 'session_id': session['session_id'], **result}, indent=2))

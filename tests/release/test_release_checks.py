@@ -105,6 +105,14 @@ class ReleaseMetadataTests(unittest.TestCase):
         self.assertEqual(stable['PRERELEASE'], 'false')
         self.assertEqual(stable['MAKE_LATEST'], 'true')
 
+    def test_073_stable_requires_main_and_becomes_latest(self):
+        stable = release.release_metadata('0.7.3', 'v0.7.3', 'refs/heads/main')
+        self.assertEqual(stable['PRERELEASE'], 'false')
+        self.assertEqual(stable['MAKE_LATEST'], 'true')
+        with self.assertRaises(ValueError):
+            release.release_metadata('0.7.3', 'v0.7.3',
+                                     'refs/heads/' + release.EXTENSIBILITY_ALPHA_BRANCH)
+
     def test_reject_mismatched_tag_and_wrong_dispatch_ref(self):
         for tag, ref in [('v0.6.0', 'refs/heads/' + release.ALPHA_BRANCH),
                          ('v0.6.0-alpha', 'refs/heads/main'),

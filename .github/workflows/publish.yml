@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag matching manifest.yml; e.g. v0.7.2-alpha (dispatch on release/0.7.2-alpha)"
+        description: "Tag matching manifest.yml; e.g. v0.7.3 (dispatch on main)"
         required: true
         type: string
 
@@ -64,10 +64,8 @@ jobs:
           test -s "dist/MCP4Rhino-${VERSION}-skills.zip"
           test -s dist/grasshopper-smoke.py
           cmp scripts/grasshopper-smoke.py dist/grasshopper-smoke.py
-          if [[ "$VERSION" == 0.7.2* ]]; then
-            test -s dist/grasshopper-compatibility-smoke.py
-            cmp scripts/grasshopper-compatibility-smoke.py dist/grasshopper-compatibility-smoke.py
-          fi
+          test -s dist/grasshopper-compatibility-smoke.py
+          cmp scripts/grasshopper-compatibility-smoke.py dist/grasshopper-compatibility-smoke.py
 
       - name: Download Yak CLI
         id: yak

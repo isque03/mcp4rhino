@@ -1,6 +1,6 @@
 # Resources and reusable prompts
 
-MCP4Rhino 0.7.2-alpha.1 provides resources and prompts alongside explicit tools. Clients discover them using `resources/list`, `resources/templates/list`, and `prompts/list`. Support depends on the host UI; do not assume automatic loading or a particular slash-command presentation.
+MCP4Rhino 0.7.3 provides resources and prompts alongside explicit tools. Clients discover them using `resources/list`, `resources/templates/list`, and `prompts/list`. Support depends on the host UI; do not assume automatic loading or a particular slash-command presentation.
 
 Start with:
 
@@ -12,7 +12,7 @@ Start with:
 - `mcp4rhino://grasshopper/sessions`: sessions bound to the active Rhino document and the visible unattached definition.
 - `mcp4rhino://grasshopper/guides/index`: packaged guides and versioned recipe resources.
 
-Use `resources/read` with a concrete URI. Templates describe document/layer/object/view, graph/node/component, result/output, guide and recipe inspection. Template variables are identifiers, never filesystem paths. Only the installed version's recipes are served, for example `mcp4rhino://grasshopper/recipes/0.7.2-alpha.1/profile`.
+Use `resources/read` with a concrete URI. Templates describe document/layer/object/view, graph/node/component, result/output, guide and recipe inspection. Template variables are identifiers, never filesystem paths. Only the installed version's recipes are served, for example `mcp4rhino://grasshopper/recipes/0.7.3/profile`.
 
 Resource reads do not initialize Grasshopper, attach or activate documents, instantiate components, solve, capture, bake, save, or fetch external data. An unavailable or uninitialized subsystem is explicit. Use a discovery tool to initialize it. Component resources reuse contracts cached by `gh_describe_components`. Authorized types without cached ports return `ports_status:not_described` and a next-tool hint. Denied types without cached contracts return `authorization_required` or `restricted` with no next-tool hint; cached metadata remains readable after permission revocation; metadata discovery does not authorize construction.
 
