@@ -40,6 +40,10 @@
           </text>
           <macro_id>af7bc9be-059d-4790-a89f-1c739c4b92e4</macro_id>
         </menu_item>
+        <menu_item guid="e7485635-e786-4fb7-80b0-aa773d227704">
+          <text><locale_1033>Grasshopper plugins…</locale_1033></text>
+          <macro_id>a4b564f3-cf45-42d7-9352-7a11d7acb891</macro_id>
+        </menu_item>
         <menu_item guid="7c2a1e44-9b0d-4f6a-8c31-2e5d8a0b6f14">
           <text>
             <locale_1033>Usage data…</locale_1033>
@@ -160,6 +164,14 @@
         <locale_1033>Usage data…</locale_1033>
       </menu_text>
       <script>! _MCP4RhinoTelemetry</script>
+    </macro_item>
+    <macro_item guid="a4b564f3-cf45-42d7-9352-7a11d7acb891">
+      <text><locale_1033>Grasshopper plugins…</locale_1033></text>
+      <tooltip><locale_1033>Choose which third-party Grasshopper plugins MCP4Rhino may use</locale_1033></tooltip>
+      <help_text><locale_1033>Built-in modeling components work automatically.</locale_1033></help_text>
+      <button_text><locale_1033>Grasshopper plugins…</locale_1033></button_text>
+      <menu_text><locale_1033>Grasshopper plugins…</locale_1033></menu_text>
+      <script>! _MCP4RhinoGrasshopper</script>
     </macro_item>
   </macros>
   <bitmaps />

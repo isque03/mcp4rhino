@@ -7,6 +7,44 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.7.3] — 2026-10-28
+
+### Added
+
+- Stable release of Grasshopper component extensibility: installed component discovery, automatic built-in modeling support, native third-party plugin preferences, and slider edits that preserve existing mixed definitions.
+
+### Changed
+
+- Promoted the tested `0.7.2-alpha.1` implementation to `0.7.3` after user confirmation, with no application behavior changes. The tested OS and Rhino build were not supplied; other native scenarios remain unverified.
+- Synchronized package, MCP and informational versions to `0.7.3`, with assembly/file versions `0.7.3.0`. Both Grasshopper smoke scripts remain release assets and are checked against their tagged sources.
+
+## [0.7.2-alpha.1] — 2026-10-28
+
+### Fixed
+
+- Built-in Grasshopper modeling components, including components outside the verified manifest, work without user configuration. Known script, timer, cluster and I/O restrictions remain in place.
+- Replaced environment-variable authorization with **Tools → MCP4Rhino → Grasshopper plugins…**. Select trusted third-party plugins and click Apply; permissions persist and take effect immediately, without a restart.
+- Updated MCP help and authorization errors to point to the Rhino preferences dialog. Discovery's `authorized` field determines whether a component can run; `supported` remains the verified compatibility badge.
+- Prevented a possible UI deadlock when native preferences and an MCP request initialize Grasshopper concurrently.
+
+Native UI and modeling acceptance remain pending separate-machine testing of this build. Stable 0.7.2 promotion waits for user confirmation.
+
+## [0.7.2-alpha] — 2026-10-28
+
+### Added
+
+- Opt-in prerelease for separate-machine testing. Stable 0.7.2 publication waits for explicit user confirmation.
+- Installed component categories: verified, available and restricted, with exact assembly identities and explicit authorization metadata. The verified manifest and legacy support flag remain compatible.
+- Local `MCP4RHINO_GH_TRUSTED_ASSEMBLIES` configuration for reviewed available assemblies; known scripting, cluster, timer and external-I/O types remain restricted. Discovery alone grants no execution permission.
+- In-place slider-only patches for existing mixed definitions, retaining unrelated object instances, ports and wires, targeted undo/redo, raw slider state and full accuracy modes.
+- Component policy/slider planning tests, compatibility smoke runner, architecture review and Windows/macOS native acceptance matrix.
+
+### Changed
+
+- Structural edits require authorization before serialization and validate cloned graph identities. Archive loading rejects warnings/errors rather than accepting potentially incomplete definitions.
+- Patch/undo/load operations suppress implicit solutions; undo/redo requires a subsequent explicit solve. Authorized solves retain native preview behavior.
+- Native 0.7.2 discovery, plugin graphs, solve/bake, persistence and undo/redo remain unverified until licensed platform acceptance runs succeed. Build and pure tests do not establish these behaviors.
+
 ## [0.7.1] — 2026-10-28
 
 ### Added

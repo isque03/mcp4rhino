@@ -129,6 +129,7 @@ with zipfile.ZipFile(dest) as archive:
 PY
 python3 "$ROOT/scripts/package-agent-skills.py"
 cp "$ROOT/scripts/grasshopper-smoke.py" "$DIST/grasshopper-smoke.py"
+cp "$ROOT/scripts/grasshopper-compatibility-smoke.py" "$DIST/grasshopper-compatibility-smoke.py"
 
 echo "Packed MCP4Rhino $VERSION → $DEST"
 echo "Release publication uses the exact CI Build artifact via the Publish workflow; see docs/PUBLISHING.md."

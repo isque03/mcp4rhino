@@ -3,7 +3,7 @@ name: Build
 on:
   pull_request:
   push:
-    branches: [main, release/0.6.0-alpha, release/0.6.1-alpha, release/0.6.2-alpha, release/0.6.4-alpha, release/0.6.5-alpha]
+    branches: [main, release/0.6.0-alpha, release/0.6.1-alpha, release/0.6.2-alpha, release/0.6.4-alpha, release/0.6.5-alpha, release/0.7.2-alpha]
 
 concurrency:
   group: build-${{ github.workflow }}-${{ github.ref }}
@@ -102,5 +102,6 @@ jobs:
             dist/MCP4Rhino-*.yak
             dist/MCP4Rhino-*-skills.zip
             dist/grasshopper-smoke.py
+            dist/grasshopper-compatibility-smoke.py
           if-no-files-found: error
           retention-days: 14

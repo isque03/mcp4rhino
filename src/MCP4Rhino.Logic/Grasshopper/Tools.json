@@ -35,7 +35,7 @@
   },
   {
     "name": "gh_search_components",
-    "description": "Search installed components; inspect support status. Discovery initializes Grasshopper.",
+    "description": "Search installed components and authorization status. Built-in modeling components work automatically; enable third-party plugins in Rhino's Grasshopper plugins preferences. Search does not instantiate components.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -63,7 +63,7 @@
   },
   {
     "name": "gh_describe_components",
-    "description": "Inspect component types, actual port IDs, defaults and access modes. Discovery initializes Grasshopper.",
+    "description": "Inspect component types, port IDs, defaults and access modes. Built-in modeling types are allowed automatically. Third-party types require permission in Rhino's Grasshopper plugins preferences; denied types return metadata only.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -172,7 +172,7 @@
   },
   {
     "name": "gh_apply_patch",
-    "description": "Apply a validated batch under one undo record. Uses temporary node aliases. solve defaults false. gh_help(workflow) explains operations.",
+    "description": "Apply a validated batch under one undo record. Slider-only patches preserve unrelated plugin objects; other edits require authorized graph objects. Uses temporary aliases. solve defaults false. See gh_help(workflow).",
     "inputSchema": {
       "type": "object",
       "properties": {

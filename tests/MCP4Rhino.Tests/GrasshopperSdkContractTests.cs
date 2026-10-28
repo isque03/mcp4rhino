@@ -34,4 +34,34 @@ public class GrasshopperSdkContractTests
 
     private static FieldDefinition Field(MetadataReader metadata, TypeDefinition type, string name) =>
         type.GetFields().Select(metadata.GetFieldDefinition).Single(field => metadata.GetString(field.Name) == name);
+
+    [Fact]
+    public void PinnedSdkSupportsDynamicMetadataRawSlidersAndArchiveDiagnostics()
+    {
+        var cache = Environment.GetEnvironmentVariable("NUGET_PACKAGES") ??
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages");
+        var directory = Path.Combine(cache, "grasshopper", "8.21.25188.17001", "lib", "net7.0");
+        AssertMembers(Path.Combine(directory, "Grasshopper.dll"), "Grasshopper.Kernel.GH_ComponentServer",
+            ["get_ObjectProxies", "EmitObjectProxy", "EmitObject"]);
+        AssertMembers(Path.Combine(directory, "Grasshopper.dll"), "Grasshopper.Kernel.IGH_ObjectProxy",
+            ["get_Type", "get_SDKCompliant", "get_LibraryGuid", "get_Obsolete"]);
+        AssertMembers(Path.Combine(directory, "Grasshopper.dll"), "Grasshopper.Kernel.GH_AssemblyInfo",
+            ["get_Assembly", "get_Location", "get_LoadingMechanism"]);
+        AssertMembers(Path.Combine(directory, "Grasshopper.dll"), "Grasshopper.GUI.GH_Slider", ["get_Value", "get_Type"]);
+        AssertMembers(Path.Combine(directory, "GH_IO.dll"), "GH_IO.Serialization.GH_Archive",
+            ["ReadFromFile", "ExtractObject", "MessageCount"]);
+        Assert.DoesNotContain(AppDomain.CurrentDomain.GetAssemblies(), assembly => assembly.GetName().Name == "Grasshopper");
+        Assert.NotEmpty(AssemblyName.GetAssemblyName(Path.Combine(directory, "Grasshopper.dll")).GetPublicKeyToken()!);
+    }
+
+    private static void AssertMembers(string assemblyPath, string typeName, string[] members)
+    {
+        using var file = File.OpenRead(assemblyPath);
+        using var pe = new PEReader(file);
+        var metadata = pe.GetMetadataReader();
+        var type = metadata.TypeDefinitions.Select(metadata.GetTypeDefinition).Single(type =>
+            metadata.GetString(type.Namespace) + "." + metadata.GetString(type.Name) == typeName);
+        var methods = type.GetMethods().Select(metadata.GetMethodDefinition).Select(method => metadata.GetString(method.Name)).ToArray();
+        foreach (var member in members) Assert.Contains(member, methods);
+    }
 }

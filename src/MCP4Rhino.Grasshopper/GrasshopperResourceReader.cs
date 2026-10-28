@@ -26,7 +26,9 @@ internal static class GrasshopperResourceReader
         var kind = args["kind"]!.GetValue<string>();
         if (kind == "capabilities") return new { status = "initialized", initialized = true,
             installed_component_count = GH.ComponentServer.ObjectProxies.Count(),
-            supported_installed_component_count = GH.ComponentServer.ObjectProxies.Count(ComponentCatalog.Supported) };
+            supported_installed_component_count = GH.ComponentServer.ObjectProxies.Count(ComponentCatalog.Supported),
+            component_support_levels = new[] { "verified", "available", "restricted" },
+            component_authorization = "Built-in modeling components work automatically. Enable third-party plugins in Rhino: Tools > MCP4Rhino > Grasshopper plugins… (MCP4RhinoGrasshopper). Restricted types remain blocked." };
         var document = RhinoDoc.ActiveDoc;
         if (kind == "component") return new { status = "available", data = ComponentCatalog.ReadDescriptor(Guid.Parse(args["component_id"]!.GetValue<string>())) };
         if (document is null) return new { status = "no_active_document" };

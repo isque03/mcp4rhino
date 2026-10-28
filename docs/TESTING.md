@@ -60,6 +60,8 @@ Full Rhino.Testing harness for ArchElement/ViewCapture is optional and out of th
 
 ## Grasshopper 0.7.0
 
+For 0.7.2 discovery/authorization and existing plugin definitions, see the [extensibility review and native acceptance matrix](GRASSHOPPER_EXTENSIBILITY.md). Pure policy and slider-plan tests run without Grasshopper; native component creation, mixed-definition preservation, slider expressions/undo/redo, archive recovery, solving and baking require licensed platform runs. These new 0.7.2 behaviors have not yet been verified in a native runtime.
+
 `McpProtocolTests`, `McpProtocolValidationTests`, and `McpHttpIntegrationTests` cover the 2024/2025/2026 profiles, required headers, negotiation, errors, Origin/Host checks, legacy behavior and concurrent requests over real local HTTP. `McpResourceTests` and `McpPromptTests` cover every route/catalog, privacy, byte/item limits, identity scope helpers, cursor validation, and static reads/prompts that cannot reach tools or native gateways. See [native resource acceptance](MCP_RESOURCES_PROMPTS.md#validation-and-migration) for licensed checks and smoke-runner flags.
 
 `GrasshopperInspectionTests` covers result/revision guards, unique named selections, bounded report pagination, canvas framing validation, MCP image limits, and capture association contracts. Recipe tests validate all packaged examples against the released schemas and support manifest, including multi-patch recipes.

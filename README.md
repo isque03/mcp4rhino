@@ -36,13 +36,15 @@ Create walls, floors, roofs, doors, windows, stairs, spaces, and related element
 
 ### Parametric design with Grasshopper
 
-Install or update **MCP4Rhino 0.7.1** from Rhino `PackageManager`, apply, and restart Rhino completely.
+Install or update **MCP4Rhino** from Rhino `PackageManager`, apply, and restart Rhino completely.
 
 Create native, editable Grasshopper definitions, connect components, adjust parameters, inspect data trees, and explicitly bake geometry into Rhino.
 
 > “Create a Grasshopper facade with adjustable panel count, spacing, and depth.”
 
 Agents can learn the workflow through `gh_help`, the `grasshopper_getting_started` prompt, or the bundled [parametric design skill](skills/grasshopper-parametric-design/SKILL.md). See [Grasshopper support](docs/GRASSHOPPER.md) for setup, supported components and examples.
+
+Stable 0.7.3 adds [component extensibility](docs/GRASSHOPPER_EXTENSIBILITY.md): slider edits that preserve third-party definitions, installed component categories, automatic support for built-in modeling components, and a Rhino preferences dialog for third-party plugin permissions.
 
 Discoverable read-only document/graph resources and reusable workflow prompts are documented in [resources, prompts and protocol compatibility](docs/MCP_RESOURCES_PROMPTS.md). Reading context does not initialize Grasshopper or modify a model.
 

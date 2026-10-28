@@ -21,6 +21,8 @@ internal static class ResultReader
     {
         node = node.InstanceGuid, component_id = node.ComponentGuid, name = node.Name, nickname = node.NickName,
         supported = ComponentCatalog.Supported(node), position = new[] { node.Attributes.Pivot.X, node.Attributes.Pivot.Y },
+        support_level = ComponentCatalog.Permission(node).SupportLevel, authorized = ComponentCatalog.Permission(node).Authorized,
+        restriction_reason = ComponentCatalog.Permission(node).Reason, assembly_identity = node.GetType().Assembly.FullName,
         enabled = node is not IGH_ActiveObject active || !active.Locked,
         preview = node is IGH_PreviewObject preview && !preview.Hidden, settings = ComponentCatalog.Settings(node),
         inputs = ComponentCatalog.Ports(node, true, resource), outputs = ComponentCatalog.Ports(node, false, resource),
@@ -88,6 +90,7 @@ internal static class ResultReader
     {
         var rhino = session.RequireContext();
         GhJson.ExpectRevision(session.Revision, args); session.RequireResult(GhJson.Text(args, "result_id"));
+        ComponentCatalog.RequireAuthorized(session.Document);
         var outputs = GhJson.Array(args["outputs"]);
         if (outputs.Count is < 1 or > 100) throw new GhException("limit_exceeded", "Select 1–100 output ports.");
         var items = outputs.SelectMany(p => BakeItems(session.Document, GhJson.Object(p))).Take(10001).ToArray();

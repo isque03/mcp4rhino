@@ -31,7 +31,7 @@ public sealed class StatusDialog : Dialog
     public StatusDialog()
     {
         Title = "MCP4Rhino Status";
-        ClientSize = new Size(520, 360);
+        ClientSize = new Size(520, 410);
         Resizable = false;
         Padding = 12;
 
@@ -82,6 +82,8 @@ public sealed class StatusDialog : Dialog
         };
 
         var close = new Button { Text = "Close" };
+        var grasshopper = new Button { Text = "Grasshopper plugins…" };
+        grasshopper.Click += (_, _) => CloseThen(() => RhinoApp.RunScript("_MCP4RhinoGrasshopper", false));
         close.Click += (_, _) => Close();
         DefaultButton = close;
 
@@ -113,6 +115,7 @@ public sealed class StatusDialog : Dialog
                     Items = { updates, logBtn, issue, close },
                 },
                 usage,
+                grasshopper,
             },
         };
 

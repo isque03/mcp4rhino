@@ -1,7 +1,9 @@
 using System.Text.Json.Nodes;
+using System.Reflection;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Special;
 using MCP4Rhino.Logic.Grasshopper;
+using MCP4Rhino.Contracts;
 using GH = Grasshopper.Instances;
 
 namespace MCP4Rhino.Grasshopper;
@@ -9,11 +11,54 @@ namespace MCP4Rhino.Grasshopper;
 internal static class ComponentCatalog
 {
     private static readonly Dictionary<Guid, JsonObject> Descriptions = new();
+    private static ComponentPolicy Policy = new();
+    private static readonly Dictionary<Assembly, bool> BuiltInLibraries = new();
+    public static void Configure(IGrasshopperComponentAuthorization authorization) => Policy = new(authorization.IsTrustedAssembly);
     public static bool Supported(IGH_DocumentObject node) => ComponentSupport.Allows(
         node.GetType().Assembly.GetName().Name ?? "", node.GetType().FullName ?? "", node.Obsolete);
 
     public static bool Supported(IGH_ObjectProxy proxy) => proxy.Type is { } type && ComponentSupport.Allows(
         type.Assembly.GetName().Name ?? "", type.FullName ?? "", proxy.Obsolete);
+
+    private static ComponentIdentity Identity(Type? type, bool obsolete) => new(type?.Assembly.GetName().Name ?? "",
+        type?.Assembly.FullName ?? "", type?.FullName ?? "", obsolete, type is not null) { BuiltIn = type is not null && BuiltIn(type.Assembly) };
+
+    private static bool BuiltIn(Assembly assembly)
+    {
+        if (BuiltInLibraries.TryGetValue(assembly, out var value)) return value;
+        var gh = typeof(GH_Document).Assembly;
+        var token = Convert.ToHexString(assembly.GetName().GetPublicKeyToken() ?? []);
+        var ghToken = Convert.ToHexString(gh.GetName().GetPublicKeyToken() ?? []);
+        value = !assembly.IsDynamic && BuiltInComponentAssembly.Matches(assembly.GetName().Name ?? "", token,
+            InstalledPath(assembly), InstalledPath(gh), ghToken);
+        BuiltInLibraries[assembly] = value;
+        return value;
+    }
+
+    private static string InstalledPath(Assembly assembly) => !string.IsNullOrEmpty(assembly.Location) ? assembly.Location :
+        GH.ComponentServer.Libraries.FirstOrDefault(library => library.Assembly == assembly)?.Location ?? "";
+
+    public static GrasshopperComponentLibrary[] Libraries() => GH.ComponentServer.ObjectProxies
+        .Where(p => p.Type is not null && !BuiltIn(p.Type.Assembly))
+        .GroupBy(p => p.Type!.Assembly.FullName!).Select(group => new GrasshopperComponentLibrary(group.Key,
+            group.First().Type!.Assembly.GetName().Name ?? "Plugin", group.First().Type!.Assembly.GetName().Version?.ToString() ?? "",
+            group.Count(p => Permission(p).SupportLevel == "available"), group.Count(p => Permission(p).SupportLevel == "restricted")))
+        .OrderBy(library => library.Name).ToArray();
+
+    public static ComponentPermission Permission(IGH_DocumentObject node) => Permission(node.GetType(), node.Obsolete);
+    private static ComponentPermission Permission(IGH_ObjectProxy proxy) => Permission(proxy.Type, proxy.Obsolete || !proxy.SDKCompliant);
+
+    private static ComponentPermission Permission(Type? type, bool obsolete)
+    {
+        var permission = Policy.Classify(Identity(type, obsolete));
+        // Known script/cluster base classes remain restricted even when a plugin renames its subclass.
+        for (var parent = type?.BaseType; parent is not null; parent = parent.BaseType)
+        {
+            var inherited = Policy.Classify(Identity(parent, false));
+            if (inherited.SupportLevel == "restricted") return inherited;
+        }
+        return permission;
+    }
 
     public static object Search(JsonObject args)
     {
@@ -32,6 +77,10 @@ internal static class ComponentCatalog
         category = proxy.Desc.Category, subcategory = proxy.Desc.SubCategory,
         library = GH.ComponentServer.FindAssembly(proxy.LibraryGuid)?.Name,
         type = proxy.Type?.FullName, supported = Supported(proxy), obsolete = proxy.Obsolete,
+        assembly_identity = proxy.Type?.Assembly.FullName, library_id = proxy.LibraryGuid,
+        support_level = Permission(proxy).SupportLevel, authorized = Permission(proxy).Authorized,
+        permission_required = Permission(proxy).SupportLevel == "available" && !Permission(proxy).Authorized,
+        restriction_reason = Permission(proxy).Reason, built_in = proxy.Type is not null && BuiltIn(proxy.Type.Assembly),
     };
 
     public static object Describe(JsonObject args) => GhJson.Array(args["component_ids"]).Take(50)
@@ -40,30 +89,42 @@ internal static class ComponentCatalog
     private static object DescribeType(Guid id)
     {
         var proxy = GH.ComponentServer.EmitObjectProxy(id) ?? throw new GhException("component_not_found", $"Unknown component type {id}.");
-        // Unsupported components are discoverable without instantiating plugin or script objects.
-        if (!Supported(proxy)) return new { descriptor = DescribeProxy(proxy), inputs = Array.Empty<object>(), outputs = Array.Empty<object>() };
+        // Constructors execute plugin code. Metadata discovery must not grant permission to run them.
+        if (!Permission(proxy).Authorized) return new { descriptor = DescribeProxy(proxy), inputs = Array.Empty<object>(), outputs = Array.Empty<object>(),
+            ports_status = Permission(proxy).SupportLevel == "restricted" ? "restricted" : "authorization_required" };
         var node = Create(id);
-        var description = new { descriptor = DescribeProxy(proxy), inputs = Ports(node, true), outputs = Ports(node, false), settings = Settings(node) };
-        Descriptions[id] = System.Text.Json.JsonSerializer.SerializeToNode(description)!.AsObject();
-        return description;
+        try
+        {
+            var description = new { descriptor = DescribeProxy(proxy), inputs = Ports(node, true), outputs = Ports(node, false), settings = Settings(node) };
+            Descriptions[id] = System.Text.Json.JsonSerializer.SerializeToNode(description)!.AsObject();
+            return description;
+        }
+        finally { (node as IDisposable)?.Dispose(); }
     }
 
     public static object ReadDescriptor(Guid id)
     {
         var proxy = GH.ComponentServer.ObjectProxies.FirstOrDefault(p => p.Guid == id) ??
             throw new MCP4Rhino.Logic.Protocol.McpRpcException(-32002, "Installed component not found");
-        return new { descriptor = DescribeProxy(proxy), ports_status = Descriptions.ContainsKey(id) ? "cached" : "not_described",
+        var authorized = Permission(proxy).Authorized;
+        return new { descriptor = DescribeProxy(proxy), ports_status = Descriptions.ContainsKey(id) ? "cached" :
+            authorized ? "not_described" : Permission(proxy).SupportLevel == "restricted" ? "restricted" : "authorization_required",
             contract = Descriptions.GetValueOrDefault(id)?.DeepClone(),
-            next_tool = Descriptions.ContainsKey(id) ? null : "gh_describe_components" };
+            next_tool = Descriptions.ContainsKey(id) || !authorized ? null : "gh_describe_components" };
     }
 
     public static IGH_DocumentObject Create(Guid id)
     {
         var proxy = GH.ComponentServer.EmitObjectProxy(id) ?? throw new GhException("component_not_found", $"Unknown type {id}.");
-        if (!Supported(proxy)) throw new GhException("unsupported_component", $"{proxy.Desc.Name} is outside the native v1 manifest.", "index");
+        Permission(proxy).Require();
         var node = GH.ComponentServer.EmitObject(id) ?? throw new GhException("component_not_found", $"Cannot create {id}.");
-        node.CreateAttributes();
-        return node;
+        try
+        {
+            Permission(node).Require();
+            node.CreateAttributes();
+            return node;
+        }
+        catch { (node as IDisposable)?.Dispose(); throw; }
     }
 
     public static IEnumerable<IGH_Param> Parameters(IGH_DocumentObject node, bool input) => node switch
@@ -79,6 +140,7 @@ internal static class ComponentCatalog
         {
             port = (input ? "in:" : "out:") + i, parameter_id = p.InstanceGuid, name = p.Name, nickname = p.NickName,
             description = p.Description, type = p.TypeName, access = p.Access.ToString(), optional = p.Optional,
+            data_type = p.Type.AssemblyQualifiedName, parameter_type = p.GetType().AssemblyQualifiedName,
             mapping = p.DataMapping.ToString(), simplify = p.Simplify, reverse = p.Reverse,
             sources = p.Sources.Take(resource ? 200 : int.MaxValue).Select(Source).ToArray(),
             persistent = ValueCodec.PersistentSummary(p, !resource),
@@ -93,8 +155,9 @@ internal static class ComponentCatalog
 
     public static object? Settings(IGH_DocumentObject node) => node is GH_NumberSlider slider ? new
     {
-        value = slider.CurrentValue, minimum = slider.Slider.Minimum, maximum = slider.Slider.Maximum,
+        value = slider.CurrentValue, raw_value = slider.Slider.Value, minimum = slider.Slider.Minimum, maximum = slider.Slider.Maximum,
         accuracy = slider.Slider.Type.ToString(),
+        decimal_places = slider.Slider.DecimalPlaces,
     } : null;
 
     public static IGH_Param Port(IGH_DocumentObject node, string token, bool input)
@@ -105,10 +168,15 @@ internal static class ComponentCatalog
         return Parameters(node, input).ElementAtOrDefault(index) ?? throw new GhException("invalid_port", $"Port {token} does not exist.");
     }
 
-    public static void RequireSupported(GH_Document document)
+    public static void RequireAuthorized(GH_Document document)
     {
-        var unsupported = document.Objects.Where(n => !Supported(n)).Select(n => n.Name).Distinct().ToArray();
-        if (unsupported.Length != 0)
-            throw new GhException("unsupported_component", "Definition contains unsupported objects: " + string.Join(", ", unsupported), "index");
+        foreach (var node in document.Objects)
+        {
+            var permission = Permission(node);
+            var code = permission.SupportLevel == "restricted" ? "restricted_component" : "component_authorization_required";
+            if (!permission.Authorized) throw new GhException(code,
+                $"{code}: {node.Name} ({node.ComponentGuid}; {node.GetType().Assembly.FullName}): {permission.Reason} " +
+                "Inspection and slider-only patches with solve:false remain available.", "workflow");
+        }
     }
 }
