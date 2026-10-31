@@ -187,7 +187,7 @@ Full tool list: [docs/MCP_TOOLS.md](docs/MCP_TOOLS.md).
 
 ## Usage data
 
-MCP4Rhino sends anonymous usage data unless you turn it off. The agent is not asked to mention it, and tool calls are not blocked. Events are delivered to `https://events.agenttoolkit.ai/telemetry` using the install token shipped in the package. `MCP4RHINO_TELEMETRY_API_KEY` overrides that token. The value is one `X-Api-Key` header and is not part of the URL. If neither is set, or `MCP4RHINO_TELEMETRY_URL` is set to an invalid URL, the choice can be on and still nothing is sent. Events include a random installation id, plugin and Rhino versions, operating system, and which MCP tools ran (name, duration, and success). Version 0.7.1 adds controlled failure categories and the canonical name of a recognized leading Rhino command. Events do not include models, document names, prompts, scripts, arguments, results, error messages, or stack traces. Turn this off from **MCP4Rhino → Usage data…**. Details: [docs/TELEMETRY.md](docs/TELEMETRY.md).
+MCP4Rhino sends anonymous usage data unless you turn it off. Events are delivered to `https://events.agenttoolkit.ai/telemetry`. Events include a random installation id, plugin and Rhino versions, operating system, and which MCP tools ran (name, duration, and success). Events do not include models, document names, prompts, scripts, arguments, results, error messages, or stack traces. Turn this off from the MCP4Rhino menu bar.  **MCP4Rhino → Usage data…**. Details: [docs/TELEMETRY.md](docs/TELEMETRY.md).
 
 ## Documentation
 
