@@ -93,9 +93,9 @@ Native reads have one pending UI request and a 500 ms HTTP wait budget; a blocke
 | `inspect_model` | None |
 | `plan_parametric_definition` | `goal` |
 | `create_and_verify_definition` | `design_intent` |
-| `diagnose_graph` | `session_id` |
-| `explore_parameter_variation` | `session_id`, `parameter`, `value_or_range` |
-| `prepare_output_snapshot` | `session_id`, `outputs` |
+| `diagnose_graph` | `gh_session` |
+| `explore_parameter_variation` | `gh_session`, `parameter`, `value_or_range` |
+| `prepare_output_snapshot` | `gh_session`, `outputs` |
 | `prepare_model_report` | None; supply document/session and intended audience as appropriate |
 
 Prompts preserve user changes, require supported-component discovery for Grasshopper workflows, distinguish preview from snapshots, and require explicit save/bake/export intent. Reports must associate measurements and images with the same document or solution identity. No staircase service or regulatory/manufacturing approval is added.

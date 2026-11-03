@@ -56,7 +56,7 @@ public class GrasshopperHelpTests
         var operations = recipe["operations"]!.AsArray();
         foreach (var batch in operations.Chunk(100))
         {
-            var patch = new JsonObject { ["session_id"] = "fixture-session", ["expected_revision"] = 0,
+            var patch = new JsonObject { ["gh_session"] = "fixture-session", ["expected_revision"] = 0,
                 ["request_id"] = "fixture", ["operations"] = new JsonArray(batch.Select(n => n!.DeepClone()).ToArray()) };
             GhToolCatalog.Validate("gh_apply_patch", patch);
         }

@@ -56,7 +56,7 @@ public class McpPromptTests
     [InlineData("{\"name\":\"inspect_model\",\"arguments\":[]}")]
     [InlineData("{\"name\":\"inspect_model\",\"arguments\":{\"unexpected\":\"x\"}}")]
     [InlineData("{\"name\":\"inspect_model\",\"arguments\":{\"focus\":42}}")]
-    [InlineData("{\"name\":\"diagnose_graph\",\"arguments\":{\"session_id\":\" \"}}")]
+    [InlineData("{\"name\":\"diagnose_graph\",\"arguments\":{\"gh_session\":\" \"}}")]
     public void InvalidPromptArgumentsFailBeforeAnyNativeAccess(string json) =>
         Assert.Equal(-32602, Assert.Throws<McpRpcException>(() => PromptCatalog.Get(JsonNode.Parse(json)!.AsObject())).Code);
 

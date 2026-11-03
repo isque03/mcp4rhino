@@ -38,6 +38,8 @@ Version 0.7.3 adds [component categories, local authorization and existing-defin
 
 All mutations require a unique request ID; exact retries return the original receipt. Session mutations require an expected revision. Inspect again after user edits or a conflict. Patch aliases identify nodes only inside that patch; retain the returned node GUIDs for later calls.
 
+Session-scoped tools take **`gh_session`** (returned by `gh_open_document` / `gh_list_documents`). Do not pass `session_id` as a tool argument — Claude Desktop strips that name before it reaches the server. Legacy `session_id` input is still accepted for scripts and non-Desktop clients; responses include both fields. Resource URI templates still use `{session_id}` in the path.
+
 `gh_show_document` changes editor state only, requires a request ID and expected revision, and leaves graph revision unchanged. Capture is read-only with respect to graph/editor state and writes a PNG destination. It does not require a mutation request ID.
 
 ## General graph capabilities in 0.7.0

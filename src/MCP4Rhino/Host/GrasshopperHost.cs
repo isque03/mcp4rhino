@@ -59,6 +59,7 @@ public static class GrasshopperHost
     {
         try
         {
+            GhJson.AcceptSessionAlias(context);
             GhSchema.Validate(CaptureContent.ContextSchema, context);
             return Runtime().WithPreview(context, capture);
         }

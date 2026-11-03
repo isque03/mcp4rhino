@@ -24,7 +24,7 @@ def nodes():
 class FakeClient:
     def __init__(self):
         self.nodes = nodes()
-        self.session = {'session_id': 's', 'revision': 0}
+        self.session = {'gh_session': 's', 'session_id': 's', 'revision': 0}
         self.receipts = {}
         self.solve_attempts = 0
 
@@ -85,9 +85,9 @@ class CompatibilitySmokeTests(unittest.TestCase):
         class PagedClient:
             def call(self, tool, arguments):
                 offset = arguments['offset']
-                return {'session': {'session_id': 's', 'revision': offset}, 'total': 2, 'nodes': [nodes()[offset]]}
+                return {'session': {'gh_session': 's', 'session_id': 's', 'revision': offset}, 'total': 2, 'nodes': [nodes()[offset]]}
         with self.assertRaisesRegex(AssertionError, 'Graph changed'):
-            smoke.inspect_all(PagedClient(), {'session_id': 's'})
+            smoke.inspect_all(PagedClient(), {'gh_session': 's', 'session_id': 's'})
 
     def test_test_value_must_exercise_a_change(self):
         client = FakeClient()

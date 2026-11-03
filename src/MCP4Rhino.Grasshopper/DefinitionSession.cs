@@ -86,8 +86,8 @@ internal sealed class DefinitionSession : IDisposable
 
     public object Summary() => new
     {
-        session_id = Id, document_id = Document.RuntimeID, name = Label ?? Document.DisplayName, owned = Owned,
-        revision = Revision, rhino_document = RhinoSerial, result_id = ResultId,
+        gh_session = Id, session_id = Id, document_id = Document.RuntimeID, name = Label ?? Document.DisplayName,
+        owned = Owned, revision = Revision, rhino_document = RhinoSerial, result_id = ResultId,
         modified = Document.IsModified, faulted = Faulted,
     };
 

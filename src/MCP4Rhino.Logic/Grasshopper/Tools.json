@@ -146,7 +146,7 @@
     "inputSchema": {
       "type": "object",
       "properties": {
-        "session_id": {
+        "gh_session": {
           "type": "string"
         },
         "offset": {
@@ -160,7 +160,7 @@
         }
       },
       "required": [
-        "session_id"
+        "gh_session"
       ],
       "additionalProperties": false
     },
@@ -176,7 +176,7 @@
     "inputSchema": {
       "type": "object",
       "properties": {
-        "session_id": {
+        "gh_session": {
           "type": "string"
         },
         "expected_revision": {
@@ -493,7 +493,7 @@
         }
       },
       "required": [
-        "session_id",
+        "gh_session",
         "expected_revision",
         "request_id",
         "operations"
@@ -512,7 +512,7 @@
     "inputSchema": {
       "type": "object",
       "properties": {
-        "session_id": {
+        "gh_session": {
           "type": "string"
         },
         "expected_revision": {
@@ -529,7 +529,7 @@
         }
       },
       "required": [
-        "session_id",
+        "gh_session",
         "expected_revision",
         "request_id"
       ],
@@ -589,7 +589,7 @@
     "inputSchema": {
       "type": "object",
       "properties": {
-        "session_id": {
+        "gh_session": {
           "type": "string"
         },
         "result_id": {
@@ -616,7 +616,7 @@
         }
       },
       "required": [
-        "session_id",
+        "gh_session",
         "result_id",
         "node",
         "port"
@@ -635,7 +635,7 @@
     "inputSchema": {
       "type": "object",
       "properties": {
-        "session_id": {
+        "gh_session": {
           "type": "string"
         },
         "expected_revision": {
@@ -677,7 +677,7 @@
         }
       },
       "required": [
-        "session_id",
+        "gh_session",
         "expected_revision",
         "request_id",
         "result_id",
@@ -697,7 +697,7 @@
     "inputSchema": {
       "type": "object",
       "properties": {
-        "session_id": {
+        "gh_session": {
           "type": "string"
         },
         "expected_revision": {
@@ -715,7 +715,7 @@
         }
       },
       "required": [
-        "session_id",
+        "gh_session",
         "expected_revision",
         "request_id",
         "path"
@@ -734,7 +734,7 @@
     "inputSchema": {
       "type": "object",
       "properties": {
-        "session_id": {
+        "gh_session": {
           "type": "string"
         },
         "expected_revision": {
@@ -749,7 +749,7 @@
         }
       },
       "required": [
-        "session_id",
+        "gh_session",
         "expected_revision",
         "request_id"
       ],
@@ -767,7 +767,7 @@
     "inputSchema": {
       "type": "object",
       "properties": {
-        "session_id": {
+        "gh_session": {
           "type": "string"
         },
         "expected_revision": {
@@ -813,7 +813,7 @@
         }
       },
       "required": [
-        "session_id",
+        "gh_session",
         "expected_revision",
         "result_id",
         "outputs"
@@ -832,7 +832,7 @@
     "inputSchema": {
       "type": "object",
       "properties": {
-        "session_id": {
+        "gh_session": {
           "type": "string"
         },
         "expected_revision": {
@@ -875,7 +875,7 @@
         }
       },
       "required": [
-        "session_id"
+        "gh_session"
       ],
       "additionalProperties": false
     },
@@ -891,7 +891,7 @@
     "inputSchema": {
       "type": "object",
       "properties": {
-        "session_id": {
+        "gh_session": {
           "type": "string"
         },
         "expected_revision": {
@@ -906,7 +906,7 @@
         }
       },
       "required": [
-        "session_id",
+        "gh_session",
         "expected_revision",
         "request_id"
       ],

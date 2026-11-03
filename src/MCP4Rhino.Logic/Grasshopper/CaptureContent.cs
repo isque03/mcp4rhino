@@ -6,9 +6,9 @@ namespace MCP4Rhino.Logic.Grasshopper;
 public static class CaptureContent
 {
     public static JsonObject ContextSchema => JsonNode.Parse("""
-        {"type":"object","properties":{"session_id":{"type":"string"},
+        {"type":"object","properties":{"gh_session":{"type":"string"},
          "expected_revision":{"type":"integer","minimum":0},"result_id":{"type":"string"}},
-         "required":["session_id","expected_revision","result_id"],"additionalProperties":false}
+         "required":["gh_session","expected_revision","result_id"],"additionalProperties":false}
         """)!.AsObject();
 
     public static object FromPng(JsonObject metadata, byte[] bytes)
@@ -25,14 +25,17 @@ public static class CaptureContent
         return embedded ? McpContent.TextAndPng(metadata.ToJsonString(), bytes) : McpContent.TextOnly(metadata.ToJsonString());
     }
 
-    public static object Associate(object result, object identity)
+    public static object Associate(object result, ResultIdentity identity)
     {
         var content = JsonSerializer.SerializeToNode(result)!.AsObject();
         if (content["isError"]?.GetValue<bool>() == true) return result;
         var text = content["content"]![0]!;
         var metadata = JsonNode.Parse(text["text"]!.GetValue<string>())!.AsObject();
-        metadata["grasshopper"] = JsonSerializer.SerializeToNode(identity, new JsonSerializerOptions
-            { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });
+        metadata["grasshopper"] = JsonSerializer.SerializeToNode(new
+        {
+            gh_session = identity.SessionId, session_id = identity.SessionId,
+            document_id = identity.DocumentId, revision = identity.Revision, result_id = identity.ResultId,
+        });
         text["text"] = metadata.ToJsonString();
         return content;
     }

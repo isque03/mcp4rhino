@@ -38,7 +38,7 @@ internal static class ResultReader
 
     public static object SolveSummary(DefinitionSession session) => new
     {
-        session_id = session.Id, revision = session.Revision, result_id = session.ResultId,
+        gh_session = session.Id, session_id = session.Id, revision = session.Revision, result_id = session.ResultId,
         milliseconds = session.Document.SolutionSpan.TotalMilliseconds,
         diagnostics = session.Document.Objects.Select(Diagnostics).ToArray(),
         outputs = session.Document.Objects.SelectMany(n => ComponentCatalog.Parameters(n, false)
@@ -53,7 +53,7 @@ internal static class ResultReader
         var offset = GhJson.Offset(args);
         var limit = GhJson.PageSize(args);
         var page = ValueCodec.Rows(port.VolatileData, rhino.ModelAbsoluteTolerance, offset: offset).Take(limit + 1).ToArray();
-        return new { session_id = session.Id, revision = session.Revision, result_id = session.ResultId,
+        return new { gh_session = session.Id, session_id = session.Id, revision = session.Revision, result_id = session.ResultId,
             units = Units(rhino), branch_count = port.VolatileData.PathCount,
             item_count = port.VolatileDataCount, rows = page.Take(limit).ToArray(),
             next_offset = page.Length > limit ? offset + limit : (int?)null };
@@ -137,7 +137,7 @@ internal static class ResultReader
                 ids.Add(id);
             }
             rhino.Views.Redraw();
-            return new { session_id = session.Id, result_id = session.ResultId, object_ids = ids };
+            return new { gh_session = session.Id, session_id = session.Id, result_id = session.ResultId, object_ids = ids };
         }
         catch { foreach (var id in ids) rhino.Objects.Delete(id, true); throw; }
         finally { rhino.EndUndoRecord(record); }

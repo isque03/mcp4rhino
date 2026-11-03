@@ -20,6 +20,7 @@ public static class GhToolCatalog
     {
         var definition = Definitions.GetValueOrDefault(name) ??
             throw new GhException("unknown_tool", $"Unknown Grasshopper tool {name}.", "index");
+        GhJson.AcceptSessionAlias(args);
         GhSchema.Validate(definition["inputSchema"]!.AsObject(), args);
     }
 }

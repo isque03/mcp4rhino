@@ -95,6 +95,7 @@ public sealed class GrasshopperRuntime : IGrasshopperRuntime
     public object WithPreview(JsonObject context, Func<object> capture)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        GhJson.AcceptSessionAlias(context);
         GhSchema.Validate(CaptureContent.ContextSchema, context);
         if (_jobs.Busy) throw new GhException("busy", "Wait for the running solve before capturing preview.");
         return _dispatcher.Invoke(() =>
@@ -132,7 +133,7 @@ public sealed class GrasshopperRuntime : IGrasshopperRuntime
         return session.Summary();
     }
 
-    private DefinitionSession Session(JsonObject args) => _sessions.GetValueOrDefault(GhJson.Text(args, "session_id")) ??
+    private DefinitionSession Session(JsonObject args) => _sessions.GetValueOrDefault(GhJson.SessionId(args)) ??
         throw new GhException("session_not_found", "Session not found. Open or explicitly attach a definition.");
 
     private object List() => new
@@ -243,14 +244,14 @@ public sealed class GrasshopperRuntime : IGrasshopperRuntime
         {
             GhJson.ExpectRevision(session.Revision, args);
             session.Dispose(); _sessions.TryRemove(session.Id, out _);
-            return new { session_id = session.Id, closed = true, detached = true };
+            return new { gh_session = session.Id, session_id = session.Id, closed = true, detached = true };
         }
         session.RequireContext(); GhJson.ExpectRevision(session.Revision, args);
         if (session.Owned && session.Document.IsModified && !GhJson.Flag(args, "discard"))
             throw new GhException("unsaved_changes", "Save the definition or explicitly pass discard:true.");
         session.Dispose(); _sessions.TryRemove(session.Id, out _);
         if (session.Owned) { GH.DocumentServer.RemoveDocument(session.Document); session.Document.Dispose(); }
-        return new { session_id = session.Id, closed = session.Owned, detached = !session.Owned };
+        return new { gh_session = session.Id, session_id = session.Id, closed = session.Owned, detached = !session.Owned };
     }
 
     private void GeometryChanged(object? sender, RhinoObjectEventArgs e) => Invalidate(e.TheObject.Document.RuntimeSerialNumber, e.ObjectId);

@@ -15,7 +15,7 @@ SPEC.loader.exec_module(smoke)
 def inspect_all(client, session):
     nodes, offset, revision = [], 0, None
     while True:
-        page = client.call('gh_inspect_document', {'session_id': session['session_id'], 'offset': offset, 'limit': 200})
+        page = client.call('gh_inspect_document', {'gh_session': session['gh_session'], 'offset': offset, 'limit': 200})
         observed = page['session']['revision']
         if revision is None:
             revision = observed
@@ -101,7 +101,7 @@ def main():
     assert support['server_version'] == '0.7.3', support
     session = client.call('gh_open_document', {'mode': 'attach', 'document_id': args.document_id, 'request_id': str(uuid.uuid4())})
     result = exercise(client, session, args.slider_id, args.value, args.expect_solve_denied)
-    print(json.dumps({'version': support['server_version'], 'session_id': session['session_id'], **result}, indent=2))
+    print(json.dumps({'version': support['server_version'], 'gh_session': session.get('gh_session', session['session_id']), **result}, indent=2))
 
 
 if __name__ == '__main__':
