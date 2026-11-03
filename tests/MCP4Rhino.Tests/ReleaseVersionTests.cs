@@ -15,7 +15,7 @@ public class ReleaseVersionTests
         var informational = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion;
         Assert.Equal(McpJsonRpc.ServerVersion, informational.Split('+')[0]);
         Assert.Equal(new Version(0, 7, 3, 0), assembly.GetName().Version);
-        Assert.Equal("0.7.3.0", assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()!.Version);
+        Assert.Equal("0.7.4.0", assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()!.Version);
 
         var response = McpJsonRpc.Dispatch(new JsonObject { ["id"] = 1, ["method"] = "initialize" }, new EmptyTools());
         Assert.Equal(McpJsonRpc.ServerVersion, response!["result"]!["serverInfo"]!["version"]!.GetValue<string>());

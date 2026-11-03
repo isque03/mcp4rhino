@@ -7,6 +7,12 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.7.4] — 2026-11-03
+
+### Fixed
+
+- Grasshopper session tools now take `gh_session` instead of `session_id`. Claude Desktop silently drops a tool argument named `session_id` before it reaches MCP servers ([anthropics/claude-code#77248](https://github.com/anthropics/claude-code/issues/77248)), which made every session-scoped GH tool fail with `arguments.session_id: required`. Legacy `session_id` input is still accepted and rewritten; responses include both `gh_session` and `session_id`.
+
 ## [0.7.3] — 2026-10-28
 
 ### Added

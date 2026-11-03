@@ -19,7 +19,7 @@ Use this path when the user wants an **editable parametric definition**. For one
 
 1. Confirm Rhino is open. Call `gh_status` and `get_document_units`. Tell the user whether Grasshopper is available. Help topics do not load the editor; discovery and open do.
 2. Orient with `gh_help(topic: index)` or `mcp4rhino://grasshopper/guides/index`. Prefer packaged quickstart and a small example (for example `examples/array` or `examples/profile`) before inventing a large graph.
-3. Ask permission to create a **separate visible** definition. After they agree, call `gh_open_document` with `mode: create` and a clear name. Keep `session_id` and `revision`.
+3. Ask permission to create a **separate visible** definition. After they agree, call `gh_open_document` with `mode: create` and a clear name. Keep `gh_session` and `revision` (Claude Desktop drops a tool argument named `session_id`).
 4. Discover before you build: `gh_search_components`, then `gh_describe_components` for chosen supported IDs. Use only `supported:true` components. Resolve real component IDs; do not invent GUIDs.
 5. Ask permission, then apply a small revision-checked `gh_apply_patch` (few nodes). Prefer a packaged recipe pattern when it fits. Report unsupported operations instead of forcing workarounds.
 6. Solve with `gh_solve` and a new `request_id`. Poll `gh_get_job` until terminal. Inspect diagnostics; a completed job is not proof every component succeeded.

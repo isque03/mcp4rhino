@@ -66,7 +66,7 @@ public class GrasshopperContractTests
     public void MutationRetriesReturnOriginalReceiptAndRejectDifferentIntent()
     {
         var ledger = new RequestLedger(); var calls = 0;
-        var args = Args("""{"request_id":"bake-1","session_id":"s","expected_revision":1}""");
+        var args = Args("""{"request_id":"bake-1","gh_session":"s","expected_revision":1}""");
         Assert.Equal("receipt", ledger.Execute("bake", args, () => { calls++; return "receipt"; }));
         Assert.Equal("receipt", ledger.Execute("bake", (JsonObject)args.DeepClone(), () => throw new Exception()));
         Assert.Equal(1, calls);
@@ -92,8 +92,12 @@ public class GrasshopperContractTests
         Assert.Equal(2.5, GhJson.Number(JsonNode.Parse("2.5")));
         Assert.Throws<GhException>(() => GhJson.Number(null));
         Assert.Throws<GhException>(() => GhJson.Number(JsonValue.Create(double.NaN)));
-        Assert.Throws<GhException>(() => GhJson.Text(new JsonObject(), "session_id"));
+        Assert.Throws<GhException>(() => GhJson.SessionId(new JsonObject()));
         Assert.Throws<GhException>(() => GhJson.Object(new JsonArray()));
+        var legacy = Args("""{"session_id":"legacy-session"}""");
+        GhJson.AcceptSessionAlias(legacy);
+        Assert.Equal("legacy-session", GhJson.SessionId(legacy));
+        Assert.False(legacy.ContainsKey("session_id"));
         GhJson.ExpectRevision(7, Args("""{"expected_revision":7}"""));
         Assert.Equal("revision_conflict", Assert.Throws<GhException>(() => GhJson.ExpectRevision(8, Args("""{"expected_revision":7}"""))).Code);
         Assert.Throws<GhException>(() => GhJson.ExpectRevision(7, new JsonObject()));
@@ -123,8 +127,9 @@ public class GrasshopperContractTests
         Assert.Throws<GhException>(() => GhToolCatalog.Validate("gh_solve", new JsonObject()));
         Assert.Throws<GhException>(() => GhToolCatalog.Validate("gh_status", Args("""{"load":true}""")));
         Assert.Throws<GhException>(() => GhToolCatalog.Validate("gh_open_document", Args("""{"mode":"run-code","request_id":"1"}""")));
-        var patch = Args("""{"session_id":"s","expected_revision":0,"request_id":"1","operations":[{"op":"remove","node":"n"}]}""");
+        var patch = Args("""{"gh_session":"s","expected_revision":0,"request_id":"1","operations":[{"op":"remove","node":"n"}]}""");
         GhToolCatalog.Validate("gh_apply_patch", patch);
+        GhToolCatalog.Validate("gh_inspect_document", Args("""{"session_id":"legacy"}"""));
         patch["operations"]![0]!["code"] = "print('wrong')";
         Assert.Throws<GhException>(() => GhToolCatalog.Validate("gh_apply_patch", patch));
     }

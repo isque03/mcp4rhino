@@ -9,7 +9,7 @@ Lengths and bounds use the bound Rhino document's model units. Area uses model u
 For a report, call `gh_get_solution_summary`:
 
 ```json
-{"session_id":"SESSION","expected_revision":4,"result_id":"RESULT","outputs":[{"name":"profile","node":"NODE","port":"out:0"}],"offset":0,"limit":50}
+{"gh_session":"SESSION","expected_revision":4,"result_id":"RESULT","outputs":[{"name":"profile","node":"NODE","port":"out:0"}],"offset":0,"limit":50}
 ```
 
 This returns `identity`, `session`, `units`, a page of graph controls/persistent-input samples/diagnostics, and selected output pages with total branch/item counts. Select 1–20 outputs with unique names. Each page contains at most 200 rows; `graph.next_offset` and each output's `data.next_offset` are independent. Fetch each page using the same revision/result guard; use `gh_read_output` to page a single output independently. Persistent inputs are bounded samples, not a complete dump of large trees.

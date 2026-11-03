@@ -3,7 +3,7 @@
 Call tools with JSON objects (the examples below show tool arguments).
 
 1. `gh_status({})`, `get_document_units({})`. If Grasshopper is not initialized, discovery/open will load its editor. Help does not load it.
-2. `gh_open_document({"mode":"create","name":"Study","request_id":"study-open-1"})`. Keep the returned `session_id` and `revision`.
+2. `gh_open_document({"mode":"create","name":"Study","request_id":"study-open-1"})`. Keep the returned `gh_session` and `revision`. Always pass `gh_session` on later tools — never `session_id` (Claude Desktop strips that argument name).
 3. `gh_search_components({"query":"Series"})`. Choose an entry with `supported:true`, then `gh_describe_components({"component_ids":["<returned component_id>"]})`.
 4. Read input/output port descriptions and defaults; input access may be item, list, or tree. Type GUIDs create components; placed node GUIDs identify instances.
 5. Submit a `gh_apply_patch` using the session and exact revision. New nodes can be referenced by aliases inside the same patch. See workflow or `gh_help({"topic":"examples/array"})`.

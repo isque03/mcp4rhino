@@ -10,9 +10,31 @@ public sealed class GhException(string code, string message, string helpTopic = 
 
 public static class GhJson
 {
+    public const string SessionKey = "gh_session";
+    public const string LegacySessionKey = "session_id";
+
     public static string Text(JsonObject args, string key) =>
         args[key]?.GetValue<string>() is { Length: > 0 } s ? s :
             throw new GhException("invalid_arguments", $"{key} is required.");
+
+    /// <summary>
+    /// Claude Desktop drops the tool argument name <c>session_id</c> before it reaches MCP servers
+    /// (collision with Streamable-HTTP / Mcp-Session-Id). Public schemas use <c>gh_session</c>;
+    /// accept the legacy key and rewrite it before schema validation.
+    /// </summary>
+    public static void AcceptSessionAlias(JsonObject args)
+    {
+        var current = args[SessionKey]?.GetValue<string>();
+        var legacy = args[LegacySessionKey]?.GetValue<string>();
+        if (!string.IsNullOrEmpty(current) && !string.IsNullOrEmpty(legacy) && current != legacy)
+            throw new GhException("invalid_arguments",
+                $"{SessionKey} and {LegacySessionKey} disagree; pass only {SessionKey}.");
+        if (string.IsNullOrEmpty(current) && !string.IsNullOrEmpty(legacy))
+            args[SessionKey] = legacy;
+        args.Remove(LegacySessionKey);
+    }
+
+    public static string SessionId(JsonObject args) => Text(args, SessionKey);
 
     public static int Integer(JsonObject args, string key, int fallback = 0) =>
         args[key]?.GetValue<int>() ?? fallback;

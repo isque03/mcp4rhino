@@ -2,7 +2,7 @@
 
 Every mutation requires a `request_id`. Reuse it only for an exact retry with identical arguments; use a new ID for a changed operation. Receipts live in the runtime until Rhino exits. Mutations against sessions also require `expected_revision` from the latest response/inspection. Never guess the next revision after manual canvas edits.
 
-`gh_apply_patch` arguments are `session_id`, `expected_revision`, `request_id`, `operations`, and optional `solve` (default false). Maximum 100 operations. The returned `patch.aliases` maps temporary aliases to placed node IDs; retain those IDs for later edits. A requested solve returns a job under `job`.
+`gh_apply_patch` arguments are `gh_session`, `expected_revision`, `request_id`, `operations`, and optional `solve` (default false). Maximum 100 operations. The returned `patch.aliases` maps temporary aliases to placed node IDs; retain those IDs for later edits. A requested solve returns a job under `job`.
 
 Operations:
 

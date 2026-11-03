@@ -36,7 +36,7 @@ class PatchClient:
                     assert endpoint['node'] in aliases or endpoint['node'] in self.ids
         self.ids.update(aliases.values())
         self.calls.append(copy.deepcopy(arguments))
-        result = {'session': {'session_id': 's', 'revision': arguments['expected_revision'] + 1},
+        result = {'session': {'gh_session': 's', 'session_id': 's', 'revision': arguments['expected_revision'] + 1},
                   'patch': {'aliases': aliases}, 'job': {'job_id': 'j'} if arguments['solve'] else None}
         self.receipts[key] = (copy.deepcopy(arguments), result)
         return result
@@ -53,7 +53,7 @@ class SmokeBatchTests(unittest.TestCase):
                         'target': {'node': 'later', 'port': 'in:0'}}]
         original = copy.deepcopy(operations)
         client = PatchClient()
-        session, aliases, job = smoke.apply_recipe(client, {'session_id': 's', 'revision': 0},
+        session, aliases, job = smoke.apply_recipe(client, {'gh_session': 's', 'session_id': 's', 'revision': 0},
                                                    {'operations': operations}, {'native': 'discovered-type'})
         self.assertEqual([len(call['operations']) for call in client.calls], [100, 3])
         self.assertEqual([call['solve'] for call in client.calls], [False, True])
@@ -66,7 +66,7 @@ class SmokeBatchTests(unittest.TestCase):
 
     def test_short_recipe_keeps_intra_patch_aliases(self):
         client = PatchClient()
-        smoke.apply_recipe(client, {'session_id': 's', 'revision': 0}, {'operations': [
+        smoke.apply_recipe(client, {'gh_session': 's', 'session_id': 's', 'revision': 0}, {'operations': [
             {'op': 'add', 'alias': 'control', 'component_id': '$native'},
             {'op': 'set_slider', 'node': 'control', 'value': 3}]}, {'native': 'discovered-type'})
         self.assertEqual(client.calls[0]['operations'][1]['node'], 'control')

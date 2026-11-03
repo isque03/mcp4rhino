@@ -61,7 +61,7 @@ class Mcp:
 
 
 def mutation(session, **arguments):
-    return {'session_id': session['session_id'], 'expected_revision': session['revision'],
+    return {'gh_session': session.get('gh_session', session['session_id']), 'expected_revision': session['revision'],
             'request_id': str(uuid.uuid4()), **arguments}
 
 
@@ -119,7 +119,7 @@ def read_output(client, session, result, endpoint):
     rows = []
     offset = 0
     while True:
-        page = client.call('gh_read_output', {'session_id': session['session_id'],
+        page = client.call('gh_read_output', {'gh_session': session['gh_session'],
                          'result_id': result['result_id'], **endpoint, 'offset': offset})
         rows.extend(page['rows'])
         if page['next_offset'] is None:
@@ -130,13 +130,13 @@ def read_output(client, session, result, endpoint):
 
 
 def verify_failed_patch(client, session):
-    before = client.call('gh_inspect_document', {'session_id': session['session_id']})
+    before = client.call('gh_inspect_document', {'gh_session': session['gh_session']})
     first = before['nodes'][0]['node']
     error = client.call('gh_apply_patch', mutation(session, operations=[
         {'op': 'set_properties', 'node': first, 'name': 'must roll back'},
         {'op': 'remove', 'node': str(uuid.uuid4())}]), expect_error=True)
     assert error['code'] == 'node_not_found', error
-    after = client.call('gh_inspect_document', {'session_id': session['session_id']})
+    after = client.call('gh_inspect_document', {'gh_session': session['gh_session']})
     assert after['session']['revision'] == before['session']['revision']
     assert after['total'] == before['total']
     assert after['nodes'] == before['nodes']
@@ -152,7 +152,7 @@ def verify_variation(client, name, session, aliases, result, endpoint):
         operations = [{'op': 'set_slider', 'node': aliases[control], 'value': value}]
     changed = client.call('gh_apply_patch', mutation(session, operations=operations, solve=True))
     session = changed['session']
-    client.call('gh_read_output', {'session_id': session['session_id'], 'result_id': result['result_id'],
+    client.call('gh_read_output', {'gh_session': session['gh_session'], 'result_id': result['result_id'],
                                  **endpoint}, expect_error=True)
     if getattr(client, 'resources', False):
         verify_expired_resource(client, session, result)
@@ -199,13 +199,13 @@ def vary_stair(client, session, aliases, result, endpoint):
         changed = client.call('gh_apply_patch', mutation(session, operations=[
             {'op': 'set_slider', 'node': aliases[control], 'value': value}], solve=True))
         session = changed['session']
-        client.call('gh_read_output', {'session_id': session['session_id'], 'result_id': result['result_id'],
+        client.call('gh_read_output', {'gh_session': session['gh_session'], 'result_id': result['result_id'],
                                     **endpoint}, expect_error=True)
         if getattr(client, 'resources', False):
             verify_expired_resource(client, session, result)
         result = await_job(client, changed['job'])
         outputs = [{'name': name, 'node': aliases[name], 'port': 'out:0'} for name in ('rise', 'tread_count', 'run', 'treads', 'stringers')]
-        summary = client.call('gh_get_solution_summary', {'session_id': session['session_id'],
+        summary = client.call('gh_get_solution_summary', {'gh_session': session['gh_session'],
             'expected_revision': session['revision'], 'result_id': result['result_id'], 'outputs': outputs})
         by_name = {item['name']: item for item in summary['outputs']}
         for name, expected in [('rise', rise), ('tread_count', treads), ('run', run)]:
@@ -218,7 +218,7 @@ def vary_stair(client, session, aliases, result, endpoint):
 
 
 def capture_views(client, session, result):
-    context = {'session_id': session['session_id'], 'expected_revision': session['revision'], 'result_id': result['result_id']}
+    context = {'gh_session': session['gh_session'], 'expected_revision': session['revision'], 'result_id': result['result_id']}
     canvas = client.call('gh_capture_canvas', {**context, 'framing': 'fit'})
     assert canvas['identity']['result_id'] == result['result_id'], canvas
     client.call('gh_show_document', {**mutation(session), 'fit': True})
@@ -254,7 +254,7 @@ def verify_list_matching(client):
     changed = client.call('gh_apply_patch', mutation(session, operations=[{'op': 'set_value',
         'node': aliases['right'], 'port': 'in:0', 'tree': [{'path': [0], 'items': []}, {'path': [3, 0], 'items': [None]}]}]))
     session = changed['session']
-    graph = client.call('gh_inspect_document', {'session_id': session['session_id'], 'limit': 200})
+    graph = client.call('gh_inspect_document', {'gh_session': session['gh_session'], 'limit': 200})
     node = next(n for n in graph['nodes'] if n['node'] == aliases['right'])
     sample = node['inputs'][0]['persistent']['sample']
     assert sample[0]['empty'] and sample[0]['item_index'] is None, sample
@@ -304,12 +304,12 @@ def round_trip(client, session, directory):
     paths = []
     for extension in ('gh', 'ghx'):
         path = str(directory / f'study.{extension}')
-        before = client.call('gh_inspect_document', {'session_id': session['session_id'], 'limit': 200})
+        before = client.call('gh_inspect_document', {'gh_session': session['gh_session'], 'limit': 200})
         saved = client.call('gh_save_document', mutation(session, path=path))
         session = saved['session']
         client.call('gh_close_document', mutation(session, discard=True))
         session = client.call('gh_open_document', {'mode': 'open', 'path': path, 'request_id': str(uuid.uuid4())})
-        after = client.call('gh_inspect_document', {'session_id': session['session_id'], 'limit': 200})
+        after = client.call('gh_inspect_document', {'gh_session': session['gh_session'], 'limit': 200})
         assert [n['component_id'] for n in before['nodes']] == [n['component_id'] for n in after['nodes']]
         assert [n['position'] for n in before['nodes']] == [n['position'] for n in after['nodes']]
         assert [n['inputs'] for n in before['nodes']] == [n['inputs'] for n in after['nodes']]
@@ -373,14 +373,16 @@ def protocol_probe(client):
 
 
 def verify_expired_resource(client, session, old_result):
-    uri = f"mcp4rhino://grasshopper/sessions/{session['session_id']}/results/{old_result['result_id']}"
+    sid = session.get('gh_session', session['session_id'])
+    uri = f"mcp4rhino://grasshopper/sessions/{sid}/results/{old_result['result_id']}"
     error = client.rpc('resources/read', {'uri': uri}, expect_error=True)
     assert error['code'] == -32002 and 'stale_result' in error['message'], error
 
 
 def verify_resources(client, session, result, endpoint):
-    base = f"mcp4rhino://grasshopper/sessions/{session['session_id']}"
-    before = client.call('gh_inspect_document', {'session_id': session['session_id']})
+    sid = session.get('gh_session', session['session_id'])
+    base = f"mcp4rhino://grasshopper/sessions/{sid}"
+    before = client.call('gh_inspect_document', {'gh_session': sid})
     graph = client.read_resource(base + f"/graph?expected_revision={session['revision']}")
     assert graph['revision'] == session['revision'], graph
     assert graph['data']['total_nodes'] == before['total'], graph
@@ -392,7 +394,7 @@ def verify_resources(client, session, result, endpoint):
     assert identity['identity']['result_id'] == result['result_id'], identity
     output_uri = base + f"/results/{result['result_id']}/nodes/{endpoint['node']}/outputs/" + endpoint['port'].split(':')[1]
     output = client.read_resource(output_uri)
-    tool = client.call('gh_read_output', {'session_id': session['session_id'], 'result_id': result['result_id'], **endpoint})
+    tool = client.call('gh_read_output', {'gh_session': sid, 'result_id': result['result_id'], **endpoint})
     assert output['data']['item_count'] == tool['item_count'], output
     assert output['data']['branch_count'] == tool['branch_count'], output
     document = client.read_resource('mcp4rhino://rhino/documents/active')
@@ -405,7 +407,7 @@ def verify_resources(client, session, result, endpoint):
     objects = document['data']['objects']['items']
     if objects:
         client.read_resource(f"mcp4rhino://rhino/documents/{document['document_id']}/objects/{objects[0]['object_id']}")
-    after = client.call('gh_inspect_document', {'session_id': session['session_id']})
+    after = client.call('gh_inspect_document', {'gh_session': sid})
     assert before['session']['revision'] == after['session']['revision'], (before, after)
     assert before['session']['result_id'] == after['session']['result_id'], (before, after)
     verify_component_resource(client)

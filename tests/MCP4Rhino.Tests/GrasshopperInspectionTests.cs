@@ -116,19 +116,21 @@ public class GrasshopperInspectionTests
         var error = new { isError = true, content = new[] { new { type = "text", text = "failure" } } };
         var unchanged = JsonSerializer.SerializeToNode(CaptureContent.Associate(error, identity))!;
         Assert.Equal("failure", unchanged["content"]![0]!["text"]!.GetValue<string>());
-        GhSchema.Validate(CaptureContent.ContextSchema, Args("""{"session_id":"s","expected_revision":4,"result_id":"r"}"""));
-        Assert.Throws<GhException>(() => GhSchema.Validate(CaptureContent.ContextSchema, Args("""{"session_id":"s"}""")));
+        var context = Args("""{"session_id":"s","expected_revision":4,"result_id":"r"}""");
+        GhJson.AcceptSessionAlias(context);
+        GhSchema.Validate(CaptureContent.ContextSchema, context);
+        Assert.Throws<GhException>(() => GhSchema.Validate(CaptureContent.ContextSchema, Args("""{"gh_session":"s"}""")));
     }
 
     [Fact]
     public void NewToolContractsRejectMissingGuardsAndUnknownOptions()
     {
-        var summary = Args("""{"session_id":"s","expected_revision":0,"result_id":"r","outputs":[{"name":"value","node":"n","port":"out:0"}]}""");
+        var summary = Args("""{"gh_session":"s","expected_revision":0,"result_id":"r","outputs":[{"name":"value","node":"n","port":"out:0"}]}""");
         GhToolCatalog.Validate("gh_get_solution_summary", summary);
         summary.Remove("result_id");
         Assert.Throws<GhException>(() => GhToolCatalog.Validate("gh_get_solution_summary", summary));
         GhToolCatalog.Validate("gh_capture_canvas", Args("""{"session_id":"s","framing":"fit"}"""));
-        Assert.Throws<GhException>(() => GhToolCatalog.Validate("gh_capture_canvas", Args("""{"session_id":"s","width":8192}""")));
-        Assert.Throws<GhException>(() => GhToolCatalog.Validate("gh_show_document", Args("""{"session_id":"s"}""")));
+        Assert.Throws<GhException>(() => GhToolCatalog.Validate("gh_capture_canvas", Args("""{"gh_session":"s","width":8192}""")));
+        Assert.Throws<GhException>(() => GhToolCatalog.Validate("gh_show_document", Args("""{"gh_session":"s"}""")));
     }
 }
