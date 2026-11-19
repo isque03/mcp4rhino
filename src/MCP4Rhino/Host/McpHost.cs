@@ -157,7 +157,7 @@ public static class McpHost
     {
         HotReload = HotReload, Support = LiveSupport, Telemetry = Telemetry.Gateway,
         Instructions = TelemetryHost.InitializeInstructions, OnInitialized = TelemetryHost.MarkNoticeDelivered,
-        Resources = Resources,
+        Resources = Resources, Feedback = FeedbackHost.Service,
     };
 
     private static SupportContext LiveSupport() => new(

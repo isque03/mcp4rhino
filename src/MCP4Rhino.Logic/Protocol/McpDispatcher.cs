@@ -78,7 +78,7 @@ public static class McpDispatcher
     {
         var request = new JsonObject { ["jsonrpc"] = "2.0", ["id"] = 1, ["method"] = method, ["params"] = args.DeepClone() };
         var response = McpJsonRpc.Dispatch(request, services.Tools, services.HotReload, services.Support,
-            services.Telemetry, services.Instructions, services.OnInitialized)!;
+            services.Telemetry, services.Instructions, services.OnInitialized, services.Feedback)!;
         if (response["error"] is { } error)
             throw new McpRpcException(error["code"]!.GetValue<int>(), error["message"]!.GetValue<string>());
         return response["result"]!.DeepClone().AsObject();

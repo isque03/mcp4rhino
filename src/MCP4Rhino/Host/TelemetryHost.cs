@@ -144,7 +144,7 @@ public static class TelemetryHost
         return null;
     }
 
-    private static string? ResolvedApiKey() =>
+    internal static string? ResolvedApiKey() =>
         TelemetryEndpoint.ApiKey(packaged: PackagedInstallToken());
 
     private static string? PackagedInstallToken()
@@ -161,7 +161,7 @@ public static class TelemetryHost
         }
     }
 
-    private static string RhinoMajor()
+    internal static string RhinoMajor()
     {
         try
         {

@@ -28,6 +28,7 @@ MCP resources and prompts complement tools in 0.7.0. See [resources, prompts and
 | `capture_viewport` | PNG screenshot (+ MCP image when ≤ 1 MiB) |
 | `run_rhino_command` | Scripted Rhino command escape hatch |
 | `get_support_info` | Version, endpoint, log path, GitHub Issues URLs, filing tips |
+| `send_feedback` | Send a message to the MCP4Rhino maintainers. Only when the user explicitly asks. See [TELEMETRY.md](TELEMETRY.md#sending-feedback) |
 | `mcp4rhino_reload` | Hot-reload Tools and Logic |
 
 `initialize` also returns MCP `instructions` (prose) that point agents at capability lanes on `mcp4rhino://server/capabilities`, clear-English writing guidance, [GitHub Issues](https://github.com/isque03/mcp4rhino/issues), and `get_support_info` before filing bugs or enhancements. New users can follow `getting_started` / `grasshopper_getting_started` (or the matching `mcp4rhino://server/…` guides). Tutorials ask agents to show captures in the chat harness and to track completion in the workspace file `.mcp4rhino/tutorial-memory.md`.

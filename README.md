@@ -189,6 +189,10 @@ Full tool list: [docs/MCP_TOOLS.md](docs/MCP_TOOLS.md).
 
 MCP4Rhino sends anonymous usage data unless you turn it off. Events are delivered to `https://events.agenttoolkit.ai/telemetry`. Events include a random installation id, plugin and Rhino versions, operating system, and which MCP tools ran (name, duration, and success). Events do not include models, document names, prompts, scripts, arguments, results, error messages, or stack traces. Turn this off from the MCP4Rhino menu bar.  **MCP4Rhino → Usage data…**. Details: [docs/TELEMETRY.md](docs/TELEMETRY.md).
 
+## Sending feedback
+
+If you ask your agent to send feedback to the MCP4Rhino maintainers, it can use the `send_feedback` tool. The tool sends only your message, a category, an optional tool name, the plugin and Rhino versions, the operating system and a timestamp. It does not send an installation id, document names, file paths or model content, and it works even when usage data is off. Your agent never calls it unless you ask. Details: [docs/TELEMETRY.md](docs/TELEMETRY.md#sending-feedback).
+
 ## Documentation
 
 **User docs (Mintlify):** [mcp4rhino.mintlify.app](https://mcp4rhino.mintlify.app/) — quickstart, how-tos, and tool reference.

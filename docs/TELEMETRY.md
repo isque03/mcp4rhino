@@ -114,3 +114,43 @@ $env:MCP4RHINO_TELEMETRY_URL = "http://127.0.0.1:8080"
 CI writes the repository Actions secret `MCP4RHINO_TELEMETRY_API_KEY` into `net8.0/telemetry-install-token` inside the yak. The plugin reads that file and sends it as one `X-Api-Key` header. If `MCP4RHINO_TELEMETRY_API_KEY` is set in the environment, that value is used instead. The token is an install token: it ships in the package, so it is not a confidential secret. Do not put it in the URL, source, logs, or command-line arguments. A `k` query parameter is removed before the request and is not copied into the header.
 
 If the path already ends in `/telemetry`, that path is used. Otherwise `/telemetry` is appended. Other query parameters are kept. The value must be an absolute `http` or `https` URL. An invalid override disables sending even when usage data is on. Status then shows `Usage data: on, not sending (MCP4RHINO_TELEMETRY_URL unset)`. When the URL is valid and neither the packaged token nor the environment variable is set, status shows `Usage data: on, not sending (install token unset)`.
+
+## Sending feedback
+
+The `send_feedback` tool sends one message to the MCP4Rhino maintainers. It is not usage data. It runs only when you ask your agent to send feedback, a bug report or a feature request. The tool description tells the agent to call it only on that request, and to show you the exact text first when the client supports it.
+
+Arguments:
+
+| Argument | Rule |
+|----------|------|
+| `message` | Required. 1-4000 characters |
+| `category` | `bug`, `feature_request`, `praise`, or `other` (default `other`) |
+| `tool` | Optional. The name of an MCP4Rhino tool. An unknown name is rejected |
+
+Each request looks like this:
+
+```json
+{
+  "message": "Please add a mirror tool.",
+  "category": "feature_request",
+  "tool": "transform_objects",
+  "pluginVersion": "0.7.3",
+  "rhinoVersion": "8",
+  "os": "macOS",
+  "timestamp": "2026-10-20T14:30:00Z"
+}
+```
+
+`tool` is omitted when you do not name one. Nothing else is sent. There is no installation id, no tracking id, no document name, no file path and no geometry. The body does not contain your IP address. Like any web request, the server still receives it, and the backend keeps only the country it infers from it. The message is free text, so it contains whatever you or your agent write. Do not put private data in it.
+
+Feedback is an explicit action, so it is sent even when usage data is off. It uses its own code path. It does not read the usage-data choice, does not use the event queue, and does not attach the random installation id. It reuses the endpoint and install token from [Configuration](#configuration), at the path `/feedback` instead of `/telemetry`. `MCP4RHINO_TELEMETRY_URL` changes both. If neither the packaged token nor `MCP4RHINO_TELEMETRY_API_KEY` is available, the tool returns an error.
+
+| Item | Value |
+|------|--------|
+| Method and path | `POST /feedback` |
+| Authentication | One `X-Api-Key` header, the same install token as usage data |
+| Success | Empty HTTP 204. The tool returns "Feedback sent. Thank you." |
+| Timeout | 5 seconds |
+| User-Agent | `MCP4Rhino/{pluginVersion}` |
+
+Nothing is queued or retried. A timeout, a network error or any response other than an empty 204 returns a tool error and the feedback is not saved. A failure does not affect Rhino or other tool calls.

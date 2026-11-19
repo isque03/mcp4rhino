@@ -36,6 +36,7 @@ dotnet test tests/MCP4Rhino.Tests -c Release
 | `McpContentTests` | MCP text/image content builders; PNG signature validation; image embed helpers |
 | `RhinoLicenseStatusTests` | Save-gate allow/deny messages and evaluation classification from license snapshots |
 | `TelemetryTests` | Opt-out gate, installation id, event JSON, tool success/failure, batching, `X-Api-Key` header, URL secret stripping, delivery failure, revoke, and payload redaction |
+| `FeedbackTests` | `send_feedback` schema and description, argument validation and length limits, exact payload fields, no installation id (with usage data on or off), delivery failure and timeout handling, `X-Api-Key` header and `/feedback` URL |
 | `TelemetryDiagnosticsTests` / `RhinoCommandNameTests` | Controlled failure mapping, optional-field applicability, generic-command outcomes with unchanged MCP responses, safe leading-command lookup, and diagnostics privacy |
 
 ## Telemetry 0.7.1 native acceptance

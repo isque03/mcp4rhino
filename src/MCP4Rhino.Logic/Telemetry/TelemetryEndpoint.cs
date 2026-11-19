@@ -56,6 +56,21 @@ public static class TelemetryEndpoint
     }
 
     /// <summary>
+    /// Resolves the feedback URL from the same base URL and override as <see cref="Resolve"/>,
+    /// with the <c>/telemetry</c> path replaced by <c>/feedback</c>.
+    /// </summary>
+    public static string? ResolveFeedback(string? raw = null)
+    {
+        var telemetry = Resolve(raw);
+        if (telemetry is null)
+            return null;
+        var builder = new UriBuilder(telemetry);
+        var path = builder.Path;
+        builder.Path = path[..^"/telemetry".Length] + "/feedback";
+        return builder.Uri.AbsoluteUri;
+    }
+
+    /// <summary>
     /// Resolves the install token. A non-empty <c>MCP4RHINO_TELEMETRY_API_KEY</c> wins;
     /// otherwise <paramref name="packaged"/>, usually the yak file, is used.
     /// </summary>
