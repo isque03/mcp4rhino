@@ -7,9 +7,15 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.7.5-alpha] — 2026-11-19
+
 ### Added
 
 - `send_feedback` tool. When you ask your agent to send feedback, a bug report or a feature request to the MCP4Rhino maintainers, it sends your message (1-4000 characters) with a category, an optional tool name, the plugin and Rhino versions, the operating system and a timestamp. It works even when usage data is off. It never sends the installation id, document names, file paths or model content. See [docs/TELEMETRY.md](docs/TELEMETRY.md#sending-feedback).
+
+### Changed
+
+- Opt-in prerelease for testing. Synchronized package, MCP and informational versions to `0.7.5-alpha`, with assembly/file versions `0.7.5.0`. Grasshopper recipe resource URIs use the new version. Stable promotion waits for explicit confirmation after testing.
 
 ## [0.7.4] — 2026-11-03
 

@@ -13,14 +13,15 @@ Publish through GitHub Actions: **Build** produces an artifact, then manual **Pu
 | General Grasshopper tooling alpha | `release/0.6.4-alpha` | `v0.6.4-alpha` | Prerelease / not latest |
 | Agent-guidance balance alpha | `release/0.6.5-alpha` | `v0.6.5-alpha` | Prerelease / not latest |
 | Component extensibility alpha | `release/0.7.2-alpha` | `v0.7.2-alpha` | Prerelease / not latest |
+| Send feedback alpha | `release/0.7.5-alpha` | `v0.7.5-alpha` | Prerelease / not latest |
 
-Configured alphas, including `0.7.2-alpha` and numbered successors such as `0.7.2-alpha.1`, publish from their matching release branch. They are public and opt-in; successful Windows/macOS CI is the prerelease publication gate. Preserve published alpha tags and assets.
+Configured alphas, including `0.7.2-alpha`, `0.7.5-alpha` and numbered successors such as `0.7.2-alpha.1`, publish from their matching release branch. They are public and opt-in; successful Windows/macOS CI is the prerelease publication gate. Preserve published alpha tags and assets.
 
 The user confirmed the separate-machine alpha workflow and authorized stable `0.7.3` on October 28, 2026. The tested OS and Rhino build were not supplied; other native scenarios remain unverified. Merge the promotion into `main`, obtain fresh push CI and publish a new stable artifact. Preserve all published alpha tags and assets.
 
 ## Build and versions
 
-Build runs for pull requests and pushes to `main`, `release/0.6.0-alpha`, `release/0.6.1-alpha`, `release/0.6.2-alpha`, `release/0.6.4-alpha`, `release/0.6.5-alpha`, or `release/0.7.2-alpha`:
+Build runs for pull requests and pushes to `main`, `release/0.6.0-alpha`, `release/0.6.1-alpha`, `release/0.6.2-alpha`, `release/0.6.4-alpha`, `release/0.6.5-alpha`, `release/0.7.2-alpha`, or `release/0.7.5-alpha`:
 
 1. Build/test on Windows and macOS; enforce at least 80% Logic/Contracts line coverage.
 2. Validate release contracts, source-version consistency, canonical skill/help and example recipes.
