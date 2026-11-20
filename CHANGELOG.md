@@ -7,6 +7,16 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+### Fixed
+
+- `gh_inspect_document` no longer returns hundreds of thousands of characters on large definitions (#20). Every response stays under about 50,000 characters. When a response is cut, it sets `truncated` and gives the arguments for the next call in `next`.
+
+### Changed
+
+- `gh_inspect_document` has three modes. `overview` (the default when you pass only `gh_session`) returns the node count, counts by type and name, groups, likely inputs and nodes with errors or warnings. `compact` (the default when you pass `offset`, `limit` or a filter) returns one small row per node. `detail` returns the full description of the nodes you select. New parameters: `mode`, `nodes`, `group`, `match` and `has_diagnostics`. Callers that need full node detail must now pass `mode: "detail"`.
+- In detail mode, long lists and strings are cut and marked: ports, wire sources, persistent-value samples and text.
+- The Grasshopper skill, `gh_help` guides and docs describe the workflow: overview, then compact page or filter, then detail for the nodes you will patch.
+
 ## [0.7.5-alpha.1] — 2026-11-19
 
 ### Changed

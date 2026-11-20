@@ -130,13 +130,13 @@ def read_output(client, session, result, endpoint):
 
 
 def verify_failed_patch(client, session):
-    before = client.call('gh_inspect_document', {'gh_session': session['gh_session']})
+    before = client.call('gh_inspect_document', {'gh_session': session['gh_session'], 'mode': 'detail'})
     first = before['nodes'][0]['node']
     error = client.call('gh_apply_patch', mutation(session, operations=[
         {'op': 'set_properties', 'node': first, 'name': 'must roll back'},
         {'op': 'remove', 'node': str(uuid.uuid4())}]), expect_error=True)
     assert error['code'] == 'node_not_found', error
-    after = client.call('gh_inspect_document', {'gh_session': session['gh_session']})
+    after = client.call('gh_inspect_document', {'gh_session': session['gh_session'], 'mode': 'detail'})
     assert after['session']['revision'] == before['session']['revision']
     assert after['total'] == before['total']
     assert after['nodes'] == before['nodes']
@@ -254,7 +254,7 @@ def verify_list_matching(client):
     changed = client.call('gh_apply_patch', mutation(session, operations=[{'op': 'set_value',
         'node': aliases['right'], 'port': 'in:0', 'tree': [{'path': [0], 'items': []}, {'path': [3, 0], 'items': [None]}]}]))
     session = changed['session']
-    graph = client.call('gh_inspect_document', {'gh_session': session['gh_session'], 'limit': 200})
+    graph = client.call('gh_inspect_document', {'gh_session': session['gh_session'], 'mode': 'detail', 'limit': 200})
     node = next(n for n in graph['nodes'] if n['node'] == aliases['right'])
     sample = node['inputs'][0]['persistent']['sample']
     assert sample[0]['empty'] and sample[0]['item_index'] is None, sample
@@ -304,12 +304,12 @@ def round_trip(client, session, directory):
     paths = []
     for extension in ('gh', 'ghx'):
         path = str(directory / f'study.{extension}')
-        before = client.call('gh_inspect_document', {'gh_session': session['gh_session'], 'limit': 200})
+        before = client.call('gh_inspect_document', {'gh_session': session['gh_session'], 'mode': 'detail', 'limit': 200})
         saved = client.call('gh_save_document', mutation(session, path=path))
         session = saved['session']
         client.call('gh_close_document', mutation(session, discard=True))
         session = client.call('gh_open_document', {'mode': 'open', 'path': path, 'request_id': str(uuid.uuid4())})
-        after = client.call('gh_inspect_document', {'gh_session': session['gh_session'], 'limit': 200})
+        after = client.call('gh_inspect_document', {'gh_session': session['gh_session'], 'mode': 'detail', 'limit': 200})
         assert [n['component_id'] for n in before['nodes']] == [n['component_id'] for n in after['nodes']]
         assert [n['position'] for n in before['nodes']] == [n['position'] for n in after['nodes']]
         assert [n['inputs'] for n in before['nodes']] == [n['inputs'] for n in after['nodes']]

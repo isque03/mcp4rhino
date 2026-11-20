@@ -2,6 +2,16 @@
 
 Every mutation requires a `request_id`. Reuse it only for an exact retry with identical arguments; use a new ID for a changed operation. Receipts live in the runtime until Rhino exits. Mutations against sessions also require `expected_revision` from the latest response/inspection. Never guess the next revision after manual canvas edits.
 
+## Inspect a definition
+
+Large definitions need small steps. `gh_inspect_document` never returns more than about 50,000 characters.
+
+1. Overview: call with only `gh_session`. It returns the node count, counts by type and name, groups with member counts, likely inputs (sliders, panels, toggles, value lists, params with data) and nodes with errors or warnings. It has no port detail.
+2. Find nodes: page compact rows with `offset` and `limit`, or filter. Each row has the node ID, name, nickname, type, position, groups, error and warning counts, and port counts. Filters are `nodes` (ID list), `group` (name or ID), `match` (text in name, nickname or type) and `has_diagnostics`. They combine.
+3. Detail: pass `mode: "detail"` with a filter for the nodes you will patch. You get port IDs, wires, persistent values (up to 5 samples per port), settings, support and diagnostics. Long lists and strings are cut and marked.
+
+When a response has `truncated: true` or `next_offset`, call again with the arguments in `next`. With no `mode`, a call with no paging or filter arguments returns the overview. A call with `offset`, `limit` or a filter returns compact rows. Full detail always needs `mode: "detail"`.
+
 `gh_apply_patch` arguments are `gh_session`, `expected_revision`, `request_id`, `operations`, and optional `solve` (default false). Maximum 100 operations. The returned `patch.aliases` maps temporary aliases to placed node IDs; retain those IDs for later edits. A requested solve returns a job under `job`.
 
 Operations:

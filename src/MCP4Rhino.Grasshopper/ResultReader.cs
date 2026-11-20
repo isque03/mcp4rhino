@@ -1,5 +1,7 @@
 using System.Text.Json.Nodes;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Data;
+using Grasshopper.Kernel.Special;
 using Grasshopper.Kernel.Types;
 using MCP4Rhino.Logic.Grasshopper;
 using Rhino;
@@ -12,9 +14,67 @@ internal static class ResultReader
     public static object Inspect(DefinitionSession session, JsonObject args)
     {
         session.RequireContext();
-        var nodes = session.Document.Objects;
-        return new { session = session.Summary(), total = nodes.Count, offset = GhJson.Offset(args),
-            nodes = nodes.Skip(GhJson.Offset(args)).Take(GhJson.PageSize(args)).Select(node => DescribeNode(node)).ToArray() };
+        var options = GhInspectOptions.Parse(args);
+        var objects = session.Document.Objects.ToArray();
+        var (groups, groupsOf) = Groups(objects);
+        var infos = objects.Select(o => Info(o, groupsOf, options.Mode == GhInspectMode.Overview)).ToArray();
+        var summary = GhInspect.ToNode(session.Summary());
+        if (options.Mode == GhInspectMode.Overview && !options.Filtered)
+            return GhInspect.Overview(summary, infos, groups);
+        var matches = GhInspect.Filter(infos, groups, options);
+        if (options.Mode == GhInspectMode.Overview)
+            return GhInspect.Overview(summary, matches, groups);
+        var byId = objects.ToDictionary(o => o.InstanceGuid.ToString(), StringComparer.OrdinalIgnoreCase);
+        return GhInspect.Page(summary, matches, infos.Length, options, info => GhInspect.ToNode(DescribeNode(byId[info.Id])));
+    }
+
+    private static (GhGroupInfo[] Groups, Dictionary<Guid, List<string>> Of) Groups(IGH_DocumentObject[] objects)
+    {
+        var of = new Dictionary<Guid, List<string>>();
+        var groups = objects.OfType<GH_Group>().Select(g =>
+        {
+            var name = string.IsNullOrWhiteSpace(g.NickName) ? "Group" : g.NickName;
+            foreach (var id in g.ObjectIDs)
+                (of.TryGetValue(id, out var list) ? list : of[id] = new List<string>()).Add(name);
+            return new GhGroupInfo(g.InstanceGuid.ToString(), name, g.ObjectIDs.Select(i => i.ToString()).ToArray());
+        }).ToArray();
+        return (groups, of);
+    }
+
+    private static GhNodeInfo Info(IGH_DocumentObject node, Dictionary<Guid, List<string>> groupsOf, bool control)
+    {
+        var active = node as IGH_ActiveObject;
+        return new GhNodeInfo(node.InstanceGuid.ToString(), node.Name, node.NickName, node.GetType().Name,
+            node.Attributes.Pivot.X, node.Attributes.Pivot.Y,
+            groupsOf.TryGetValue(node.InstanceGuid, out var g) ? g.ToArray() : [],
+            active?.RuntimeMessages(GH_RuntimeMessageLevel.Error).ToArray() ?? [],
+            active?.RuntimeMessages(GH_RuntimeMessageLevel.Warning).ToArray() ?? [],
+            ComponentCatalog.Parameters(node, true).Count(), ComponentCatalog.Parameters(node, false).Count(),
+            control ? Control(node) : null);
+    }
+
+    /// <summary>Compact description of a likely user input; null for ordinary components.</summary>
+    private static JsonObject? Control(IGH_DocumentObject node)
+    {
+        switch (node)
+        {
+            case GH_NumberSlider slider:
+                return new JsonObject { ["kind"] = "slider", ["value"] = slider.CurrentValue,
+                    ["minimum"] = (double)slider.Slider.Minimum, ["maximum"] = (double)slider.Slider.Maximum };
+            case GH_Panel panel:
+                return new JsonObject { ["kind"] = "panel", ["text"] = GhInspect.Cut(panel.UserText ?? "", 100) };
+            case GH_BooleanToggle toggle:
+                return new JsonObject { ["kind"] = "toggle", ["value"] = toggle.Value };
+            case GH_ValueList list:
+                return new JsonObject { ["kind"] = "value_list", ["selected"] = GhInspect.Cut(list.FirstSelectedItem?.Name ?? "", 100),
+                    ["items"] = list.ListItems.Count };
+            case IGH_Param param when param.Sources.Count == 0 && node is not IGH_Component:
+                var data = param.GetType().GetProperty("PersistentData")?.GetValue(param) as IGH_Structure;
+                if (data is null || data.DataCount == 0) return null;
+                return new JsonObject { ["kind"] = "param", ["type"] = param.TypeName, ["items"] = data.DataCount,
+                    ["branches"] = data.PathCount, ["sample"] = GhInspect.ToNode(ValueCodec.Rows(data, measurements: false).Take(3).ToArray()) };
+            default: return null;
+        }
     }
 
     internal static object DescribeNode(IGH_DocumentObject node, bool resource = false) => new

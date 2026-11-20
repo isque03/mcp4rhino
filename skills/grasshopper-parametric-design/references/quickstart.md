@@ -10,6 +10,6 @@ Call tools with JSON objects (the examples below show tool arguments).
 6. Use the returned revision for `gh_solve` with a new request ID. Poll `gh_get_job({"job_id":"<returned job_id>"})` until terminal. `completed` means the solver returned: inspect component diagnostics too.
 7. Use the returned `result_id`, placed node ID and output port with `gh_read_output`. Follow `next_offset` until null for all rows.
 
-To edit an existing definition: list documents, explicitly attach its returned `document_id`, and inspect it. Do not assume the active canvas is the user's intended target. A session binds to the Rhino document active when it was opened; activate that document for geometry operations.
+To edit an existing definition: list documents, explicitly attach its returned `document_id`, and inspect it: call `gh_inspect_document` for the overview, then filter for the nodes you need and ask for `mode: "detail"` only on those (see [workflow](workflow.md#inspect-a-definition)). Do not assume the active canvas is the user's intended target. A session binds to the Rhino document active when it was opened; activate that document for geometry operations.
 
 New/opened definitions initially remain disabled to avoid accidental file execution. An explicit supported solve enables their previews and solver events. Unsupported definitions can be inspected but cannot be patched or solved through v1.

@@ -15,7 +15,7 @@ SPEC.loader.exec_module(smoke)
 def inspect_all(client, session):
     nodes, offset, revision = [], 0, None
     while True:
-        page = client.call('gh_inspect_document', {'gh_session': session['gh_session'], 'offset': offset, 'limit': 200})
+        page = client.call('gh_inspect_document', {'gh_session': session['gh_session'], 'mode': 'detail', 'offset': offset, 'limit': 200})
         observed = page['session']['revision']
         if revision is None:
             revision = observed
