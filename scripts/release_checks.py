@@ -17,6 +17,7 @@ TOOLS_ALPHA_BRANCH = 'release/0.6.2-alpha'
 GRAPH_ALPHA_BRANCH = 'release/0.6.4-alpha'
 GUIDANCE_ALPHA_BRANCH = 'release/0.6.5-alpha'
 EXTENSIBILITY_ALPHA_BRANCH = 'release/0.7.2-alpha'
+FEEDBACK_ALPHA_BRANCH = 'release/0.7.5-alpha'
 PROJECTS = ('MCP4Rhino', 'MCP4Rhino.Contracts', 'MCP4Rhino.Logic',
             'MCP4Rhino.Tools', 'MCP4Rhino.Grasshopper')
 REQUIRED_FILES = ('icon.png', 'manifest.yml', 'net8.0/MCP4Rhino.rhp',
@@ -41,9 +42,10 @@ def release_metadata(version, tag, workflow_ref):
     graph_alpha = re.fullmatch(r'0\.6\.4-alpha(?:\.[1-9]\d*)?', version)
     guidance_alpha = re.fullmatch(r'0\.6\.5-alpha(?:\.[1-9]\d*)?', version)
     extensibility_alpha = re.fullmatch(r'0\.7\.2-alpha(?:\.[1-9]\d*)?', version)
-    alpha = grasshopper_alpha or telemetry_alpha or tools_alpha or graph_alpha or guidance_alpha or extensibility_alpha
+    feedback_alpha = re.fullmatch(r'0\.7\.5-alpha(?:\.[1-9]\d*)?', version)
+    alpha = grasshopper_alpha or telemetry_alpha or tools_alpha or graph_alpha or guidance_alpha or extensibility_alpha or feedback_alpha
     if not stable and not alpha:
-        raise ValueError('Only stable SemVer or configured alpha releases (including 0.7.2-alpha[.N]) are supported')
+        raise ValueError('Only stable SemVer or configured alpha releases (including 0.7.2-alpha[.N] and 0.7.5-alpha[.N]) are supported')
     if tag != 'v' + version:
         raise ValueError('Tag must equal v + manifest version')
     if grasshopper_alpha:
@@ -58,6 +60,8 @@ def release_metadata(version, tag, workflow_ref):
         branch = GUIDANCE_ALPHA_BRANCH
     elif extensibility_alpha:
         branch = EXTENSIBILITY_ALPHA_BRANCH
+    elif feedback_alpha:
+        branch = FEEDBACK_ALPHA_BRANCH
     else:
         branch = 'main'
     if workflow_ref != 'refs/heads/' + branch:

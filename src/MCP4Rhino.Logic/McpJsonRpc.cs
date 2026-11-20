@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using MCP4Rhino.Logic.Feedback;
 using MCP4Rhino.Logic.Telemetry;
 using MCP4Rhino.Contracts;
 
@@ -23,7 +24,7 @@ public static class McpJsonRpc
 {
     public const string ProtocolVersion = "2024-11-05";
     public const string ServerName = "MCP4Rhino";
-    public const string ServerVersion = "0.7.4";
+    public const string ServerVersion = "0.7.5";
 
     public static JsonNode? Dispatch(
         JsonNode? req,
@@ -32,7 +33,8 @@ public static class McpJsonRpc
         Func<SupportContext>? supportContext = null,
         ITelemetry? telemetry = null,
         Func<string>? instructions = null,
-        Action? onInitialized = null)
+        Action? onInitialized = null,
+        FeedbackService? feedback = null)
     {
         if (req is null) return null;
 
@@ -57,7 +59,7 @@ public static class McpJsonRpc
                 },
                 "ping" => new { },
                 "tools/list" => new { tools = ListAllTools(tools, hotReload is not null) },
-                "tools/call" => CallTool(@params, tools, hotReload, supportContext, telemetry),
+                "tools/call" => CallTool(@params, tools, hotReload, supportContext, telemetry, feedback),
                 null => throw new InvalidOperationException("Missing method"),
                 _ => throw new InvalidOperationException($"Method not found: {method}"),
             };
@@ -68,7 +70,7 @@ public static class McpJsonRpc
             {
                 jsonrpc = "2.0",
                 id,
-                error = new { code = -32000, message = ex.Message },
+                error = new { code = -32000, message = ErrorMessage(method, @params, ex) },
             });
         }
 
@@ -86,6 +88,25 @@ public static class McpJsonRpc
             id,
             result,
         });
+    }
+
+    /// <summary>
+    /// Adds the feedback hint to tool errors that look like a plugin fault. Errors from bad input or
+    /// document state (argument, invalid state, not supported, timeout, cancel) stay unchanged.
+    /// </summary>
+    private static string ErrorMessage(string? method, JsonNode? @params, Exception ex)
+    {
+        if (method != "tools/call")
+            return ex.Message;
+        string? name = null;
+        try { name = @params?["name"]?.GetValue<string>(); }
+        catch { /* a malformed name gets no hint */ }
+        if (name is null || name == FeedbackRequest.ToolName)
+            return ex.Message;
+        return ex is ArgumentException or InvalidOperationException or NotSupportedException
+            or TimeoutException or OperationCanceledException
+            ? ex.Message
+            : ex.Message + FeedbackRequest.ErrorHint;
     }
 
     public static object ParseError(JsonNode? id, string message) => new
@@ -106,6 +127,40 @@ public static class McpJsonRpc
                     "Return MCP4Rhino version, endpoint, log path, and GitHub Issues URLs for filing bugs or enhancement requests. " +
                     "Call this before opening an issue so the report includes the right metadata.",
                 inputSchema = new { type = "object", properties = new { } },
+            },
+            new
+            {
+                name = FeedbackRequest.ToolName,
+                description =
+                    FeedbackRequest.ToolDescription,
+                inputSchema = new
+                {
+                    type = "object",
+                    properties = new
+                    {
+                        message = new
+                        {
+                            type = "string",
+                            minLength = 1,
+                            maxLength = FeedbackRequest.MaxMessageLength,
+                            description = "The feedback text, exactly as the user approved it.",
+                        },
+                        category = new
+                        {
+                            type = "string",
+                            @enum = FeedbackRequest.Categories,
+                            @default = FeedbackRequest.DefaultCategory,
+                            description = "bug, feature_request, praise or other (default other).",
+                        },
+                        tool = new
+                        {
+                            type = "string",
+                            description = "Optional. The MCP4Rhino tool name this feedback is about.",
+                        },
+                    },
+                    required = new[] { "message" },
+                    additionalProperties = false,
+                },
             },
         };
 
@@ -153,14 +208,15 @@ public static class McpJsonRpc
         IMcpToolProvider tools,
         Func<JsonObject, object>? hotReload,
         Func<SupportContext>? supportContext,
-        ITelemetry? telemetry)
+        ITelemetry? telemetry,
+        FeedbackService? feedback)
     {
         var name = @params?["name"]?.GetValue<string>()
             ?? throw new ArgumentException("tools/call missing name");
         var started = Stopwatch.GetTimestamp();
         try
         {
-            var result = ExecuteTool(@params, name, tools, hotReload, supportContext);
+            var result = ExecuteTool(@params, name, tools, hotReload, supportContext, feedback);
             var diagnostics = (result as ToolCallResult)?.Diagnostics;
             if (result is ToolCallResult execution) result = execution.Result;
             ReportTool(telemetry, name, started, ToolTelemetry.FromResult(name, result, diagnostics));
@@ -173,6 +229,7 @@ public static class McpJsonRpc
             {
                 "mcp4rhino_reload" => hotReload is null ? ToolErrorStage.Dispatch : ToolErrorStage.Execution,
                 "get_support_info" => ToolErrorStage.Execution,
+                FeedbackRequest.ToolName => ToolErrorStage.Execution,
                 _ => null,
             };
             ReportTool(telemetry, name, started, ToolTelemetry.FromException(ex, stage));
@@ -185,9 +242,13 @@ public static class McpJsonRpc
         string name,
         IMcpToolProvider tools,
         Func<JsonObject, object>? hotReload,
-        Func<SupportContext>? supportContext)
+        Func<SupportContext>? supportContext,
+        FeedbackService? feedback)
     {
         var args = @params?["arguments"] as JsonObject ?? new JsonObject();
+
+        if (name == FeedbackRequest.ToolName)
+            return SendFeedback(args, tools, hotReload is not null, feedback);
 
         if (name == "get_support_info")
         {
@@ -210,6 +271,32 @@ public static class McpJsonRpc
         }
 
         return tools.CallTool(@params);
+    }
+
+    private static object SendFeedback(JsonObject args, IMcpToolProvider tools, bool includeReload, FeedbackService? feedback)
+    {
+        var request = FeedbackRequest.Parse(args, RegisteredToolNames(tools, includeReload));
+        var result = feedback is null
+            ? new FeedbackResult(false, "Feedback is not available in this install. Open an issue at " + SupportInfo.NewIssueUrl + " instead.")
+            : feedback.Send(request);
+        return new
+        {
+            content = new object[] { new { type = "text", text = result.Message } },
+            isError = !result.Sent,
+        };
+    }
+
+    private static HashSet<string> RegisteredToolNames(IMcpToolProvider tools, bool includeReload)
+    {
+        var names = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var tool in ListAllTools(tools, includeReload))
+        {
+            var name = JsonSerializer.SerializeToNode(tool)?["name"]?.GetValue<string>();
+            if (!string.IsNullOrEmpty(name))
+                names.Add(name);
+        }
+
+        return names;
     }
 
     private static void ReportTool(ITelemetry? telemetry, string name, long started, ToolOutcome outcome)

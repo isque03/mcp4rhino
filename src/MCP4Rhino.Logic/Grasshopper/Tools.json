@@ -142,7 +142,7 @@
   },
   {
     "name": "gh_inspect_document",
-    "description": "Inspect graph, actual port IDs, persistent values, support and diagnostics.",
+    "description": "Inspect a Grasshopper definition in small steps. With only gh_session it returns an overview: node count, counts by type and name, groups, likely inputs (sliders, panels, toggles, value lists, params with data), and nodes with errors or warnings. With offset, limit or a filter it returns compact rows (id, name, nickname, type, position, groups, error/warning counts, port counts). Use mode detail with nodes, group, match or has_diagnostics for full port IDs, persistent values, settings, support and diagnostics of the nodes you will patch. Responses stay under about 50,000 characters. If truncated is true, call again with the arguments in next.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -151,12 +151,43 @@
         },
         "offset": {
           "type": "integer",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Index of the first matching node to return. Default 0."
         },
         "limit": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 200
+          "maximum": 200,
+          "description": "Maximum rows per page. Default 50, maximum 200. The size budget may return fewer."
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "overview",
+            "compact",
+            "detail"
+          ],
+          "description": "overview: counts, groups, inputs, diagnostics (default when no offset, limit or filter is given). compact: one small row per node (default when paging or filtering). detail: full description with ports and persistent values; use it with a filter."
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 200,
+          "description": "Only these node IDs (GUIDs)."
+        },
+        "group": {
+          "type": "string",
+          "description": "Only members of groups whose ID equals this value or whose name contains it (case-insensitive)."
+        },
+        "match": {
+          "type": "string",
+          "description": "Only nodes whose name, nickname or type contains this text (case-insensitive)."
+        },
+        "has_diagnostics": {
+          "type": "boolean",
+          "description": "Only nodes with runtime errors or warnings."
         }
       },
       "required": [

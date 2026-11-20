@@ -27,7 +27,7 @@ For read-only context and reusable workflows, see [resources and prompts](MCP_RE
 | `gh_help`, `gh_status` | Help and runtime availability without opening the editor |
 | `gh_search_components`, `gh_describe_components` | Installed catalog, native support flags, port types/access/default samples |
 | `gh_list_documents`, `gh_open_document` | List documents, create/open a separate visible definition, explicitly attach an existing document |
-| `gh_inspect_document`, `gh_apply_patch` | Inspect and batch-edit a revisioned graph |
+| `gh_inspect_document`, `gh_apply_patch` | Inspect (overview, compact page, filtered detail) and batch-edit a revisioned graph |
 | `gh_solve`, `gh_get_job`, `gh_cancel_job` | Queue incremental solves and poll/cancel jobs |
 | `gh_read_output`, `gh_bake` | Page current outputs and explicitly bake additive Rhino snapshots |
 | `gh_get_solution_summary` | Revision/result-bound graph controls, named output pages, units, and diagnostics |
@@ -36,7 +36,7 @@ For read-only context and reusable workflows, see [resources and prompts](MCP_RE
 
 Version 0.7.3 adds [component categories, local authorization and existing-definition compatibility](GRASSHOPPER_EXTENSIBILITY.md). Install the matching 0.7.3 package and restart Rhino; an older running server does not exercise these changes.
 
-All mutations require a unique request ID; exact retries return the original receipt. Session mutations require an expected revision. Inspect again after user edits or a conflict. Patch aliases identify nodes only inside that patch; retain the returned node GUIDs for later calls.
+All mutations require a unique request ID; exact retries return the original receipt. Session mutations require an expected revision. Inspect again after user edits or a conflict. `gh_inspect_document` is built for large definitions. With only `gh_session` it returns an overview (counts, groups, inputs, nodes with diagnostics). With `offset`/`limit` or a filter (`nodes`, `group`, `match`, `has_diagnostics`) it returns compact rows. `mode: "detail"` returns full port and value detail for the filtered nodes. Each response stays under about 50,000 characters and points to the next call with `truncated`, `next_offset` and `next`. Patch aliases identify nodes only inside that patch; retain the returned node GUIDs for later calls.
 
 Session-scoped tools take **`gh_session`** (returned by `gh_open_document` / `gh_list_documents`). Do not pass `session_id` as a tool argument — Claude Desktop strips that name before it reaches the server. Legacy `session_id` input is still accepted for scripts and non-Desktop clients; responses include both fields. Resource URI templates still use `{session_id}` in the path.
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Native 0.7.3 checks on an explicitly supplied disposable, already-open definition."""
+"""Native 0.7.5 checks on an explicitly supplied disposable, already-open definition."""
 import argparse
 import importlib.util
 import json
@@ -15,7 +15,7 @@ SPEC.loader.exec_module(smoke)
 def inspect_all(client, session):
     nodes, offset, revision = [], 0, None
     while True:
-        page = client.call('gh_inspect_document', {'gh_session': session['gh_session'], 'offset': offset, 'limit': 200})
+        page = client.call('gh_inspect_document', {'gh_session': session['gh_session'], 'mode': 'detail', 'offset': offset, 'limit': 200})
         observed = page['session']['revision']
         if revision is None:
             revision = observed
@@ -98,7 +98,7 @@ def main():
     args = parser.parse_args()
     client = smoke.Mcp(args.endpoint)
     support = client.call('get_support_info')
-    assert support['server_version'] == '0.7.3', support
+    assert support['server_version'] == '0.7.5', support
     session = client.call('gh_open_document', {'mode': 'attach', 'document_id': args.document_id, 'request_id': str(uuid.uuid4())})
     result = exercise(client, session, args.slider_id, args.value, args.expect_solve_denied)
     print(json.dumps({'version': support['server_version'], 'gh_session': session.get('gh_session', session['session_id']), **result}, indent=2))

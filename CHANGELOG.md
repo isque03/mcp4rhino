@@ -7,6 +7,39 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.7.5] — 2026-11-20
+
+Stable release. It includes the `send_feedback` tool from 0.7.5-alpha and 0.7.5-alpha.1 (see below) and the `gh_inspect_document` fix.
+
+### Fixed
+
+- `gh_inspect_document` no longer returns hundreds of thousands of characters on large definitions (#20). Every response stays under about 50,000 characters. When a response is cut, it sets `truncated` and gives the arguments for the next call in `next`.
+
+### Changed
+
+- `gh_inspect_document` has three modes. `overview` (the default when you pass only `gh_session`) returns the node count, counts by type and name, groups, likely inputs and nodes with errors or warnings. `compact` (the default when you pass `offset`, `limit` or a filter) returns one small row per node. `detail` returns the full description of the nodes you select. New parameters: `mode`, `nodes`, `group`, `match` and `has_diagnostics`. Callers that need full node detail must now pass `mode: "detail"`.
+- In detail mode, long lists and strings are cut and marked: ports, wire sources, persistent-value samples and text.
+- The Grasshopper skill, `gh_help` guides and docs describe the workflow: overview, then compact page or filter, then detail for the nodes you will patch.
+- Synchronized package, MCP and informational versions to `0.7.5`, with assembly/file versions `0.7.5.0`. Grasshopper recipe resource URIs use the new version.
+
+## [0.7.5-alpha.1] — 2026-11-19
+
+### Changed
+
+- `send_feedback` is easier to find. The agent may now offer it once per session when MCP4Rhino itself seems to be at fault: the same tool fails two or more times, an error looks like a plugin fault, or you are frustrated with MCP4Rhino. It still sends only text you approve, and it does not offer again if you decline. Routine input errors do not trigger an offer.
+- Unexpected tool errors end with a short hint that `send_feedback` and GitHub Issues exist. Errors from bad input or document state are unchanged.
+- The server instructions and the getting-started guide mention `send_feedback`. The tool description tells the agent to draft bug reports from the failing tool and error without paths, document names or model content, and to tell you that feedback is one-way: the maintainers cannot reply.
+
+## [0.7.5-alpha] — 2026-11-19
+
+### Added
+
+- `send_feedback` tool. When you ask your agent to send feedback, a bug report or a feature request to the MCP4Rhino maintainers, it sends your message (1-4000 characters) with a category, an optional tool name, the plugin and Rhino versions, the operating system and a timestamp. It works even when usage data is off. It never sends the installation id, document names, file paths or model content. See [docs/TELEMETRY.md](docs/TELEMETRY.md#sending-feedback).
+
+### Changed
+
+- Opt-in prerelease for testing. Synchronized package, MCP and informational versions to `0.7.5-alpha`, with assembly/file versions `0.7.5.0`. Grasshopper recipe resource URIs use the new version. Stable promotion waits for explicit confirmation after testing.
+
 ## [0.7.4] — 2026-11-03
 
 ### Fixed

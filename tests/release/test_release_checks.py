@@ -105,6 +105,22 @@ class ReleaseMetadataTests(unittest.TestCase):
         self.assertEqual(stable['PRERELEASE'], 'false')
         self.assertEqual(stable['MAKE_LATEST'], 'true')
 
+    def test_feedback_alpha_requires_matching_branch_and_keeps_stable_latest(self):
+        for version in ('0.7.5-alpha', '0.7.5-alpha.1', '0.7.5-alpha.12'):
+            metadata = release.release_metadata(version, 'v' + version,
+                                                'refs/heads/' + release.FEEDBACK_ALPHA_BRANCH)
+            self.assertEqual(metadata['BUILD_BRANCH'], release.FEEDBACK_ALPHA_BRANCH)
+            self.assertEqual(metadata['PRERELEASE'], 'true')
+            self.assertEqual(metadata['MAKE_LATEST'], 'false')
+            for branch in ('main', release.EXTENSIBILITY_ALPHA_BRANCH):
+                with self.subTest(version=version, branch=branch), self.assertRaises(ValueError):
+                    release.release_metadata(version, 'v' + version, 'refs/heads/' + branch)
+        for version in ('0.7.5-alpha.0', '0.7.5-alpha.01'):
+            with self.assertRaises(ValueError):
+                release.release_metadata(version, 'v' + version, 'refs/heads/' + release.FEEDBACK_ALPHA_BRANCH)
+        with self.assertRaises(ValueError):
+            release.release_metadata('0.7.5', 'v0.7.5', 'refs/heads/' + release.FEEDBACK_ALPHA_BRANCH)
+
     def test_073_stable_requires_main_and_becomes_latest(self):
         stable = release.release_metadata('0.7.3', 'v0.7.3', 'refs/heads/main')
         self.assertEqual(stable['PRERELEASE'], 'false')

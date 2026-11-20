@@ -23,7 +23,8 @@ public static class SupportInfo
         "Optional workflows: prompts/list. Inspect-only: inspect_model. Reading resources or prompts never mutates the model or initializes Grasshopper. " +
         "When writing to the user in English, use short clear sentences and one term per idea (ASD-STE100 style, not full compliance); see mcp4rhino://server/writing-style. In other languages, keep the same clarity: short sentences and consistent terms. " +
         "File bugs at https://github.com/isque03/mcp4rhino/issues. Call get_support_info first. " +
-        "Include MCP4Rhino/Rhino/OS versions, repro, expected vs actual, and relevant log lines. Do not paste secrets or full license keys.";
+        "Include MCP4Rhino/Rhino/OS versions, repro, expected vs actual, and relevant log lines. Do not paste secrets or full license keys. " +
+        "For a quick one-way message to the maintainers, use send_feedback. You may offer it once per session when MCP4Rhino keeps failing or the user is frustrated with it; send only after the user approves the text.";
 
     public static int ResolvePort()
     {

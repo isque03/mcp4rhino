@@ -58,5 +58,6 @@ public sealed record McpServerServices(IMcpToolProvider Tools)
     public ITelemetry? Telemetry { get; init; }
     public Func<string>? Instructions { get; init; }
     public Action? OnInitialized { get; init; }
+    public Feedback.FeedbackService? Feedback { get; init; }
     public Resources.IMcpResourceGateway? Resources { get; init; }
 }

@@ -44,7 +44,7 @@ Create native, editable Grasshopper definitions, connect components, adjust para
 
 Agents can learn the workflow through `gh_help`, the `grasshopper_getting_started` prompt, or the bundled [parametric design skill](skills/grasshopper-parametric-design/SKILL.md). See [Grasshopper support](docs/GRASSHOPPER.md) for setup, supported components and examples.
 
-Stable 0.7.4 renames Grasshopper tool argument `session_id` to `gh_session` so Claude Desktop can call session tools. Stable 0.7.3 adds [component extensibility](docs/GRASSHOPPER_EXTENSIBILITY.md): slider edits that preserve third-party definitions, installed component categories, automatic support for built-in modeling components, and a Rhino preferences dialog for third-party plugin permissions.
+Stable 0.7.5 adds the `send_feedback` tool for one-way messages to the maintainers, and `gh_inspect_document` overview, compact and filtered detail modes so large definitions stay readable. Stable 0.7.4 renames Grasshopper tool argument `session_id` to `gh_session` so Claude Desktop can call session tools. Stable 0.7.3 adds [component extensibility](docs/GRASSHOPPER_EXTENSIBILITY.md): slider edits that preserve third-party definitions, installed component categories, automatic support for built-in modeling components, and a Rhino preferences dialog for third-party plugin permissions.
 
 Discoverable read-only document/graph resources and reusable workflow prompts are documented in [resources, prompts and protocol compatibility](docs/MCP_RESOURCES_PROMPTS.md). Reading context does not initialize Grasshopper or modify a model.
 
@@ -188,6 +188,10 @@ Full tool list: [docs/MCP_TOOLS.md](docs/MCP_TOOLS.md).
 ## Usage data
 
 MCP4Rhino sends anonymous usage data unless you turn it off. Events are delivered to `https://events.agenttoolkit.ai/telemetry`. Events include a random installation id, plugin and Rhino versions, operating system, and which MCP tools ran (name, duration, and success). Events do not include models, document names, prompts, scripts, arguments, results, error messages, or stack traces. Turn this off from the MCP4Rhino menu bar.  **MCP4Rhino → Usage data…**. Details: [docs/TELEMETRY.md](docs/TELEMETRY.md).
+
+## Sending feedback
+
+If you ask your agent to send feedback to the MCP4Rhino maintainers, it can use the `send_feedback` tool. The tool sends only your message, a category, an optional tool name, the plugin and Rhino versions, the operating system and a timestamp. It does not send an installation id, document names, file paths or model content, and it works even when usage data is off. Your agent may offer it once if MCP4Rhino keeps failing, but it sends only text you approve. Feedback is one-way: the maintainers cannot reply. For a reply, open a GitHub issue. Details: [docs/TELEMETRY.md](docs/TELEMETRY.md#sending-feedback).
 
 ## Documentation
 
