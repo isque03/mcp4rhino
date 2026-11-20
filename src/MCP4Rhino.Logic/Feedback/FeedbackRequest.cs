@@ -15,6 +15,23 @@ public sealed record FeedbackRequest(string Message, string Category, string? To
 
     public static readonly IReadOnlyList<string> Categories = ["bug", "feature_request", "praise", "other"];
 
+    public const string ToolDescription =
+        "Send a short message to the MCP4Rhino maintainers: a bug report, a feature request, praise or other feedback. " +
+        "Send it only when the user asks, and only after they approve the exact text. " +
+        "You may offer it once per session when MCP4Rhino itself seems to be at fault: the same tool fails two or more times, " +
+        "an error looks like a plugin fault rather than bad input, or the user is frustrated with MCP4Rhino. " +
+        "Do not offer it for routine errors such as a wrong parameter. If the user declines or ignores the offer, do not offer it again. " +
+        "To draft a bug report, describe the failing tool and the error in your own words and set tool. " +
+        "Leave out file paths, document names, object names and model content. " +
+        "Only the message, category, tool name, plugin version, Rhino version, OS and a timestamp are sent. No install identifier is sent. " +
+        "It works even when usage data is turned off. " +
+        "Feedback is one-way: tell the user the maintainers cannot reply. If they want a reply, suggest a GitHub issue (see get_support_info).";
+
+    /// <summary>Appended to unexpected tool errors so the agent can offer <c>send_feedback</c>.</summary>
+    public const string ErrorHint =
+        " If this looks like an MCP4Rhino bug, you may offer the user send_feedback (once per session, only with their approval) " +
+        "or a GitHub issue (see get_support_info).";
+
     private static readonly HashSet<string> KnownArguments = ["message", "category", "tool"];
 
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);

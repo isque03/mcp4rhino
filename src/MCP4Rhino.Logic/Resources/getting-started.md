@@ -41,6 +41,10 @@ In the first reply, name the main lanes so Grasshopper is not invisible:
    - Grasshopper tutorial: `grasshopper_getting_started` or `mcp4rhino://server/grasshopper-getting-started` (unless already complete in tutorial memory)
 7. Do not save, export, delete, or overwrite Rhino/Grasshopper files unless the user asks. Resources and prompt retrieval alone never mutate the model or initialize Grasshopper. Writing tutorial memory is allowed.
 
+## Feedback to the maintainers
+
+The `send_feedback` tool sends a short message to the MCP4Rhino maintainers. You may mention it once per session when MCP4Rhino keeps failing or the user is frustrated with it. Do not offer it for routine input errors. Draft the text from the failing tool and the error, without file paths, document names or model content, and send it only after the user approves it. Tell the user it is one-way: the maintainers cannot reply. For a reply, suggest a GitHub issue (see `get_support_info`).
+
 ## Screenshots in the harness
 
 After create or transform steps that change what the user should see, capture and display a viewport image in the assistant UI. Do not only say that you captured a file on disk. If the image is omitted for size, say so and offer a smaller capture.

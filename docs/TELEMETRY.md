@@ -117,7 +117,7 @@ If the path already ends in `/telemetry`, that path is used. Otherwise `/telemet
 
 ## Sending feedback
 
-The `send_feedback` tool sends one message to the MCP4Rhino maintainers. It is not usage data. It runs only when you ask your agent to send feedback, a bug report or a feature request. The tool description tells the agent to call it only on that request, and to show you the exact text first when the client supports it.
+The `send_feedback` tool sends one message to the MCP4Rhino maintainers. It is not usage data. Your agent sends it only when you ask and only after you approve the exact text. The agent may offer it once per session when MCP4Rhino itself seems to be at fault: the same tool fails two or more times, an error looks like a plugin fault, or you are frustrated with MCP4Rhino. It does not offer it for routine input errors, and it does not offer it again if you decline. Unexpected tool errors end with a short hint that tells the agent the tool exists. Feedback is one-way: the maintainers cannot reply. For a reply, open a GitHub issue.
 
 Arguments:
 

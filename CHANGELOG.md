@@ -7,6 +7,14 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.7.5-alpha.1] — 2026-11-19
+
+### Changed
+
+- `send_feedback` is easier to find. The agent may now offer it once per session when MCP4Rhino itself seems to be at fault: the same tool fails two or more times, an error looks like a plugin fault, or you are frustrated with MCP4Rhino. It still sends only text you approve, and it does not offer again if you decline. Routine input errors do not trigger an offer.
+- Unexpected tool errors end with a short hint that `send_feedback` and GitHub Issues exist. Errors from bad input or document state are unchanged.
+- The server instructions and the getting-started guide mention `send_feedback`. The tool description tells the agent to draft bug reports from the failing tool and error without paths, document names or model content, and to tell you that feedback is one-way: the maintainers cannot reply.
+
 ## [0.7.5-alpha] — 2026-11-19
 
 ### Added

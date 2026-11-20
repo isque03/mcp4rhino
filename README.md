@@ -191,7 +191,7 @@ MCP4Rhino sends anonymous usage data unless you turn it off. Events are delivere
 
 ## Sending feedback
 
-If you ask your agent to send feedback to the MCP4Rhino maintainers, it can use the `send_feedback` tool. The tool sends only your message, a category, an optional tool name, the plugin and Rhino versions, the operating system and a timestamp. It does not send an installation id, document names, file paths or model content, and it works even when usage data is off. Your agent never calls it unless you ask. Details: [docs/TELEMETRY.md](docs/TELEMETRY.md#sending-feedback).
+If you ask your agent to send feedback to the MCP4Rhino maintainers, it can use the `send_feedback` tool. The tool sends only your message, a category, an optional tool name, the plugin and Rhino versions, the operating system and a timestamp. It does not send an installation id, document names, file paths or model content, and it works even when usage data is off. Your agent may offer it once if MCP4Rhino keeps failing, but it sends only text you approve. Feedback is one-way: the maintainers cannot reply. For a reply, open a GitHub issue. Details: [docs/TELEMETRY.md](docs/TELEMETRY.md#sending-feedback).
 
 ## Documentation
 

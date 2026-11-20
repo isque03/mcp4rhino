@@ -61,6 +61,53 @@ public class FeedbackTests : IDisposable
         return McpJsonRpc.Dispatch(request, new FakeTools(), feedback: service);
     }
 
+    private sealed class ThrowingTools(Exception error) : IMcpToolProvider
+    {
+        public object[] ListTools() =>
+        [
+            new { name = "create_box", description = "box", inputSchema = new { type = "object" } },
+        ];
+
+        public object CallTool(JsonNode? @params) => throw error;
+    }
+
+    private static string ToolErrorMessage(Exception error, string name = "create_box")
+    {
+        var request = new JsonObject
+        {
+            ["jsonrpc"] = "2.0",
+            ["id"] = 1,
+            ["method"] = "tools/call",
+            ["params"] = new JsonObject { ["name"] = name, ["arguments"] = new JsonObject() },
+        };
+        return McpJsonRpc.Dispatch(request, new ThrowingTools(error))!["error"]!["message"]!.GetValue<string>();
+    }
+
+    [Fact]
+    public void Unexpected_Tool_Errors_End_With_The_Feedback_Hint()
+    {
+        Assert.Equal("boom" + FeedbackRequest.ErrorHint, ToolErrorMessage(new NullReferenceException("boom")));
+        Assert.Contains("send_feedback", FeedbackRequest.ErrorHint);
+        Assert.Contains("once per session", FeedbackRequest.ErrorHint);
+    }
+
+    [Fact]
+    public void Input_And_State_Errors_Get_No_Feedback_Hint()
+    {
+        Assert.Equal("bad radius", ToolErrorMessage(new ArgumentException("bad radius")));
+        Assert.Equal("no document", ToolErrorMessage(new InvalidOperationException("no document")));
+        Assert.Equal("nope", ToolErrorMessage(new NotSupportedException("nope")));
+        Assert.Equal("slow", ToolErrorMessage(new TimeoutException("slow")));
+        Assert.Equal("stop", ToolErrorMessage(new OperationCanceledException("stop")));
+    }
+
+    [Fact]
+    public void Server_Instructions_Mention_Feedback()
+    {
+        Assert.Contains("send_feedback", SupportInfo.ServerInstructions);
+        Assert.Contains("once per session", SupportInfo.ServerInstructions);
+    }
+
     private static JsonObject Args(string message = "Please add a mirror tool.") => new() { ["message"] = message };
 
     [Fact]
@@ -70,9 +117,12 @@ public class FeedbackTests : IDisposable
             JsonNode.Parse("""{"jsonrpc":"2.0","id":3,"method":"tools/list","params":{}}"""), new FakeTools());
         var tool = list!["result"]!["tools"]!.AsArray().Single(t => t!["name"]!.GetValue<string>() == "send_feedback")!;
         var description = tool["description"]!.GetValue<string>();
-        Assert.Contains("ONLY when the user explicitly asks", description);
-        Assert.Contains("Never call it on your own initiative", description);
-        Assert.Contains("show the user the exact text", description);
+        Assert.Contains("only after they approve the exact text", description);
+        Assert.Contains("offer it once per session", description);
+        Assert.Contains("Do not offer it for routine errors", description);
+        Assert.Contains("do not offer it again", description);
+        Assert.Contains("maintainers cannot reply", description);
+        Assert.Contains("Leave out file paths", description);
 
         var schema = tool["inputSchema"]!;
         Assert.Equal("message", Assert.Single(schema["required"]!.AsArray())!.GetValue<string>());

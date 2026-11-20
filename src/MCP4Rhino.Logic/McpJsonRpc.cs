@@ -24,7 +24,7 @@ public static class McpJsonRpc
 {
     public const string ProtocolVersion = "2024-11-05";
     public const string ServerName = "MCP4Rhino";
-    public const string ServerVersion = "0.7.5-alpha";
+    public const string ServerVersion = "0.7.5-alpha.1";
 
     public static JsonNode? Dispatch(
         JsonNode? req,
@@ -70,7 +70,7 @@ public static class McpJsonRpc
             {
                 jsonrpc = "2.0",
                 id,
-                error = new { code = -32000, message = ex.Message },
+                error = new { code = -32000, message = ErrorMessage(method, @params, ex) },
             });
         }
 
@@ -88,6 +88,25 @@ public static class McpJsonRpc
             id,
             result,
         });
+    }
+
+    /// <summary>
+    /// Adds the feedback hint to tool errors that look like a plugin fault. Errors from bad input or
+    /// document state (argument, invalid state, not supported, timeout, cancel) stay unchanged.
+    /// </summary>
+    private static string ErrorMessage(string? method, JsonNode? @params, Exception ex)
+    {
+        if (method != "tools/call")
+            return ex.Message;
+        string? name = null;
+        try { name = @params?["name"]?.GetValue<string>(); }
+        catch { /* a malformed name gets no hint */ }
+        if (name is null || name == FeedbackRequest.ToolName)
+            return ex.Message;
+        return ex is ArgumentException or InvalidOperationException or NotSupportedException
+            or TimeoutException or OperationCanceledException
+            ? ex.Message
+            : ex.Message + FeedbackRequest.ErrorHint;
     }
 
     public static object ParseError(JsonNode? id, string message) => new
@@ -113,12 +132,7 @@ public static class McpJsonRpc
             {
                 name = FeedbackRequest.ToolName,
                 description =
-                    "Send a short message to the MCP4Rhino maintainers. Call this ONLY when the user explicitly asks to send " +
-                    "feedback, a bug report or a feature request to the MCP4Rhino maintainers. Never call it on your own " +
-                    "initiative, and never to report your own observations. If the client supports it, show the user the exact " +
-                    "text and get their approval before sending. Only the message, category, tool name, plugin version, Rhino " +
-                    "version, OS and a timestamp are sent. No model content, document names, file paths or install identifiers " +
-                    "are attached, so do not put them in the message. It works even when usage data is turned off.",
+                    FeedbackRequest.ToolDescription,
                 inputSchema = new
                 {
                     type = "object",
