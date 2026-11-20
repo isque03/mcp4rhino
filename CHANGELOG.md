@@ -7,6 +7,10 @@ Package version lives in [manifest.yml](manifest.yml).
 
 ## [Unreleased]
 
+## [0.7.5] — 2026-11-20
+
+Stable release. It includes the `send_feedback` tool from 0.7.5-alpha and 0.7.5-alpha.1 (see below) and the `gh_inspect_document` fix.
+
 ### Fixed
 
 - `gh_inspect_document` no longer returns hundreds of thousands of characters on large definitions (#20). Every response stays under about 50,000 characters. When a response is cut, it sets `truncated` and gives the arguments for the next call in `next`.
@@ -16,6 +20,7 @@ Package version lives in [manifest.yml](manifest.yml).
 - `gh_inspect_document` has three modes. `overview` (the default when you pass only `gh_session`) returns the node count, counts by type and name, groups, likely inputs and nodes with errors or warnings. `compact` (the default when you pass `offset`, `limit` or a filter) returns one small row per node. `detail` returns the full description of the nodes you select. New parameters: `mode`, `nodes`, `group`, `match` and `has_diagnostics`. Callers that need full node detail must now pass `mode: "detail"`.
 - In detail mode, long lists and strings are cut and marked: ports, wire sources, persistent-value samples and text.
 - The Grasshopper skill, `gh_help` guides and docs describe the workflow: overview, then compact page or filter, then detail for the nodes you will patch.
+- Synchronized package, MCP and informational versions to `0.7.5`, with assembly/file versions `0.7.5.0`. Grasshopper recipe resource URIs use the new version.
 
 ## [0.7.5-alpha.1] — 2026-11-19
 

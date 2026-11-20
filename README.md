@@ -44,7 +44,7 @@ Create native, editable Grasshopper definitions, connect components, adjust para
 
 Agents can learn the workflow through `gh_help`, the `grasshopper_getting_started` prompt, or the bundled [parametric design skill](skills/grasshopper-parametric-design/SKILL.md). See [Grasshopper support](docs/GRASSHOPPER.md) for setup, supported components and examples.
 
-Stable 0.7.4 renames Grasshopper tool argument `session_id` to `gh_session` so Claude Desktop can call session tools. Stable 0.7.3 adds [component extensibility](docs/GRASSHOPPER_EXTENSIBILITY.md): slider edits that preserve third-party definitions, installed component categories, automatic support for built-in modeling components, and a Rhino preferences dialog for third-party plugin permissions.
+Stable 0.7.5 adds the `send_feedback` tool for one-way messages to the maintainers, and `gh_inspect_document` overview, compact and filtered detail modes so large definitions stay readable. Stable 0.7.4 renames Grasshopper tool argument `session_id` to `gh_session` so Claude Desktop can call session tools. Stable 0.7.3 adds [component extensibility](docs/GRASSHOPPER_EXTENSIBILITY.md): slider edits that preserve third-party definitions, installed component categories, automatic support for built-in modeling components, and a Rhino preferences dialog for third-party plugin permissions.
 
 Discoverable read-only document/graph resources and reusable workflow prompts are documented in [resources, prompts and protocol compatibility](docs/MCP_RESOURCES_PROMPTS.md). Reading context does not initialize Grasshopper or modify a model.
 
